@@ -35,7 +35,6 @@ def publish_scheduled_posts():
         return
 
     try:
-        # ✅ Use stored app instance
         with _app.app_context():
             now_utc = datetime.utcnow()
             now_vn = UTC.localize(now_utc).astimezone(VN_TZ)
@@ -69,7 +68,11 @@ def publish_scheduled_posts():
                 logger.info(f"🎉 Published {published_count} post(s)")
 
     except Exception as e:
-        logger.error(f"❌ Scheduler error: {str(e)}", exc_info=True)
+        from sqlalchemy.exc import ProgrammingError
+        if isinstance(e, ProgrammingError) and "does not exist" in str(e):
+            logger.debug("⏭️ Skipping - database not ready")
+        else:
+            logger.error(f"❌ Scheduler error: {str(e)}", exc_info=True)
 
 
 def init_scheduler(app):
