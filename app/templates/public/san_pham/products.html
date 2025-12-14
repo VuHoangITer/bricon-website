@@ -1,0 +1,246 @@
+{% extends 'layouts/base.html' %}
+
+{% block meta_description %}{{ get_setting('products_meta_description', '') }}{% endblock %}
+
+{% block content %}
+
+<div class="trang-san-pham-vn">
+    <!-- ==================== BREADCRUMB & PAGE HEADER ==================== -->
+    <div class="page-header bg-light py-4">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('main.products') }}">Sản phẩm</a></li>
+                    {% if current_category %}
+                    <li class="breadcrumb-item active" aria-current="page">{{ current_category.name }}</li>
+                    {% else %}
+                    <li class="breadcrumb-item active" aria-current="page">Tất cả</li>
+                    {% endif %}
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <section class="py-4">
+        <div class="container">
+            <h1 class="mb-4 fw-semibold">
+                {% if current_category %}
+                    {{ current_category.name }}
+                {% else %}
+                    Danh sách sản phẩm
+                {% endif %}
+            </h1>
+            <!-- ==================== TOP FILTER BAR ==================== -->
+            <div class="top-filter-bar bg-white rounded-3 shadow-sm p-3 mb-4" style="top: 80px; z-index: 999;">
+                <div class="row g-3 align-items-center">
+                    <!-- Categories Dropdown -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center"
+                                    type="button" id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span>
+                                    <i class="bi bi-grid-3x3-gap me-2"></i>
+                                    {% if current_category %}{{ current_category.name }}{% else %}Tất cả danh mục{% endif %}
+                                </span>
+                            </button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="categoryDropdown">
+                                <li>
+                                    <a class="dropdown-item {% if not current_category %}active{% endif %}"
+                                       href="{{ url_for('main.products') }}">
+                                        Tất cả sản phẩm
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                {% for category in categories %}
+                                <li>
+                                    <a class="dropdown-item {% if current_category and current_category.id == category.id %}active{% endif %}"
+                                       href="{{ url_for('main.products', category_slug=category.slug) }}">
+                                        {{ category.name }}
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Search -->
+                    <div class="col-lg-3 col-md-6">
+                        <form action="{{ url_for('main.products', category_slug=current_category.slug if current_category else None) }}" method="get">
+                            {% if min_price %}
+                            <input type="hidden" name="min_price" value="{{ min_price }}">
+                            {% endif %}
+                            {% if max_price %}
+                            <input type="hidden" name="max_price" value="{{ max_price }}">
+                            {% endif %}
+                            {% if current_sort %}
+                            <input type="hidden" name="sort" value="{{ current_sort }}">
+                            {% endif %}
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="search"
+                                       value="{{ current_search }}" placeholder="Tìm sản phẩm...">
+                                <button class="btn btn-warning" type="submit">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Price Filter -->
+                    <div class="col-lg-4 col-md-6">
+                        <form action="{{ url_for('main.products', category_slug=current_category.slug if current_category else None) }}"
+                              method="get" class="d-flex gap-2 align-items-center">
+                            {% if current_search %}
+                            <input type="hidden" name="search" value="{{ current_search }}">
+                            {% endif %}
+                            {% if current_sort %}
+                            <input type="hidden" name="sort" value="{{ current_sort }}">
+                            {% endif %}
+
+                            <input type="number" class="form-control form-control-sm" name="min_price"
+                                   placeholder="Từ (₫)" value="{{ min_price if min_price else '' }}"
+                                   min="0" step="1000" style="max-width: 120px;">
+                            <span class="text-muted">-</span>
+                            <input type="number" class="form-control form-control-sm" name="max_price"
+                                   placeholder="Đến (₫)" value="{{ max_price if max_price else '' }}"
+                                   min="0" step="1000" style="max-width: 120px;">
+
+                            <button type="submit" class="btn btn-warning btn-sm">
+                                <i class="bi bi-funnel"></i>
+                            </button>
+
+                            {% if min_price or max_price %}
+                            <a href="{{ url_for('main.products', category_slug=current_category.slug if current_category else None, search=current_search if current_search else None, sort=current_sort if current_sort else None) }}"
+                               class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                            {% endif %}
+                        </form>
+                    </div>
+
+                    <!-- Sort -->
+                    <div class="col-lg-2 col-md-6">
+                        <select class="form-select form-select-sm" id="sortSelect" onchange="sortProducts(this.value)">
+                            <option value="latest" {% if current_sort =='latest' %}selected{% endif %}>Mới nhất</option>
+                            <option value="price_asc" {% if current_sort =='price_asc' %}selected{% endif %}>Giá tăng</option>
+                            <option value="price_desc" {% if current_sort =='price_desc' %}selected{% endif %}>Giá giảm</option>
+                            <option value="popular" {% if current_sort =='popular' %}selected{% endif %}>Phổ biến</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Quick Price Filters -->
+                <div class="quick-filters mt-2 d-flex gap-2 align-items-center">
+                    <small class="text-muted">Lọc Nhanh:</small>
+                    <a href="{{ url_for('main.products', category_slug=current_category.slug if current_category else None, min_price=0, max_price=0, search=current_search if current_search else None, sort=current_sort if current_sort else None) }}"
+                       class="badge bg-light text-dark border">Liên hệ</a>
+                    <a href="{{ url_for('main.products', category_slug=current_category.slug if current_category else None, min_price=1, max_price=100000, search=current_search if current_search else None, sort=current_sort if current_sort else None) }}"
+                       class="badge bg-light text-dark border">Dưới 100.000₫</a>
+                    <a href="{{ url_for('main.products', category_slug=current_category.slug if current_category else None, min_price=100000, max_price=500000, search=current_search if current_search else None, sort=current_sort if current_sort else None) }}"
+                       class="badge bg-light text-dark border">100.000₫ - 500.000₫</a>
+                    <a href="{{ url_for('main.products', category_slug=current_category.slug if current_category else None, min_price=500000, search=current_search if current_search else None, sort=current_sort if current_sort else None) }}"
+                       class="badge bg-light text-dark border">Trên 500.000₫</a>
+
+                    {% if min_price is not none or max_price is not none %}
+                    <span class="badge bg-warning text-dark ms-auto">
+                        <i class="bi bi-funnel-fill me-1"></i>
+                        {% if min_price == 0 and max_price == 0 %}
+                            Liên hệ
+                        {% elif min_price and max_price %}
+                            {{ "{:,.0f}".format(min_price) }}₫ - {{ "{:,.0f}".format(max_price) }}₫
+                        {% elif min_price %}
+                            Từ {{ "{:,.0f}".format(min_price) }}₫
+                        {% else %}
+                            Đến {{ "{:,.0f}".format(max_price) }}₫
+                        {% endif %}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="products-grid">
+                <!-- Result Info -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted">
+                        <i class="bi bi-grid-3x3 me-1"></i>
+                        Hiển thị {{ products|length }} sản phẩm
+                    </span>
+                </div>
+
+                <!-- Products -->
+                {% if products %}
+                <div class="row g-4">
+                    {% for product in products %}
+                        {% include 'components/card_product.html' with context %}
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% set endpoint = 'main.products' %}
+                {% set category_slug = current_category.slug if current_category else None %}
+                {% set search = current_search if current_search else None %}
+                {% set sort = current_sort if current_sort != 'latest' else None %}
+                {% include 'components/pagination.html' with context %}
+
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox display-1 text-muted"></i>
+                    <p class="text-muted mt-3">Không tìm thấy sản phẩm nào</p>
+                    {% if current_search or min_price or max_price %}
+                    <a href="{{ url_for('main.products', category_slug=current_category.slug if current_category else None) }}"
+                       class="btn btn-outline-warning">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i>
+                        Xóa bộ lọc
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Schema ItemList -->
+            <script type="application/ld+json">
+            {
+              "@context": "https://schema.org",
+              "@type": "ItemList",
+              "name": "Sản phẩm {{ get_setting('website_name', 'BRICON VIỆT NAM') }}",
+              "itemListElement": [
+                {% for product in products %}
+                {
+                  "@type": "ListItem",
+                  "position": {{ loop.index }},
+                  "item": {
+                    "@type": "Product",
+                    "name": "{{ product.name }}",
+                    "image": "{{ product.image }}",
+                    "description": "{{ product.description or 'Keo dán gạch, chà ron và chống thấm BRICON – Keo của người Việt' }}",
+                    "url": "{{ url_for('main.product_detail', slug=product.slug, _external=True) }}",
+                    "offers": {
+                      "@type": "Offer",
+                      "priceCurrency": "VND",
+                      "price": {{ product.price }},
+                      "availability": "https://schema.org/InStock"
+                    }
+                  }
+                }{% if not loop.last %},{% endif %}
+                {% endfor %}
+              ]
+            }
+            </script>
+
+        </div>
+    </section>
+</div>
+<!-- KẾT THÚC namespace trang-san-pham-vn -->
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function sortProducts(sortValue) {
+    const url = new URL(window.location);
+    url.searchParams.set('sort', sortValue);
+    url.searchParams.set('page', '1');
+    window.location = url;
+}
+</script>
+{% endblock %}

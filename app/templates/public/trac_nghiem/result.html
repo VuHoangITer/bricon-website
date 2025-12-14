@@ -1,0 +1,480 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Kết quả - {{ quiz.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ==================== RESULT CONTAINER ==================== */
+.result-container {
+    max-width: 800px;
+    margin: 1.5rem auto;
+    padding: 0 1rem;
+}
+
+/* ==================== RESULT CARD ==================== */
+.result-card {
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.result-header {
+    background: #f8f9fa;
+    border-bottom: 2px solid #333;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.result-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.result-subtitle {
+    font-size: 0.95rem;
+    color: #666;
+}
+
+/* ==================== SCORE DISPLAY ==================== */
+.score-display {
+    padding: 1.5rem;
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* ==================== STATS GRID ==================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.25rem;
+}
+
+/* ==================== STATUS BADGE ==================== */
+.status-badge {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 0.75rem 0;
+}
+
+.status-badge.passed {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #4caf50;
+}
+
+.status-badge.failed {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #f44336;
+}
+
+/* ==================== REVIEW SECTION ==================== */
+.review-section {
+    padding: 1.5rem;
+}
+
+.review-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.nav-tabs {
+    border-bottom: 1px solid #dee2e6;
+}
+
+.nav-tabs .nav-link {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    color: #666;
+    border: none;
+    border-bottom: 2px solid transparent;
+}
+
+.nav-tabs .nav-link.active {
+    color: #333;
+    background: none;
+    border-bottom-color: #333;
+}
+
+.question-review {
+    background: #fafafa;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-left: 3px solid #28a745;
+}
+
+.question-review.wrong {
+    border-left-color: #dc3545;
+}
+
+.question-review-header {
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.question-review-text {
+    font-size: 0.95rem;
+    color: #333;
+    margin-bottom: 0.75rem;
+}
+
+.answer-review {
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.answer-review.correct {
+    background: #e8f5e9;
+    border: 1px solid #c8e6c9;
+}
+
+.answer-review.wrong {
+    background: #ffebee;
+    border: 1px solid #ffcdd2;
+}
+
+.answer-review.neutral {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+}
+
+.answer-icon {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* ==================== EXPLANATION ==================== */
+.explanation-box {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: #fff;
+    border-left: 3px solid #17a2b8;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.explanation-box strong {
+    color: #17a2b8;
+    font-size: 0.85rem;
+}
+
+.explanation-box p {
+    margin: 0.5rem 0 0 0;
+    color: #555;
+}
+
+/* ==================== ACTION BUTTONS ==================== */
+.action-buttons {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    flex: 1;
+    min-width: 180px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+/* ==================== USER INFO ==================== */
+.user-info {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.75rem;
+}
+
+.user-info strong {
+    color: #333;
+}
+
+/* ==================== PAGINATION ==================== */
+#paginationContainer {
+    margin-top: 1rem;
+}
+
+#paginationContainer .btn {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.75rem;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    .result-title {
+        font-size: 1.25rem;
+    }
+
+    .score-circle {
+        width: 100px;
+        height: 100px;
+    }
+
+    .score-value {
+        font-size: 2rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .action-btn {
+        width: 100%;
+    }
+}
+
+/* ==================== PRINT ==================== */
+@media print {
+    .action-buttons,
+    .navbar,
+    footer,
+    #paginationContainer,
+    .nav-tabs {
+        display: none !important;
+    }
+
+    .result-container {
+        max-width: 100%;
+    }
+
+    .question-review {
+        page-break-inside: avoid;
+    }
+
+    .tab-content .tab-pane {
+        display: block !important;
+        opacity: 1 !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="result-container">
+    <!-- Result Card -->
+    <div class="result-card">
+        <!-- Header -->
+        <div class="result-header">
+            <div class="result-title">KẾT QUẢ BÀI KIỂM TRA</div>
+            <div class="result-subtitle">{{ quiz.title }}</div>
+        </div>
+
+        <!-- Score Display -->
+        <div class="score-display">
+            <div class="user-info">
+                Người làm: <strong>{{ attempt.user_name }}</strong>
+                {% if attempt.user_email %}
+                    • {{ attempt.user_email }}
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Statistics Grid -->
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-label">Tổng số câu</div>
+                <div class="stat-value">{{ attempt.total_questions }}</div>
+            </div>
+
+            <div class="stat-item">
+                <div class="stat-label">Trả lời đúng</div>
+                <div class="stat-value text-success">{{ attempt.correct_answers }}</div>
+            </div>
+
+            <div class="stat-item">
+                <div class="stat-label">Trả lời sai</div>
+                <div class="stat-value text-danger">{{ attempt.wrong_answers }}</div>
+            </div>
+
+            <div class="stat-item">
+                <div class="stat-label">Thời gian</div>
+                <div class="stat-value">{{ attempt.get_time_spent_formatted() }}</div>
+            </div>
+        </div>
+
+        {% if quiz.show_correct_answers %}
+        <!-- Review Section -->
+        <div class="review-section">
+            <h3 class="review-title">Chi tiết đáp án</h3>
+
+            <!-- Tabs -->
+            <ul class="nav nav-tabs mb-3" id="reviewTabs">
+                <li class="nav-item">
+                    <a class="nav-link active" data-bs-toggle="tab" href="#tab-correct">Câu đúng ({{ attempt.correct_answers }})</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#tab-wrong">Câu sai ({{ attempt.wrong_answers }})</a>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- CÂU ĐÚNG -->
+                <div class="tab-pane fade show active" id="tab-correct">
+                    {% set correct_questions = questions_detail|selectattr('is_correct', 'equalto', True)|list %}
+                    {% if correct_questions %}
+                        {% for item in correct_questions %}
+                            <div class="question-review">
+                                <div class="question-review-header">
+                                    ✓ Câu {{ loop.index }}
+                                </div>
+                                <div class="question-review-text">{{ item.question.question_text }}</div>
+                                <div class="answer-review correct">
+                                    <span class="answer-icon">✓</span>
+                                    <span>{{ item.selected_answer.answer_text }}</span>
+                                </div>
+                                {% if item.question.explanation %}
+                                <div class="explanation-box">
+                                    <strong>💡 Giải thích</strong>
+                                    <p>{{ item.question.explanation }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Không có câu nào đúng.</p>
+                    {% endif %}
+                </div>
+
+                <!-- CÂU SAI -->
+                <div class="tab-pane fade" id="tab-wrong">
+                    {% set wrong_questions = questions_detail|rejectattr('is_correct', 'equalto', True)|list %}
+                    {% if wrong_questions %}
+                        {% for item in wrong_questions %}
+                            <div class="question-review wrong">
+                                <div class="question-review-header">
+                                    ✗ Câu {{ loop.index }}
+                                </div>
+                                <div class="question-review-text">{{ item.question.question_text }}</div>
+                                <div class="answer-review wrong">
+                                    <span class="answer-icon">✗</span>
+                                    <span>Bạn chọn: {{ item.selected_answer.answer_text }}</span>
+                                </div>
+                                <div class="answer-review correct">
+                                    <span class="answer-icon">✓</span>
+                                    <span>Đáp án đúng: {{ item.correct_answer.answer_text }}</span>
+                                </div>
+                                {% if item.question.explanation %}
+                                <div class="explanation-box">
+                                    <strong>💡 Giải thích</strong>
+                                    <p>{{ item.question.explanation }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Không có câu nào sai.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- PHÂN TRANG -->
+            <nav id="paginationContainer" class="text-center"></nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const perPage = 5;
+    const tabs = document.querySelectorAll('#reviewTabs a');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function (e) {
+            setupPagination(e.target.getAttribute('href'));
+        });
+    });
+
+    setupPagination('#tab-correct');
+
+    function setupPagination(tabId) {
+        const container = document.querySelector(tabId);
+        const reviews = container.querySelectorAll('.question-review');
+        const pagination = document.getElementById('paginationContainer');
+        pagination.innerHTML = '';
+
+        if (reviews.length <= perPage) {
+            reviews.forEach(el => el.style.display = '');
+            return;
+        }
+
+        let currentPage = 1;
+        const totalPages = Math.ceil(reviews.length / perPage);
+
+        function showPage(page) {
+            reviews.forEach((el, i) => {
+                el.style.display = (i >= (page - 1) * perPage && i < page * perPage) ? '' : 'none';
+            });
+
+            pagination.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                btn.className = 'btn btn-sm ' + (i === page ? 'btn-primary' : 'btn-outline-secondary');
+                btn.style.margin = '0 4px';
+                btn.onclick = () => showPage(i);
+                pagination.appendChild(btn);
+            }
+        }
+
+        showPage(currentPage);
+    }
+
+    // Ngăn chặn quay lại trang trước
+    history.pushState(null, null, window.location.href);
+    window.onpopstate = function () {
+        history.pushState(null, null, window.location.href);
+    };
+});
+</script>
+{% endblock %}

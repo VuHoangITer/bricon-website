@@ -1,0 +1,206 @@
+{% extends 'layouts/admin.html' %}
+
+{% block page_title %}Quản lý Tin tức{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-newspaper"></i> Danh sách Tin tức / Blog</h4>
+    <a href="{{ url_for('admin.add_blog') }}" class="btn btn-warning">
+        <i class="bi bi-plus-circle"></i> Thêm bài viết
+    </a>
+</div>
+
+<!-- ==================== STATUS FILTER ==================== -->
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="btn-group" role="group">
+            <a href="{{ url_for('admin.blogs', status='all') }}"
+               class="btn btn-sm {% if status_filter == 'all' %}btn-warning{% else %}btn-outline-secondary{% endif %}">
+                Tất cả ({{ stats.all }})
+            </a>
+            <a href="{{ url_for('admin.blogs', status='published') }}"
+               class="btn btn-sm {% if status_filter == 'published' %}btn-success{% else %}btn-outline-secondary{% endif %}">
+                Đã đăng ({{ stats.published }})
+            </a>
+            <a href="{{ url_for('admin.blogs', status='scheduled') }}"
+               class="btn btn-sm {% if status_filter == 'scheduled' %}btn-info{% else %}btn-outline-secondary{% endif %}">
+                Đã lên lịch ({{ stats.scheduled }})
+            </a>
+            <a href="{{ url_for('admin.blogs', status='draft') }}"
+               class="btn btn-sm {% if status_filter == 'draft' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+                Bản nháp ({{ stats.draft }})
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Hình ảnh</th>
+                        <th>Tiêu đề</th>
+                        <th>Tác giả</th>
+                        <th>Lượt xem</th>
+                        <th>Nổi bật</th>
+                        <th>Trạng thái</th>
+                        <th>Thời gian</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for blog in blogs.items %}
+                    <tr>
+                        <td>{{ blog.id }}</td>
+                        <td>
+                            {% if blog.image %}
+                            <img src="{{ blog.image }}"
+                                 alt="{{ blog.title }}"
+                                 style="width: 80px; height: 50px; object-fit: cover; border-radius: 5px;">
+                            {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center"
+                                 style="width: 80px; height: 50px; border-radius: 5px;">
+                                <i class="bi bi-image text-muted"></i>
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong>{{ blog.title }}</strong><br>
+                            <small class="text-muted">{{ blog.slug }}</small>
+                        </td>
+                        <td>
+                            <i class="bi bi-person"></i> {{ blog.author if blog.author else 'N/A' }}
+                        </td>
+                        <td>
+                            <i class="bi bi-eye"></i> {{ blog.views }}
+                        </td>
+                        <td>
+                            {% if blog.is_featured %}
+                            <i class="bi bi-star-fill text-warning" title="Nổi bật"></i>
+                            {% else %}
+                            <i class="bi bi-star text-muted"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge {{ blog.status_badge_class }}">
+                                {{ blog.status_label }}
+                            </span>
+                            {% if not blog.is_active %}
+                            <br><small class="text-muted">(Ẩn)</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if blog.status == 'published' and blog.published_at %}
+                                <small class="text-success">
+                                    <i class="bi bi-check-circle"></i> Đăng: {{ blog.published_at|vn_datetime('%d/%m/%Y %H:%M') }}
+                                </small>
+                            {% elif blog.status == 'scheduled' and blog.scheduled_at %}
+                                <small class="text-info">
+                                    <i class="bi bi-clock"></i> Lịch: {{ blog.scheduled_at|vn_datetime('%d/%m/%Y %H:%M') }}
+                                </small>
+                            {% else %}
+                                <small class="text-muted">
+                                    <i class="bi bi-pencil"></i> Tạo: {{ blog.created_at|vn_datetime('%d/%m/%Y %H:%M') }}
+                                </small>
+                            {% endif %}
+                        </td>
+                        <td class="table-actions">
+                            {% if blog.status == 'published' %}
+                            <a href="{{ url_for('main.blog_detail', slug=blog.slug) }}"
+                               class="btn btn-sm btn-info"
+                               target="_blank"
+                               title="Xem">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            {% elif blog.status == 'scheduled' or blog.status == 'draft' %}
+                            <button class="btn btn-sm btn-success"
+                                    onclick="quickPublish({{ blog.id }})"
+                                    title="Đăng ngay">
+                                <i class="bi bi-send"></i>
+                            </button>
+                            {% endif %}
+                            <a href="{{ url_for('admin.edit_blog', id=blog.id) }}"
+                               class="btn btn-sm btn-primary"
+                               title="Sửa">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{{ url_for('admin.delete_blog', id=blog.id) }}"
+                               class="btn btn-sm btn-danger"
+                               data-confirm="Bạn có chắc muốn xóa bài viết này?"
+                               title="Xóa">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if blogs.pages > 1 %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item {% if not blogs.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin.blogs', page=blogs.prev_num, status=status_filter) }}">Trước</a>
+                </li>
+
+                {% for page_num in blogs.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                    {% if page_num %}
+                        <li class="page-item {% if page_num == blogs.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('admin.blogs', page=page_num, status=status_filter) }}">{{ page_num }}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+
+                <li class="page-item {% if not blogs.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin.blogs', page=blogs.next_num, status=status_filter) }}">Sau</a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Quick publish function (AJAX)
+function quickPublish(blogId) {
+    if (!confirm('Đăng bài viết này ngay bây giờ?')) return;
+
+    const csrfToken = document.querySelector('input[name="csrf_token"]')?.value;
+
+    fetch(`/admin/blogs/quick-publish/${blogId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ ' + data.message);
+            location.reload();
+        } else {
+            alert('❌ ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('❌ Có lỗi xảy ra: ' + error.message);
+    });
+}
+
+// Enable Bootstrap tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}

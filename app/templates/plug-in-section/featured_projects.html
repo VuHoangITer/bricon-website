@@ -1,0 +1,80 @@
+<!-- ==================== FEATURED PROJECTS CAROUSEL (SWIPER) ==================== -->
+<section class="py-5 bg-white" id="featured-projects">
+  <div class="container">
+    <!-- Section Title -->
+    <div class="mb-5">
+      <h2 class="fw-bold mb-3">Dự án tiêu biểu</h2>
+      <div class="title-underline"></div>
+    </div>
+
+    <!-- Swiper Carousel -->
+    <div class="swiper project-slider">
+      <div class="swiper-wrapper">
+        {% for project in featured_projects %}
+        <div class="swiper-slide">
+          <div class="project-slide">
+            <!-- Project Info (Bên trái) -->
+            <div class="project-info">
+              {% if project.project_type %}
+              <span class="project-label">
+                {% if project.project_type == 'commercial' %}
+                  TTTM & Khách sạn
+                {% elif project.project_type == 'resort_golf' %}
+                  Khu du lịch & Sân golf
+                {% elif project.project_type == 'residential' %}
+                  Nhà ở & Chung cư
+                {% elif project.project_type == 'industrial' %}
+                  Nhà máy & Công nghiệp
+                {% elif project.project_type == 'public' %}
+                  Công trình công cộng
+                {% else %}
+                  {{ project.project_type|capitalize }}
+                {% endif %}
+              </span>
+              {% endif %}
+
+              <h3 class="project-title">{{ project.title }}</h3>
+
+              <p class="project-desc">
+                {{ project.description[:150] if project.description else
+                   (project.get_media_seo_info().caption[:150] if project.get_media_seo_info() and project.get_media_seo_info().caption else 'Dự án sử dụng sản phẩm BRICON') }}
+              </p>
+
+              <div class="project-meta mb-3">
+                {% if project.location %}
+                <span class="meta-item">
+                  <i class="bi bi-geo-alt-fill"></i> {{ project.location }}
+                </span>
+                {% endif %}
+                {% if project.year %}
+                <span class="meta-item">
+                  <i class="bi bi-calendar-check"></i> {{ project.year }}
+                </span>
+                {% endif %}
+              </div>
+
+              <a href="{{ url_for('main.project_detail', slug=project.slug) }}"
+                 class="project-link">
+                Xem chi tiết
+              </a>
+            </div>
+
+            <!-- Project Image (Bên phải) -->
+            <div class="project-image">
+              {% set media_info = project.get_media_seo_info() if project.image else None %}
+              <img
+                src="{{ project.image if project.image else 'https://via.placeholder.com/800x600/FFC107/FFFFFF?text=Project' }}"
+                alt="{{ media_info.alt_text if media_info and media_info.alt_text else project.title }}"
+                loading="lazy"
+              />
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination (chấm tròn) -->
+      <div class="project-pagination swiper-pagination"></div>
+    </div>
+  </div>
+</section>

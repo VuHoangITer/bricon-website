@@ -1,0 +1,108 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}
+{{ get_setting('meta_title', 'Hoangvn') }}
+{% endblock %}
+
+{% block meta_description %}
+{{ get_setting('index_meta_description', 'Hoangvn') }}
+{% endblock %}
+
+{% block content %}
+
+
+{% if is_feature_enabled('banners') and banners %}
+  {% include 'plug-in-section/banner.html' %}
+{% endif %}
+
+{% if is_feature_enabled('products') and categories %}
+  {% include 'plug-in-section/product-lines.html' %}
+{% endif %}
+
+{% include 'plug-in-section/quick-access.html' %}
+
+{% if is_feature_enabled('products') and featured_products %}
+  {% include 'plug-in-section/featured-products.html' %}
+{% endif %}
+
+
+{% if is_feature_enabled('projects') and featured_projects %}
+  {% include 'plug-in-section/featured_projects.html' %}
+{% endif %}
+
+
+{% if is_feature_enabled('blogs') and featured_blogs %}
+  {% include 'plug-in-section/featured-blogs.html' %}
+{% endif %}
+
+
+{% include 'plug-in-section/newsleter.html' %}
+
+
+<!-- Schema WebSite -->
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "{{ get_setting('website_name', 'Hoangvn') }}",
+    "url": "{{ get_setting('main_url', request.url_root) }}",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "{{ url_for('main.products') }}?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+</script>
+
+{# ✅ Schema Product - chỉ thêm nếu products feature enabled và có data #}
+{% if is_feature_enabled('products') and featured_products %}
+<script type="application/ld+json">
+  [
+  {% for product in featured_products %}
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": "{{ product.name|e }}",
+      "image": "{{ product.image|e }}",
+      "description": "{{ (product.description or 'Hoangvn')|e }}",
+      "sku": "{{ product.id }}",
+      "brand": {
+        "@type": "Brand",
+        "name": "{{ get_setting('website_name', 'Hoangvn')|e }}"
+      },
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "VND",
+        "price": "{{ product.price }}",
+        "url": "{{ url_for('main.product_detail', slug=product.slug, _external=True) }}",
+        "availability": "https://schema.org/InStock",
+        "itemCondition": "https://schema.org/NewCondition"
+      }
+    }{% if not loop.last %},{% endif %}
+  {% endfor %}
+  ]
+</script>
+{% endif %}
+
+{# ✅ Schema Banner - chỉ thêm nếu banners feature enabled và có data #}
+{% if is_feature_enabled('banners') and banners %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ImageGallery",
+  "name": "{{ get_setting('website_name', 'Hoangvn') }} Banner Gallery",
+  "image": [
+    {% for banner in banners %}
+    {
+      "@type": "ImageObject",
+      "url": "{{ banner.image }}",
+      "name": "{{ banner.title }}",
+      "description": "{{ banner.subtitle }}"
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endif %}
+
+{% endblock %}

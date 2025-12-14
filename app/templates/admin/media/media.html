@@ -1,0 +1,282 @@
+{% extends 'layouts/admin.html' %}
+
+{% block page_title %}Quản lý Media Library{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4><i class="bi bi-images"></i> Media Library</h4>
+        <p class="text-muted mb-0">
+            <i class="bi bi-file-earmark"></i> {{ total_files }} files
+            <i class="bi bi-hdd ms-3"></i> {{ total_size_mb }} MB
+        </p>
+    </div>
+    <div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createAlbumModal">
+            <i class="bi bi-folder-plus"></i> Tạo Album
+        </button>
+        <a href="{{ url_for('admin.upload_media') }}" class="btn btn-warning">
+            <i class="bi bi-cloud-upload"></i> Upload File
+        </a>
+    </div>
+</div>
+
+<!-- Filter Albums Only -->
+<div class="card mb-4">
+    <div class="card-body">
+        <strong class="me-2"><i class="bi bi-folder"></i> Albums:</strong>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ url_for('admin.media') }}"
+               class="btn btn-sm {% if not current_album %}btn-warning{% else %}btn-outline-secondary{% endif %}">
+                <i class="bi bi-grid"></i> Tất cả ({{ total_files }})
+            </a>
+
+            {% for album in albums %}
+            <div class="btn-group btn-group-sm" role="group">
+                <a href="{{ url_for('admin.media', album=album.name) }}"
+                   class="btn {% if current_album == album.name %}btn-warning{% else %}btn-outline-secondary{% endif %}">
+                    <i class="bi bi-folder"></i> {{ album.name }} ({{ album.count }})
+                </a>
+                <button type="button"
+                        class="btn {% if current_album == album.name %}btn-warning{% else %}btn-outline-secondary{% endif %} border-start"
+                        onclick="deleteAlbum('{{ album.name }}', {{ album.count }})"
+                        title="Xóa album">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Media Grid -->
+<div class="card">
+    <div class="card-body">
+        {% if media_files.items %}
+        <div class="row g-3">
+            {% for media in media_files.items %}
+            <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                <div class="card h-100 border-0 shadow-sm media-item">
+                    <div class="position-relative">
+                        <img src="{{ media.filepath }}"
+                             class="card-img-top"
+                             alt="{{ media.alt_text or media.filename }}"
+                             style="height: 150px; object-fit: cover; cursor: pointer;"
+                             onclick="viewImage('{{ media.filepath }}', '{{ media.filename }}')">
+
+                        <!-- Menu - Góc trên phải -->
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-dark opacity-75"
+                                        type="button"
+                                        data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="#"
+                                           onclick="copyToClipboard('{{ media.filepath }}')">
+                                            <i class="bi bi-clipboard"></i> Copy URL
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="{{ url_for('admin.edit_media', id=media.id) }}">
+                                            <i class="bi bi-pencil"></i> Chỉnh sửa
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item text-danger"
+                                           href="{{ url_for('admin.delete_media', id=media.id) }}"
+                                           onclick="return confirm('Xóa file này?')">
+                                            <i class="bi bi-trash"></i> Xóa
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Album Badge -->
+                        {% if media.album %}
+                        <span class="badge bg-primary position-absolute bottom-0 start-0 m-2">
+                            {{ media.album }}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="card-body p-2">
+                        <p class="small mb-1 text-truncate" title="{{ media.original_filename }}">
+                            <strong>{{ media.original_filename }}</strong>
+                        </p>
+
+                        <!-- Basic Info -->
+                        <div class="mb-2">
+                            {% if media.alt_text %}
+                            <span class="badge bg-success" style="font-size: 0.65rem;">
+                                <i class="bi bi-check-circle"></i> Alt
+                            </span>
+                            {% else %}
+                            <span class="badge bg-danger" style="font-size: 0.65rem;">
+                                <i class="bi bi-x-circle"></i> Alt
+                            </span>
+                            {% endif %}
+
+                            {% if media.title %}
+                            <span class="badge bg-success" style="font-size: 0.65rem;">
+                                <i class="bi bi-check-circle"></i> Title
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <p class="small text-muted mb-0">
+                            {{ media.width }}x{{ media.height }}px
+                            <br>{{ media.get_size_mb() }} MB
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if media_files.pages > 1 %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item {% if not media_files.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin.media', page=media_files.prev_num, album=current_album) }}">Trước</a>
+                </li>
+                {% for page_num in media_files.iter_pages(left_edge=1, right_edge=1) %}
+                    {% if page_num %}
+                        <li class="page-item {% if page_num == media_files.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('admin.media', page=page_num, album=current_album) }}">{{ page_num }}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+                <li class="page-item {% if not media_files.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin.media', page=media_files.next_num, album=current_album) }}">Sau</a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-images display-1 text-muted"></i>
+            <p class="text-muted mt-3">Chưa có file nào. Upload file đầu tiên!</p>
+            <a href="{{ url_for('admin.upload_media') }}" class="btn btn-warning">
+                <i class="bi bi-cloud-upload"></i> Upload File
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal Tạo Album -->
+<div class="modal fade" id="createAlbumModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-folder-plus"></i> Tạo Album Mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin.create_album') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tên Album *</label>
+                        <input type="text" name="album_name" class="form-control"
+                               placeholder="Ví dụ: Khuyến mãi T6, Sự kiện Tết..." required>
+                        <small class="text-muted">
+                            Tên album sẽ được dùng để phân loại ảnh
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-check"></i> Tạo Album
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Xem Ảnh -->
+<div class="modal fade" id="viewImageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewImageTitle">Xem ảnh</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="viewImageSrc" src="" alt="" class="img-fluid" style="max-height: 70vh;">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Copy URL to clipboard
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('Thành công', 'Đã copy URL vào clipboard!', 'success');
+    }).catch(() => {
+        alert('Đã copy URL: ' + text);
+    });
+}
+
+// View image in modal
+function viewImage(src, filename) {
+    document.getElementById('viewImageSrc').src = src;
+    document.getElementById('viewImageTitle').textContent = filename;
+    new bootstrap.Modal(document.getElementById('viewImageModal')).show();
+}
+
+// Delete album
+function deleteAlbum(albumName, fileCount) {
+    if (fileCount > 0) {
+        alert('Không thể xóa album có chứa ' + fileCount + ' file!\n\nVui lòng xóa hết file trong album trước.');
+        return;
+    }
+
+    if (confirm('Bạn chắc chắn muốn xóa album "' + albumName + '"?')) {
+        window.location.href = '{{ url_for("admin.delete_album", album_name="PLACEHOLDER") }}'.replace('PLACEHOLDER', albumName);
+    }
+}
+
+// Toast notification helper
+function showToast(title, message, type = 'success') {
+    const bgColor = type === 'success' ? 'bg-success' :
+                    type === 'warning' ? 'bg-warning' :
+                    type === 'danger' ? 'bg-danger' : 'bg-info';
+
+    const toast = document.createElement('div');
+    toast.className = 'position-fixed top-0 end-0 p-3';
+    toast.style.zIndex = '9999';
+    toast.innerHTML = `
+        <div class="toast show" role="alert">
+            <div class="toast-header ${bgColor} text-white">
+                <i class="bi bi-check-circle me-2"></i>
+                <strong class="me-auto">${title}</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">
+                ${message}
+            </div>
+        </div>
+    `;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+</script>
+{% endblock %}

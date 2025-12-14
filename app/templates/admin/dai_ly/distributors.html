@@ -1,0 +1,247 @@
+{% extends "layouts/admin.html" %}
+
+{% block title %}Quản lý nhà phân phối{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-1"><i class="bi bi-shop"></i> Nhà phân phối</h2>
+      <p class="text-muted mb-0">Quản lý danh sách đại lý và nhà phân phối</p>
+    </div>
+    <a href="{{ url_for('admin.add_distributor') }}" class="btn btn-primary">
+      <i class="bi bi-plus-lg"></i> Thêm đại lý
+    </a>
+  </div>
+
+  <!-- Filter & Search -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <form method="GET" class="row g-3">
+        <div class="col-md-5">
+          <input
+            type="text"
+            name="search"
+            class="form-control"
+            placeholder="Tìm theo tên, địa chỉ..."
+            value="{{ search }}"
+          />
+        </div>
+        <div class="col-md-3">
+          <select name="city" class="form-select">
+            <option value="">Tất cả tỉnh/thành</option>
+            {% for city in cities %}
+            <option value="{{ city }}" {% if city == current_city %}selected{% endif %}>
+              {{ city }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-search"></i> Tìm kiếm
+          </button>
+          <a href="{{ url_for('admin.distributors') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-clockwise"></i> Làm mới
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Distributors List -->
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th style="width: 50px">ID</th>
+              <th>Tên đại lý</th>
+              <th>Địa chỉ</th>
+              <th>Liên hệ</th>
+              <th>Loại</th>
+              <th style="width: 100px" class="text-center">Trạng thái</th>
+              <th style="width: 150px" class="text-center">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in distributors.items %}
+            <tr>
+              <td>{{ d.id }}</td>
+              <td>
+                <div class="fw-semibold">{{ d.name }}</div>
+              </td>
+              <td>
+                <div class="text-truncate" style="max-width: 300px">
+                  {{ d.get_full_address() }}
+                </div>
+                {% if d.latitude and d.longitude %}
+                <small class="text-muted">
+                  <i class="bi bi-geo-alt"></i> {{ d.latitude }}, {{ d.longitude }}
+                </small>
+                {% endif %}
+              </td>
+              <td>
+                {% if d.phone %}
+                <div>{{ d.phone }}</div>
+                {% endif %}
+                {% if d.email %}
+                <div>{{ d.email }}</div>
+                {% endif %}
+              </td>
+              <td>
+                {% if d.distributor_type %}
+                <span class="badge bg-info">{{ d.distributor_type }}</span>
+                {% endif %}
+              </td>
+              <td class="text-center">
+                <button
+                  class="btn btn-sm btn-{% if d.is_active %}success{% else %}secondary{% endif %}"
+                  onclick="toggleActive({{ d.id }}, this)"
+                  title="Bật/tắt"
+                >
+                  <i class="bi bi-{% if d.is_active %}check-circle{% else %}x-circle{% endif %}"></i>
+                </button>
+              </td>
+              <td class="text-center">
+                <div class="btn-group btn-group-sm">
+                  <button
+                    class="btn btn-outline-warning"
+                    onclick="toggleFeatured({{ d.id }}, this)"
+                    title="{% if d.is_featured %}Bỏ nổi bật{% else %}Đặt nổi bật{% endif %}"
+                  >
+                    <i class="bi bi-star{% if d.is_featured %}-fill{% endif %}"></i>
+                  </button>
+                  <a
+                    href="{{ url_for('admin.edit_distributor', id=d.id) }}"
+                    class="btn btn-outline-primary"
+                    title="Sửa"
+                  >
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <button
+                    class="btn btn-outline-danger"
+                    onclick="deleteDistributor({{ d.id }}, '{{ d.name }}')"
+                    title="Xóa"
+                  >
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="7" class="text-center py-5 text-muted">
+                <i class="bi bi-inbox display-4"></i>
+                <div class="mt-2">Chưa có nhà phân phối nào</div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      {% if distributors.pages > 1 %}
+      <nav aria-label="Phân trang">
+        <ul class="pagination justify-content-center mb-0">
+          <li class="page-item {% if not distributors.has_prev %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin.distributors', page=distributors.prev_num, city=current_city, search=search) }}">
+              <i class="bi bi-chevron-left"></i>
+            </a>
+          </li>
+
+          {% for page_num in distributors.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+            {% if page_num %}
+              <li class="page-item {% if page_num == distributors.page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('admin.distributors', page=page_num, city=current_city, search=search) }}">
+                  {{ page_num }}
+                </a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+          {% endfor %}
+
+          <li class="page-item {% if not distributors.has_next %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin.distributors', page=distributors.next_num, city=current_city, search=search) }}">
+              <i class="bi bi-chevron-right"></i>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Delete Form (hidden) -->
+<form id="deleteForm" method="POST" style="display: none;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+</form>
+
+<script>
+// Get CSRF token
+function getCsrfToken() {
+  const token = document.querySelector('meta[name="csrf-token"]');
+  return token ? token.content : '';
+}
+
+function toggleActive(id, btn) {
+  fetch(`/admin/distributors/${id}/toggle-active`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCsrfToken()
+    }
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      if (data.is_active) {
+        btn.className = 'btn btn-sm btn-success';
+        btn.innerHTML = '<i class="bi bi-check-circle"></i>';
+      } else {
+        btn.className = 'btn btn-sm btn-secondary';
+        btn.innerHTML = '<i class="bi bi-x-circle"></i>';
+      }
+    }
+  })
+  .catch(err => console.error('Error:', err));
+}
+
+function toggleFeatured(id, btn) {
+  fetch(`/admin/distributors/${id}/toggle-featured`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCsrfToken()
+    }
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      const icon = btn.querySelector('i');
+      if (data.is_featured) {
+        icon.className = 'bi bi-star-fill';
+        btn.title = 'Bỏ nổi bật';
+      } else {
+        icon.className = 'bi bi-star';
+        btn.title = 'Đặt nổi bật';
+      }
+    }
+  })
+  .catch(err => console.error('Error:', err));
+}
+
+function deleteDistributor(id, name) {
+  if (!confirm(`Bạn có chắc muốn xóa đại lý "${name}"?`)) return;
+
+  const form = document.getElementById('deleteForm');
+  form.action = `/admin/distributors/${id}/delete`;
+  form.submit();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,37 @@
+# ==================== CORE FLASK ====================
+Flask==3.0.0
+Flask-SQLAlchemy==3.1.1
+Flask-Migrate==4.0.5
+Flask-Login==0.6.3
+Flask-WTF==1.2.1
+WTForms==3.1.1
+
+# ==================== UTILITIES ====================
+python-dotenv==1.0.0
+email-validator==2.1.0
+Pillow==10.0.0
+pytz==2024.1
+python-slugify==8.0.1
+APScheduler==3.10.4
+
+# ==================== DATABASE ====================
+psycopg2-binary==2.9.9
+
+# ==================== PRODUCTION SERVER ====================
+gunicorn==21.2.0
+Werkzeug==3.0.1
+
+# ==================== CLOUD SERVICES ====================
+cloudinary==1.36.0
+
+# ==================== AI/CHATBOT ====================
+groq>=0.11.0
+
+# ==================== PERFORMANCE ====================
+Flask-Compress==1.14
+
+# ==================== UTILITIES (QR CODE) ====================
+qrcode[pil]==7.4.2
+
+# ==================== CACHING  ====================
+Flask-Caching==2.1.0

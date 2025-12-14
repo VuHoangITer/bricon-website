@@ -1,0 +1,72 @@
+<!-- ==================== DÒNG SẢN PHẨM (PRODUCT LINES / CATEGORIES) ==================== -->
+{% if categories %}
+<section class="py-5 bg-white" id="product-lines-section">
+  <div class="container">
+    <!-- Section Title -->
+    <div class="mb-5">
+      <h2 class="fw-bold mb-3">Dòng sản phẩm</h2>
+      <div class="title-underline"></div>
+    </div>
+
+    <!-- Categories Grid -->
+    <div class="row g-4">
+      {% for category in categories %}
+      <div class="col-lg-3 col-md-4 col-sm-6 col-6">
+        <a href="{{ url_for('main.products', category_slug=category.slug) }}" class="text-decoration-none">
+          <div class="card h-100 border-0 shadow-sm category-card">
+            <!-- Category Image -->
+            <div class="category-image position-relative overflow-hidden" style="padding-top: 75%;">
+              {% if category.image %}
+              <img
+                src="{{ category.image }}"
+                alt="{{ category.name }}"
+                class="position-absolute top-0 start-0 w-100 h-100"
+                style="object-fit: cover;"
+                loading="lazy"
+              >
+              {% else %}
+              <div class="position-absolute top-0 start-0 w-100 h-100 bg-light d-flex align-items-center justify-content-center">
+                <i class="bi bi-box-seam text-warning" style="font-size: 3rem;"></i>
+              </div>
+              {% endif %}
+
+              <!-- Overlay gradient -->
+              <div class="position-absolute bottom-0 start-0 end-0 p-3"
+                   style="background: linear-gradient(transparent, rgba(0,0,0,0.7));">
+                <h5 class="text-white mb-0 fw-semibold text-center">{{ category.name }}</h5>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<style>
+/* Category Card Hover Effect */
+.category-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.category-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.15) !important;
+}
+
+.category-card img {
+  transition: transform 0.5s ease;
+}
+
+.category-card:hover img {
+  transform: scale(1.1);
+}
+
+.category-image {
+  border-radius: 12px;
+}
+</style>
+{% endif %}

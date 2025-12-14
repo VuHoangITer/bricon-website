@@ -1,0 +1,19 @@
+<!-- ==================== FEATURED BLOGS ==================== -->
+{% if featured_blogs %}
+<section class="py-5 bg-gray-dark" id="featured-blogs-section" data-page-section="blogs">
+  <div class="container">
+    <!-- Section Title -->
+    <div class="mb-5">
+      <h2 class="fw-bold mb-3">Tin tức nổi bật</h2>
+      <div class="title-underline"></div>
+    </div>
+
+    <!-- Blog Grid (will be converted to carousel by JS) -->
+    <div class="row g-4" id="blog-grid-container">
+      {% for blog in featured_blogs %}
+          {% include 'components/card_blog.html' with context %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}

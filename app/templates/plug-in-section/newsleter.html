@@ -1,0 +1,46 @@
+<!-- ==================== BRICON NEWSLETTER – MINIMAL ==================== -->
+<section id="newsletter-section" class="nl-section">
+  <div class="container">
+    <div class="nl-box">
+      <div class="nl-text">
+        <h3 class="nl-title">Nhận Tin Khuyến Mãi Từ Bricon</h3>
+        <p class="nl-desc">
+          Nhập email để nhận cập nhật sản phẩm & chương trình bán hàng mới.
+        </p>
+      </div>
+
+      <form id="newsletterForm" class="nl-form" novalidate>
+        <div class="nl-row">
+          <input
+            type="email"
+            id="newsletter-email"
+            name="email"
+            class="nl-input"
+            placeholder="Email của bạn"
+            required
+            autocomplete="email"
+          />
+          <button type="submit" class="nl-btn" id="newsletter-submit-btn">
+            <span class="btn-text">Đăng ký</span>
+            <span class="btn-spinner d-none">
+              <span class="spinner-border spinner-border-sm" role="status"></span>
+            </span>
+          </button>
+        </div>
+
+        <label class="nl-consent">
+          <input
+            type="checkbox"
+            class="form-check-input"
+            id="newsletter-consent"
+            name="consent"
+            required
+          />
+          <span>Tôi đồng ý nhận email từ BRICON.</span>
+        </label>
+
+        <div id="newsletterMessage" class="newsletter-message"></div>
+      </form>
+    </div>
+  </div>
+</section>

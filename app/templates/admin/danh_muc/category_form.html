@@ -1,0 +1,150 @@
+{% extends 'layouts/admin.html' %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-tag"></i> {{ title }}</h4>
+    <a href="{{ url_for('admin.categories') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            
+            <!-- ✅ Hidden field để đánh dấu xóa ảnh -->
+            <input type="hidden" name="delete_image" id="delete_image" value="0">
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Tên danh mục *</label>
+                    {{ form.name(class="form-control", placeholder="Nhập tên danh mục") }}
+                    {% if form.name.errors %}
+                        <div class="text-danger small mt-1">{{ form.name.errors[0] }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Slug (URL) *</label>
+                    {{ form.slug(class="form-control", placeholder="danh-muc-slug") }}
+                    {% if form.slug.errors %}
+                        <div class="text-danger small mt-1">{{ form.slug.errors[0] }}</div>
+                    {% endif %}
+                    <small class="text-muted">Tự động từ tên danh mục</small>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Mô tả</label>
+                    {{ form.description(class="form-control", rows="4", placeholder="Mô tả về danh mục") }}
+                </div>
+
+                <!-- ✅ FIELD UPLOAD ẢNH -->
+                <div class="col-md-6">
+                    <label class="form-label">Ảnh đại diện</label>
+                    {{ form.image(class="form-control", accept="image/*") }}
+                    {% if form.image.errors %}
+                        <div class="text-danger small mt-1">{{ form.image.errors[0] }}</div>
+                    {% endif %}
+                    <small class="text-muted">Định dạng: JPG, PNG, WebP. Khuyến nghị: 400x300px</small>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label d-block">Trạng thái</label>
+                    <div class="form-check form-switch mt-2">
+                        {{ form.is_active(class="form-check-input") }}
+                        <label class="form-check-label" for="{{ form.is_active.id }}">
+                            Kích hoạt hiển thị
+                        </label>
+                    </div>
+                </div>
+
+                <!-- ✅ HIỂN THỊ ẢNH HIỆN TẠI + NÚT XÓA -->
+                {% if category and category.image %}
+                <div class="col-md-6" id="current-image-container">
+                    <label class="form-label text-muted">Ảnh hiện tại:</label>
+                    <div class="border rounded p-2 bg-light position-relative d-inline-block">
+                        <img src="{{ category.image }}" alt="{{ category.name }}"
+                             class="img-fluid rounded" style="max-height: 150px;">
+
+                        <!-- ✅ NÚT XÓA ẢNH -->
+                        <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1"
+                                onclick="deleteCurrentImage()" title="Xóa ảnh">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                    <br>
+                    <small class="text-muted">Upload ảnh mới sẽ thay thế ảnh này</small>
+                </div>
+                {% endif %}
+
+                <!-- ✅ PREVIEW ẢNH MỚI -->
+                <div class="col-md-6" id="image-preview-container" style="display: none;">
+                    <label class="form-label text-muted">Xem trước ảnh mới:</label>
+                    <div class="border rounded p-2 bg-light">
+                        <img id="image-preview" src="" alt="Preview"
+                             class="img-fluid rounded" style="max-height: 150px;">
+                    </div>
+                </div>
+
+                <div class="col-12 mt-4">
+                    {{ form.submit(class="btn btn-warning px-5") }}
+                    <a href="{{ url_for('admin.categories') }}" class="btn btn-secondary">Hủy</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto generate slug from name
+document.querySelector('input[name="name"]').addEventListener('input', function(e) {
+    const slug = e.target.value
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+
+    document.querySelector('input[name="slug"]').value = slug;
+});
+
+// Preview image before upload
+document.querySelector('input[name="image"]').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const previewContainer = document.getElementById('image-preview-container');
+    const previewImg = document.getElementById('image-preview');
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            previewImg.src = event.target.result;
+            previewContainer.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    } else {
+        previewContainer.style.display = 'none';
+    }
+});
+
+// ✅ Xóa ảnh hiện tại
+function deleteCurrentImage() {
+    if (confirm('Bạn có chắc muốn xóa ảnh này?')) {
+        // Đánh dấu xóa ảnh
+        document.getElementById('delete_image').value = '1';
+
+        // Ẩn container ảnh hiện tại
+        const container = document.getElementById('current-image-container');
+        if (container) {
+            container.innerHTML = '<div class="alert alert-warning py-2"><i class="bi bi-info-circle me-2"></i>Ảnh sẽ bị xóa khi bạn nhấn Lưu</div>';
+        }
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,190 @@
+<!-- FOOTER (BRICON Minimal) -->
+<footer class="footer-hero" style="--footer-bg:url('{{ url_for('static', filename='img/tau.webp') }}');">
+  <div class="footer-wrap">
+    <div class="footer-card">
+
+      <div class="footer-grid">
+        <!-- Cột 1: Logo + mô tả + liên hệ + social -->
+        <div class="footer-col footer-brand">
+            <div class="brand-row">
+              <img
+                class="brand-logo"
+                src="{{ get_setting('logo_url', url_for('static', filename='img/logo.png')) }}"
+                alt="{{ get_setting('website_name', 'BRICON') }} Logo"
+              />
+            </div>
+
+          <p class="brand-desc">
+            {{ get_setting('footer_desc',
+              'BRICON Việt Nam chuyên keo dán gạch, keo chà ron và chống thấm. Cam kết chất lượng – ổn định – hỗ trợ kỹ thuật tận tâm.'
+            ) }}
+          </p>
+
+          <ul class="contact-list">
+             <li class="mb-2 d-flex align-items-start">
+                <i class="bi bi-geo-alt-fill"></i>
+                {% set branch_text = get_setting('branch_addresses', '171, Đường An Phú Đông 03, Phường An Phú Đông, Quận 12, TP.HCM') %}
+                {% set branches = branch_text.strip().split('\n') %}
+                {% set valid_branches = [] %}
+                {% for b in branches %}
+                  {% if b.strip() %}
+                    {% set _ = valid_branches.append(b.strip()) %}
+                  {% endif %}
+                {% endfor %}
+
+                {% if valid_branches|length == 0 %}
+                  <span>171, Đường An Phú Đông 03, Phường An Phú Đông, Quận 12, TP.HCM</span>
+                {% elif valid_branches|length == 1 %}
+                  <span>{{ valid_branches[0] }}</span>
+                {% else %}
+                  <div>
+                    {% for branch in valid_branches %}
+                      {% if loop.first %}
+                        <div>{{ branch }}</div>
+                      {% else %}
+                        <div class="mt-2">
+                          <i class="bi bi-geo-alt-fill"></i>{{ branch }}
+                        </div>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </li>
+            <li>
+              <i class="bi bi-telephone"></i>
+              <a href="tel:{{ get_setting('hotline', '0901180094')|replace('.', '')|replace(' ', '') }}">
+                {{ get_setting('hotline', '') }}
+              </a>
+            </li>
+            <li>
+              <i class="bi bi-envelope"></i>
+              <a href="mailto:{{ get_setting('contact_email', 'info@bricon.vn') }}">
+                {{ get_setting('contact_email', '') }}
+              </a>
+            </li>
+          </ul>
+
+          <div class="social-row">
+            {% if get_setting('facebook_url') %}
+            <a class="social-btn" href="{{ get_setting('facebook_url') }}" target="_blank" aria-label="Facebook">
+              <i class="bi bi-facebook"></i>
+            </a>
+            {% endif %}
+
+            {% if get_setting('instagram_url') %}
+            <a class="social-btn" href="{{ get_setting('instagram_url') }}" target="_blank" aria-label="Instagram">
+              <i class="bi bi-instagram"></i>
+            </a>
+            {% endif %}
+
+            {% if get_setting('shopee_url') %}
+            <a class="social-btn" href="{{ get_setting('shopee_url') }}" target="_blank" aria-label="Shopee">
+              <span class="social-text">S</span>
+            </a>
+            {% endif %}
+
+            {% if get_setting('lazada_url') %}
+            <a class="social-btn" href="{{ get_setting('lazada_url') }}" target="_blank" aria-label="Lazada">
+              <span class="social-text">L</span>
+            </a>
+            {% endif %}
+
+            {% if get_setting('tiktok_url') %}
+            <a class="social-btn" href="{{ get_setting('tiktok_url') }}" target="_blank" aria-label="Tiktok">
+              <i class="bi bi-tiktok"></i>
+            </a>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Cột 2: Chính sách -->
+        <div class="footer-col">
+          <h5 class="footer-title">Chính sách</h5>
+          <ul class="footer-links-list">
+            <li><a href="{{ url_for('main.about') }}">Giới thiệu chung</a></li>
+
+            {% if is_feature_enabled('contacts') %}
+            <li><a href="{{ url_for('main.contact') }}">Liên hệ</a></li>
+            {% endif %}
+
+            {% if get_setting('terms_of_service') %}
+            <li><a href="{{ url_for('main.policy', policy_slug='dieu-khoan-dich-vu') }}">Điều khoản dịch vụ</a></li>
+            {% endif %}
+
+            {% if get_setting('shipping_policy') %}
+            <li><a href="{{ url_for('main.policy', policy_slug='van-chuyen') }}">Chính sách vận chuyển</a></li>
+            {% endif %}
+
+            {% if get_setting('return_policy') %}
+            <li><a href="{{ url_for('main.policy', policy_slug='doi-tra') }}">Chính sách đổi trả</a></li>
+            {% endif %}
+
+            {% if get_setting('privacy_policy') %}
+            <li><a href="{{ url_for('main.policy', policy_slug='bao-mat') }}">Chính sách bảo mật</a></li>
+            {% endif %}
+
+            {% if get_setting('warranty_policy') %}
+            <li><a href="{{ url_for('main.policy', policy_slug='bao-hanh') }}">Chính sách bảo hành</a></li>
+            {% endif %}
+          </ul>
+        </div>
+
+        <!-- Cột 3: Danh mục -->
+        <div class="footer-col">
+          <h5 class="footer-title">Sản phẩm</h5>
+          <ul class="footer-links-list">
+            {% if is_feature_enabled('products') %}
+              {% for category in all_categories[:7] %}
+              <li>
+                <a href="{{ url_for('main.products', category_slug=category.slug) }}">
+                  {{ category.name }}
+                </a>
+              </li>
+              {% endfor %}
+            {% endif %}
+
+            {% if is_feature_enabled('projects') %}
+            <li><a href="{{ url_for('main.projects') }}">Dự án</a></li>
+            {% endif %}
+          </ul>
+        </div>
+
+        <!-- Cột 4: Fanpage (giữ lại) -->
+        <div class="footer-col footer-right">
+          <h5 class="footer-title">Fanpage Facebook</h5>
+          <div class="mini-block">
+            <div class="fanpage-box">
+              <div class="fanpage-placeholder">
+                <div class="fp-logo">
+                  <img
+                    src="{{ url_for('static', filename='img/logo-fanpage.webp') }}"
+                    alt="Logo Fanpage"
+                    style="width:100%;height:100%;object-fit:cover;border-radius:50%;"
+                  />
+                </div>
+                <div class="fp-name">{{ get_setting('website_name', 'BRICON') }}</div>
+                <div class="fp-meta">{{ get_setting('facebook_followers', '80K') }} người theo dõi</div>
+                <a href="{{ get_setting('facebook_url', '#') }}" target="_blank" class="fp-follow">
+                  Theo dõi Trang
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Thanh đen bo tròn dưới -->
+      <div class="footer-bottom">
+        <div class="footer-copy">
+          © {{ get_setting('website_name', 'BRICON') }}
+          <span class="dot">•</span>Make By
+          <a href="https://bricon.vn" target="_blank">Bricon</a>
+        </div>
+        <div class="footer-bottom-links">
+          <a href="{{ url_for('main.contact') }}">Trung tâm hỗ trợ</a>
+          <a href="{{ url_for('main.policy', policy_slug='dieu-khoan-dich-vu') }}">Điều khoản &amp; Điều kiện</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

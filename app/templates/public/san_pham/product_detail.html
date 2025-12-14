@@ -1,0 +1,445 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}
+    {{ product.name }} - {{ get_setting('website_name', '') }}
+{% endblock %}
+
+{% block meta_description %}
+    {{ rendered_meta_description }}
+{% endblock %}
+
+<!-- ==================== CUSTOM OG TAGS FOR PRODUCT ==================== -->
+{% block extra_css %}
+<meta
+  property="og:title"
+  content="{{ product.name }} - {{ get_setting('website_name', '') }}"
+/>
+<meta
+  property="og:description"
+  content="{{ product.description[:200] if product.description else 'Keo dán gạch, keo chà ron, chống thấm BRICON - Keo của người Việt' }}"
+/>
+<meta
+  property="og:image"
+  content="{{ product.image if product.image else get_setting('default_share_image', '/static/img/default-share.jpg') }}"
+/>
+<meta property="og:url" content="{{ request.url }}" />
+<meta property="og:type" content="product" />
+<meta property="product:price:amount" content="{{ product.price }}" />
+<meta property="product:price:currency" content="VND" />
+{% endblock %}
+
+{% block content %}
+<!-- ==================== BREADCRUMB & PAGE HEADER ==================== -->
+<div class="page-header bg-light py-4">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item">
+          <a href="{{ url_for('main.index') }}">Trang chủ</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{{ url_for('main.products') }}">Sản phẩm</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{{ url_for('main.products', category_slug=product.category.slug) }}">
+            {{ product.category.name }}
+          </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+          {{ product.name[:50] }}{% if product.name|length > 50 %}...{% endif %}
+        </li>
+      </ol>
+    </nav>
+  </div>
+</div>
+<div class="trang-san-pham-chi-tiet-vn">
+<!-- ==================== PRODUCT DETAIL ==================== -->
+<section class="py-5">
+  <div class="container">
+    <div class="row">
+      <!-- Product Image -->
+      <div class="col-lg-6 mb-4">
+        <div class="product-detail-image position-relative">
+          {% set media_info = product.get_media_seo_info() if product.image else None %}
+
+          <img
+            src="{{ product.image if product.image else 'https://via.placeholder.com/600x600/FFC107/FFFFFF?text=Product' }}"
+            class="img-fluid rounded shadow-lg w-100"
+            alt="{{ media_info.alt_text if media_info and media_info.alt_text else product.name }}"
+            title="{{ media_info.title if media_info and media_info.title else product.name }}"
+            itemprop="image"
+            loading="eager"
+          />
+
+          <!-- Badge giảm giá -->
+          {% if product.old_price and product.price > 0 %}
+          <span class="badge bg-danger position-absolute top-0 start-0 m-3 fs-5">
+            {{ ((product.old_price - product.price) / product.old_price * 100)|int }}%
+          </span>
+          {% endif %}
+
+          {# Hiển thị Caption cho SEO nhưng ẩn đi #}
+          {% if media_info and media_info.caption %}
+          <div class="visually-hidden" itemprop="description">
+            {{ media_info.caption }}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Product Info -->
+      <div class="col-lg-6">
+        <h2 class="h3 mb-3" itemprop="name">{{ product.name }}</h2>
+
+        <!-- Badges -->
+        <div class="mb-3">
+          <span class="badge bg-info me-2">
+            <i class="bi bi-tag-fill me-1"></i>{{ product.category.name }}
+          </span>
+          {% if product.is_featured %}
+          <span class="badge bg-warning">
+            <i class="bi bi-star-fill me-1"></i>Nổi bật
+          </span>
+          {% endif %}
+        </div>
+
+        <!-- Price -->
+        <div class="product-price-detail bg-light p-3 rounded mb-4">
+          {% if product.price == 0 %}
+          <h2 class="text-danger fw-bold mb-0 text-center" itemprop="price">Liên hệ</h2>
+          <meta itemprop="priceCurrency" content="VND" />
+          {% else %}
+          <h2 class="text-warning fw-bold mb-0">
+            <span itemprop="price" content="{{ product.price }}">{{ product.price|format_price }}</span>
+            <small class="fs-5">đ</small>
+            <meta itemprop="priceCurrency" content="VND" />
+          </h2>
+          {% if product.old_price %}
+          <p class="text-muted mb-0 mt-2">
+            <span class="text-decoration-line-through fs-5">{{ product.old_price|format_price }}đ</span>
+            <span class="badge bg-danger ms-2">
+              Tiết kiệm {{ ((product.old_price - product.price) / 1000)|int }}k
+            </span>
+          </p>
+          {% endif %}
+          {% endif %}
+        </div>
+
+        <!-- CTA Buttons -->
+        <div class="d-grid gap-2 mb-4">
+          <a
+            href="tel:{{ get_setting('hotline', '0901180094')|replace('.', '')|replace(' ', '') }}"
+            class="btn btn-warning btn-lg"
+          >
+            <i class="bi bi-telephone-fill me-2"></i>
+            Gọi ngay: {{ get_setting('hotline', '0901.180.094') }}
+          </a>
+          <div class="row g-2">
+            <div class="col-6">
+              <a
+                href="{{ get_setting('zalo_url', 'https://zalo.me/2548623772320781405') }}"
+                target="_blank"
+                class="btn btn-outline-primary btn-lg w-100"
+              >
+                <i class="bi bi-chat-dots-fill me-1"></i>Chat Zalo
+              </a>
+            </div>
+            <div class="col-6">
+              <a
+                href="{{ get_setting('facebook_messenger_url', '#') }}"
+                target="_blank"
+                class="btn btn-outline-primary btn-lg w-100"
+              >
+                <i class="bi bi-messenger me-1"></i>Messenger
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Social Share -->
+        <div class="border-top pt-3">
+          <h6 class="fw-semibold mb-2">Chia sẻ sản phẩm:</h6>
+          <div class="d-flex gap-2">
+            <a
+              href="https://www.facebook.com/sharer/sharer.php?u={{ request.url }}"
+              target="_blank"
+              class="btn btn-outline-primary btn-sm"
+              title="Chia sẻ lên Facebook"
+            >
+              <i class="bi bi-facebook"></i> Facebook
+            </a>
+            <a
+              href="https://zalo.me/share?url={{ request.url }}"
+              target="_blank"
+              class="btn btn-outline-info btn-sm"
+              title="Chia sẻ qua Zalo"
+            >
+              <i class="bi bi-chat-dots-fill"></i> Zalo
+            </a>
+            <button
+              onclick="copyLink()"
+              class="btn btn-outline-secondary btn-sm"
+              title="Sao chép link"
+            >
+              <i class="bi bi-link-45deg"></i> Copy Link
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PRODUCT TABS ==================== -->
+    <div class="row mt-5">
+      <div class="col-12">
+        <ul class="nav nav-tabs mb-4" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" data-bs-toggle="tab" href="#details">
+              <i class="bi bi-info-circle me-1"></i>Mô Tả Sản Phẩm
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#specs">
+              <i class="bi bi-card-list me-1"></i>Thông Số Kỹ Thuật
+            </a>
+          </li>
+        </ul>
+
+        <div class="tab-content">
+          <!-- Chi tiết sản phẩm -->
+          <div class="tab-pane fade show active" id="details">
+            <div class="bg-light p-4 rounded">
+              {{ product.description | nl2br | safe if product.description else 'Thông tin chi tiết đang được cập nhật...' }}
+            </div>
+          </div>
+
+          <!-- Thông số kỹ thuật -->
+            <div class="tab-pane fade" id="specs">
+                <div class="bg-white p-4">
+
+                    {% if product.technical_info %}
+
+                    <!-- Thông tin cơ bản (luôn hiển thị) -->
+                    <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom border-warning">
+                        <i class="bi bi-info-circle text-warning me-2"></i>Thông tin cơ bản
+                    </h5>
+                    <table class="table table-bordered mb-5">
+                        <tbody>
+                            <tr>
+                                <td class="fw-semibold bg-light" style="width: 30%">
+                                    <i class="bi bi-tag text-warning me-2"></i>Danh mục
+                                </td>
+                                <td>{{ product.category.name }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold bg-light">
+                                    <i class="bi bi-check-circle text-success me-2"></i>Tình trạng
+                                </td>
+                                <td><span class="badge bg-success">Còn hàng</span></td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold bg-light">
+                                    <i class="bi bi-flag text-warning me-2"></i>Xuất xứ
+                                </td>
+                                <td><strong>Việt Nam</strong> - {{ get_setting('website_name', '') }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Hiển thị tất cả thông tin kỹ thuật từ JSON -->
+                    <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom border-warning">
+                        <i class="bi bi-clipboard-data text-warning me-2"></i>Thông tin kỹ thuật chi tiết
+                    </h5>
+
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered table-hover">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th style="width: 35%">Thông số</th>
+                                    <th>Giá trị</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for key, value in product.technical_info.items() %}
+                                <tr>
+                                    <td class="fw-semibold text-dark">
+                                        <i class="bi bi-dot text-warning fs-3"></i>{{ key }}
+                                    </td>
+                                    <td>
+                                        {% if value is string %}
+                                            <!-- Single value -->
+                                            {% if 'ĐẠT' in value or '✓' in value %}
+                                                <span class="text-success fw-bold">
+                                                    <i class="bi bi-check-circle-fill me-1"></i>{{ value }}
+                                                </span>
+                                            {% elif '≥' in value or '≤' in value or 'MPa' in value or 'µm' in value %}
+                                                <span class="badge bg-info text-dark fs-6 px-3 py-2">{{ value }}</span>
+                                            {% else %}
+                                                {{ value }}
+                                            {% endif %}
+                                        {% elif value is sequence and value is not string %}
+                                            <!-- List values -->
+                                            <ul class="list-unstyled mb-0">
+                                                {% for item in value %}
+                                                <li class="mb-2">
+                                                    <i class="bi bi-check2 text-success me-2"></i>{{ item }}
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% else %}
+                                            {{ value }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% else %}
+
+                    <!-- Không có thông tin -->
+                    <div class="card border-warning bg-light">
+                        <div class="card-body text-center py-5">
+                            <i class="bi bi-exclamation-triangle text-warning fs-1 mb-3 d-block"></i>
+                            <p class="text-muted mb-3">Thông tin kỹ thuật đang được cập nhật.</p>
+                            <p class="mb-0">
+                                Liên hệ <strong>{{ get_setting('hotline', '0901.180.094') }}</strong>
+                                để được tư vấn chi tiết.
+                            </p>
+                        </div>
+                    </div>
+
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== RELATED PRODUCTS ==================== -->
+    {% if related_products %}
+    <div class="mt-5">
+      <h3 class="fw-bold mb-4">
+        Sản phẩm liên quan
+      </h3>
+      <div class="row g-4">
+        {% for rp in related_products %}
+          {% set product = rp %}
+            {% include 'components/card_product.html' with context %}
+          {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+</div>
+
+<!-- ==================== SCHEMA.ORG - PRODUCT ==================== -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{{ product.name|e }}",
+  "image": "{{ product.image|e }}",
+  "description": "{{ (product.description or 'Sản phẩm chất lượng cao')|striptags|e }}",
+  "sku": "{{ product.id }}",
+  "brand": {
+    "@type": "Brand",
+    "name": "{{ get_setting('website_name', 'BRICON VIỆT NAM')|e }}"
+  },
+  "offers": {
+    "@type": "Offer",
+    "url": "{{ url_for('main.product_detail', slug=product.slug, _external=True) }}",
+    "priceCurrency": "VND",
+    "price": "{{ product.price }}",
+    "priceValidUntil": "{{ (now + timedelta(days=30)).strftime('%Y-%m-%d') }}",
+    "availability": "https://schema.org/InStock",
+    "itemCondition": "https://schema.org/NewCondition",
+    "seller": {
+      "@type": "Organization",
+      "name": "{{ get_setting('website_name', 'BRICON VIỆT NAM')|e }}"
+    }
+  }
+}
+</script>
+
+<!-- ==================== SCHEMA.ORG - BREADCRUMB ==================== -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Trang chủ",
+      "item": "{{ url_for('main.index', _external=True) }}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Sản phẩm",
+      "item": "{{ url_for('main.products', _external=True) }}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "{{ product.category.name|e }}",
+      "item": "{{ url_for('main.products', category_slug=product.category.slug, _external=True) }}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "{{ product.name|e }}",
+      "item": "{{ request.url }}"
+    }
+  ]
+}
+</script>
+{% endblock %}
+
+<!-- ==================== CUSTOM JS ==================== -->
+{% block extra_js %}
+<script>
+// Copy link function
+function copyLink() {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    const notification = document.createElement('div');
+    notification.textContent = '✓ Đã sao chép link sản phẩm!';
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #28a745;
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 9999;
+      font-weight: 500;
+      animation: slideIn 0.3s ease;
+    `;
+    document.body.appendChild(notification);
+    setTimeout(() => {
+      notification.style.animation = 'slideOut 0.3s ease';
+      setTimeout(() => notification.remove(), 300);
+    }, 2000);
+  });
+}
+
+// CSS animations
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideIn {
+    from { transform: translateX(400px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(400px); opacity: 0; }
+  }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

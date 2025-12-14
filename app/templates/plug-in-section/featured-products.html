@@ -1,0 +1,17 @@
+<!-- ==================== FEATURED PRODUCTS ==================== -->
+<section class="py-5 bg-gray-dark">
+  <div class="container">
+    <!-- Section Title -->
+    <div class="mb-5">
+      <h2 class="fw-bold mb-3">Sản phẩm nổi bật</h2>
+      <div class="title-underline"></div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="row g-4">
+      {% for product in featured_products[:6] %}
+        {% include 'components/card_product.html' with context %}
+      {% endfor %}
+    </div>
+  </div>
+</section>

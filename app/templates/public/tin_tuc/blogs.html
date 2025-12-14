@@ -1,0 +1,268 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}
+    Tin tức - {{ get_setting('website_name', '') }}
+{% endblock %}
+
+{% block meta_description %}
+   {{ get_setting('blog_meta_description', '') }}
+{% endblock %}
+
+{% block content %}
+<!-- ==================== BREADCRUMB ==================== -->
+<div class="page-header bg-light py-4">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item">
+          <a href="{{ url_for('main.index') }}">Trang chủ</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Tin tức</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<!-- ==================== BLOG LIST ==================== -->
+<section class="py-5">
+  <div class="container">
+    <h1 class="fs-4 fw-semibold mb-4">
+      Tin tức
+    </h1>
+    <div class="row">
+      <!-- Blog Grid  -->
+      <div class="col-lg-9 order-lg-1 order-1">
+        {% if blogs %}
+        <div class="row g-4">
+          {% for blog in blogs %}
+            {% include 'components/card_blog.html' with context %}
+          {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% set endpoint = 'main.blog' %}
+        {% set category_slug = None %}
+        {% set search = request.args.get('search', '') %}
+        {% set sort = None %}
+        {% include 'components/pagination.html' with context %}
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-5">
+          <i class="bi bi-inbox display-1 text-muted"></i>
+          <p class="text-muted mt-3">Chưa có bài viết nào</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Sidebar -->
+      <div class="col-lg-3 order-lg-2 order-2 mb-4 mb-lg-0">
+        <!-- Search Box -->
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-body">
+            <h6 class="fw-bold mb-3">
+              <i class="bi bi-search text-warning me-2"></i>Tìm kiếm
+            </h6>
+            <form action="{{ url_for('main.blog') }}" method="get">
+              <div class="input-group input-group-sm">
+                <input
+                  type="text"
+                  class="form-control"
+                  name="search"
+                  placeholder="Tìm bài viết..."
+                  aria-label="Tìm kiếm bài viết"
+                />
+                <button class="btn btn-warning" type="submit">
+                  <i class="bi bi-search"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Featured Blogs -->
+        {% if featured_blogs %}
+        <div class="card featured-blogs-card shadow-sm border-0">
+          <div class="card-header bg-white border-0 pb-0">
+            <div class="d-flex align-items-center justify-content-between">
+              <h6 class="fw-bold mb-0">
+                Tin Tức Nổi Bật
+              </h6>
+            </div>
+          </div>
+          <div class="list-group list-group-flush featured-blogs-list">
+            {% for fb in featured_blogs %}
+            <a
+              href="{{ url_for('main.blog_detail', slug=fb.slug) }}"
+              class="list-group-item list-group-item-action d-flex align-items-center px-3 py-2 featured-blog-item"
+            >
+              {% if fb.image %}
+              <div class="featured-thumb flex-shrink-0 me-2">
+                <img
+                  src="{{ fb.image }}"
+                  alt="{{ fb.title }}"
+                  class="img-fluid rounded"
+                />
+              </div>
+              {% endif %}
+              <div class="flex-grow-1">
+                <p class="featured-title mb-1 small fw-semibold text-dark">
+                  {{ fb.title }}
+                </p>
+                <div class="d-flex align-items-center small text-muted">
+                  <i class="bi bi-calendar me-1"></i>
+                  <span>{{ fb.created_at|vn_date }}</span>
+                </div>
+              </div>
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SCHEMA.ORG - ITEM LIST ==================== -->
+{% if blogs %}
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Tin tức {{ get_setting('website_name', 'BRICON VIỆT NAM')|e }}",
+    "url": "{{ url_for('main.blog', _external=True) }}",
+    "itemListElement": [
+      {% for blog in blogs %}
+      {
+        "@type": "ListItem",
+        "position": {{ loop.index }},
+        "item": {
+          "@type": "BlogPosting",
+          "headline": "{{ blog.title|e }}",
+          "image": "{{ blog.image|e }}",
+          "datePublished": "{{ blog.created_at|vn_datetime('%Y-%m-%d') }}",
+          "dateModified": "{{ blog.updated_at|vn_datetime('%Y-%m-%d') if blog.updated_at else blog.created_at|vn_datetime('%Y-%m-%d') }}",
+          "author": {
+            "@type": "Person",
+            "name": "{{ blog.author if blog.author else get_setting('website_name', 'BRICON VIỆT NAM')|e }}"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "{{ get_setting('website_name', 'BRICON VIỆT NAM')|e }}",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "{{ get_setting('logo_url', url_for('static', filename='img/logo.png', _external=True))|e }}"
+            }
+          },
+          "url": "{{ url_for('main.blog_detail', slug=blog.slug, _external=True) }}"
+        }
+      }{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ]
+  }
+</script>
+{% endif %}
+
+<!-- ==================== SCHEMA.ORG - BREADCRUMB ==================== -->
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Trang chủ",
+        "item": "{{ url_for('main.index', _external=True) }}"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Tin tức",
+        "item": "{{ url_for('main.blog', _external=True) }}"
+      }
+    ]
+  }
+</script>
+
+<!-- Custom Styles -->
+<style>
+  .blog-card {
+    transition: transform 0.3s, box-shadow 0.3s;
+    height: auto;
+  }
+
+  .blog-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .blog-card img {
+    transition: transform 0.3s;
+  }
+
+  .blog-card:hover img {
+    transform: scale(1.05);
+  }
+
+  /* Responsive sidebar */
+  @media (max-width: 991.98px) {
+    .col-lg-3.order-lg-2 {
+      margin-bottom: 2rem;
+    }
+  }
+/* Featured Blogs Sidebar */
+.featured-blogs-card {
+  border-radius: 12px;
+}
+
+.featured-blogs-list .featured-blog-item {
+  border: 0;
+  border-left: 2px solid transparent;
+  background-color: transparent;
+  transition: all 0.2s ease;
+}
+
+.featured-blogs-list .featured-blog-item:hover {
+  background-color: #fff7e6; /* nhẹ màu vàng, hợp BRICON */
+  border-left-color: #ffc107;
+  transform: translateX(2px);
+}
+
+.featured-thumb {
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #f3f4f6;
+}
+
+.featured-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.featured-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;   /* tối đa 2 dòng */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Sidebar trên mobile cách blog list một chút */
+@media (max-width: 991.98px) {
+  .sidebar-blog {
+    margin-top: 2rem;
+  }
+}
+.blog-card .card-text {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>
+{% endblock %}

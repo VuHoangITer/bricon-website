@@ -1,0 +1,395 @@
+<!-- ====================  QUICK ACCESS ==================== -->
+<section class="bricon-exp">
+  <div class="container">
+    <div class="exp-head">
+      <div>
+        <div class="exp-title-wrap">
+          <div class="exp-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M12 3v4M12 17v4M4 12h4M16 12h4"
+                stroke="#0B0F1A"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+              <path
+                d="M7.5 7.5l3 3M13.5 13.5l3 3M16.5 7.5l-3 3M10.5 13.5l-3 3"
+                stroke="#0B0F1A"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
+          <div>
+            <h2 class="exp-title">Thao Tác</h2>
+            <div class="exp-underline"></div>
+            <div class="exp-sub">Lối tắt nhanh cho đại lý & khách hàng</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-grid">
+      <!-- 1. Điểm phân phối -->
+      <a class="exp-card" href="{{ url_for('main.distributors') }}">
+        <div class="exp-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 21s7-6 7-12a7 7 0 0 0-14 0c0 6 7 12 7 12z" />
+            <circle cx="12" cy="9" r="2.5" class="fill" />
+          </svg>
+        </div>
+        <div class="exp-text">
+          <div class="exp-name">Điểm phân phối</div>
+          <div class="exp-desc">Tìm cửa hàng gần bạn</div>
+        </div>
+        <div class="exp-arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" /></svg>
+        </div>
+      </a>
+
+      <!-- 2. Thông tin sản phẩm -->
+      {% if is_feature_enabled('products') %}
+      <a class="exp-card" href="{{ url_for('main.products') }}">
+        <div class="exp-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 7l8-4 8 4v10l-8 4-8-4V7z" />
+            <path d="M12 3v18" />
+            <circle cx="8.5" cy="9" r="1.2" class="fill" />
+          </svg>
+        </div>
+        <div class="exp-text">
+          <div class="exp-name">Thông tin sản phẩm</div>
+          <div class="exp-desc">TDS, tiêu chuẩn, ứng dụng</div>
+        </div>
+        <div class="exp-arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" /></svg>
+        </div>
+      </a>
+      {% endif %}
+
+      <!-- 3. Bảng màu -->
+      <a class="exp-card" href="{{ url_for('main.color_chart') }}">
+        <div class="exp-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M12 3c5 0 9 3.6 9 8.2 0 2.9-1.9 4.8-4.4 4.8H15c-1 0-1.7.7-1.7 1.7 0 1 .7 1.6.7 2.6 0 1.6-1.4 2.7-3 2.7C6.1 23 3 18.8 3 12.8 3 7 7 3 12 3z"
+            />
+            <circle cx="8.2" cy="10.2" r="1.2" class="fill" />
+            <circle cx="11.2" cy="8.3" r="1.2" class="fill" />
+            <circle cx="14.6" cy="9.3" r="1.2" class="fill" />
+            <circle cx="9.6" cy="13.2" r="1.2" class="fill" />
+          </svg>
+        </div>
+        <div class="exp-text">
+          <div class="exp-name">Bảng màu</div>
+          <div class="exp-desc">Các loại màu mà BRICON cung cấp</div>
+        </div>
+        <div class="exp-arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" /></svg>
+        </div>
+      </a>
+      </a>
+
+      <!-- 4. FAQ -->
+      {% if is_feature_enabled('faqs') %}
+      <a class="exp-card" href="{{ url_for('main.faq') }}">
+        <div class="exp-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M9.5 9a2.8 2.8 0 1 1 4.6 2.2c-.9.7-1.6 1.2-1.6 2.6" />
+            <circle cx="12" cy="18" r="1.2" class="fill" />
+            <path d="M4.5 5.5h15v10h-9l-4 4v-4h-2z" />
+          </svg>
+        </div>
+        <div class="exp-text">
+          <div class="exp-name">FAQ</div>
+          <div class="exp-desc">Câu hỏi thường gặp</div>
+        </div>
+        <div class="exp-arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" /></svg>
+        </div>
+      </a>
+      {% endif %}
+
+      <!-- 5. Hướng dẫn thi công -->
+      <a class="exp-card" href="{{ url_for('main.installation_guide') }}">
+        <div class="exp-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M14 3l7 7-8 8-7-7 8-8z" />
+            <path d="M6 14l-3 3a3 3 0 0 0 4 4l3-3" />
+            <path d="M10 7l7 7" />
+            <path d="M17 4l3 3" class="fill" />
+          </svg>
+        </div>
+        <div class="exp-text">
+          <div class="exp-name">Hướng dẫn thi công</div>
+          <div class="exp-desc">Chuẩn kỹ thuật, chuẩn công trình</div>
+        </div>
+        <div class="exp-arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" /></svg>
+        </div>
+      </a>
+      </a>
+
+      <!-- 6. Điều lệ dịch vụ -->
+      <a class="exp-card" href="{{ url_for('main.policy') }}">
+        <div class="exp-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M6 3h9l3 3v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"
+            />
+            <path d="M15 3v4h4" />
+            <path d="M9 9h6M9 12h6M9 15h4" />
+            <path
+              d="M12 10c2 .9 4 .9 4 .9v3.2c0 2.8-2.4 4-4 4.9-1.6-.9-4-2.1-4-4.9v-3.2S10 10.9 12 10z"
+              class="fill"
+            />
+          </svg>
+        </div>
+        <div class="exp-text">
+          <div class="exp-name">Điều lệ dịch vụ khách hàng</div>
+          <div class="exp-desc">Chính sách & cam kết BRICON</div>
+        </div>
+        <div class="exp-arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" /></svg>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+/* ==================== BRICON EXPERIENCE SECTION ==================== */
+:root {
+  --br-yellow: #ffc107;
+  --br-black: #0b0f1a;
+  --br-ink: #111827;
+  --br-muted: #6b7280;
+  --card: #ffffff;
+  --border: rgba(17, 24, 39, 0.1);
+  --shadow: 0 14px 34px rgba(11, 15, 26, 0.1);
+  --radius: 18px;
+}
+
+.bricon-exp {
+  padding: 52px 0 64px;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(
+      1000px 360px at 18% 0%,
+      rgba(255, 193, 7, 0.18),
+      transparent 55%
+    ),
+    radial-gradient(
+      800px 320px at 82% 10%,
+      rgba(255, 193, 7, 0.1),
+      transparent 55%
+    ),
+    #fff;
+}
+
+.bricon-exp::before {
+  content: "";
+  position: absolute;
+  inset: -40px -40px auto -40px;
+  height: 220px;
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(11, 15, 26, 0.06) 0px,
+    rgba(11, 15, 26, 0.06) 10px,
+    transparent 10px,
+    transparent 22px
+  );
+  transform: rotate(-2deg);
+  pointer-events: none;
+  opacity: 0.35;
+}
+
+.exp-head {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.exp-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.exp-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--br-yellow), #ffd86a);
+  box-shadow: 0 10px 22px rgba(255, 193, 7, 0.22);
+  display: grid;
+  place-items: center;
+  flex: 0 0 40px;
+}
+
+.exp-mark svg {
+  width: 22px;
+  height: 22px;
+}
+
+.exp-title {
+  margin: 0;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  font-size: clamp(26px, 3vw, 40px);
+}
+
+.exp-sub {
+  margin: 8px 0 0;
+  color: var(--br-muted);
+  font-weight: 650;
+  font-size: 14px;
+}
+
+.exp-underline {
+  width: 84px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--br-yellow);
+  margin-top: 10px;
+}
+
+.exp-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  position: relative;
+  z-index: 1;
+}
+
+.exp-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 16px;
+  border-radius: var(--radius);
+  background: var(--card);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 1px 0 rgba(11, 15, 26, 0.03);
+  transition: transform 0.18s ease, box-shadow 0.18s ease,
+    border-color 0.18s ease;
+  position: relative;
+  overflow: hidden;
+  min-height: 86px;
+}
+
+.exp-card::before {
+  content: "";
+  position: absolute;
+  top: -42px;
+  right: -42px;
+  width: 96px;
+  height: 96px;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(255, 193, 7, 0.55),
+    rgba(255, 193, 7, 0) 70%
+  );
+  transform: rotate(18deg);
+  pointer-events: none;
+}
+
+.exp-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+  border-color: rgba(255, 193, 7, 0.35);
+}
+
+.exp-ico {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 193, 7, 0.22),
+    rgba(255, 193, 7, 0.06)
+  );
+  border: 1px solid rgba(255, 193, 7, 0.25);
+  display: grid;
+  place-items: center;
+  flex: 0 0 54px;
+}
+
+.exp-ico svg {
+  width: 26px;
+  height: 26px;
+  stroke: var(--br-black);
+  stroke-width: 2.2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.exp-ico .fill {
+  fill: var(--br-yellow);
+  stroke: none;
+}
+
+.exp-text {
+  min-width: 0;
+}
+
+.exp-name {
+  font-weight: 900;
+  font-size: 16px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.exp-desc {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--br-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.exp-arrow {
+  margin-left: auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(11, 15, 26, 0.035);
+  border: 1px solid rgba(11, 15, 26, 0.06);
+  flex: 0 0 34px;
+}
+
+.exp-arrow svg {
+  width: 16px;
+  height: 16px;
+  stroke: rgba(11, 15, 26, 0.65);
+  stroke-width: 2.4;
+  fill: none;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .exp-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .exp-grid {
+    grid-template-columns: 1fr;
+  }
+  .exp-card {
+    min-height: 82px;
+  }
+}
+</style>

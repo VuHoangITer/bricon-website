@@ -1,0 +1,90 @@
+<!-- ==================== BANNER SLIDER ==================== -->
+<section class="banner-slider">
+  <div
+    id="bannerCarousel"
+    class="carousel slide carousel-fade"
+    data-bs-ride="carousel"
+    data-bs-interval="5000"
+  >
+    <!-- Indicators -->
+    <div class="carousel-indicators">
+      {% for banner in banners %}
+      <button
+        type="button"
+        data-bs-target="#bannerCarousel"
+        data-bs-slide-to="{{ loop.index0 }}"
+        {% if loop.first %}class="active" aria-current="true"{% endif %}
+        aria-label="Slide {{ loop.index }}"
+      ></button>
+      {% endfor %}
+    </div>
+
+    <!-- Slides -->
+    <div class="carousel-inner">
+      {% for banner in banners %}
+      <div class="carousel-item {% if loop.first %}active{% endif %}">
+        {# Lấy thông tin SEO từ Media nếu có #}
+        {% set media_info = banner.get_media_seo_info() if banner.image else None %}
+        {% set mobile_info = banner.get_mobile_media_seo_info() if banner.image_mobile else media_info %}
+
+        <!-- ✅ Thêm hỗ trợ ảnh mobile -->
+        <picture>
+          {% if banner.image_mobile %}
+          <!-- Ảnh mobile khi màn hình nhỏ hơn 768px -->
+          <source media="(max-width: 767px)" srcset="{{ banner.image_mobile }}" type="image/webp">
+          {% endif %}
+          <!-- Ảnh desktop -->
+          <source media="(min-width: 768px)" srcset="{{ banner.image }}" type="image/webp">
+
+          <!-- Fallback -->
+          <img
+            src="{{ banner.image if banner.image else 'https://via.placeholder.com/1200x500/FFC107/FFFFFF?text=Banner+' + loop.index|string }}"
+            class="d-block w-100"
+            alt="{{ media_info.alt if media_info else banner.title }}"
+            title="{{ media_info.title if media_info else banner.title }}"
+            loading="lazy"
+          />
+        </picture>
+
+        <div class="carousel-caption">
+          {% if loop.first %}
+          <h1 class="display-4 fw-bold mb-3">{{ banner.title }}</h1>
+          {% else %}
+          <h2 class="display-4 fw-bold mb-3">{{ banner.title }}</h2>
+          {% endif %}
+          <p class="lead mb-4">{{ banner.subtitle }}</p>
+          {% if banner.button_text and banner.link %}
+          <a href="{{ banner.link }}" class="btn btn-warning btn-lg px-4 py-2">
+            {{ banner.button_text }} <i class="bi bi-arrow-right ms-2"></i>
+          </a>
+          {% endif %}
+        </div>
+
+        {% if media_info and media_info.caption %}
+        <div class="visually-hidden">{{ media_info.caption }}</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Controls -->
+    <button
+      class="carousel-control-prev"
+      type="button"
+      data-bs-target="#bannerCarousel"
+      data-bs-slide="prev"
+    >
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button
+      class="carousel-control-next"
+      type="button"
+      data-bs-target="#bannerCarousel"
+      data-bs-slide="next"
+    >
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>
+</section>

@@ -1,0 +1,416 @@
+{% extends 'layouts/admin.html' %}
+
+{% block page_title %}Dashboard Analytics{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {--gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);--gradient-warning: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);--gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);--gradient-info: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);--shadow-sm: 0 2px 4px rgba(0,0,0,0.04);--shadow-md: 0 4px 12px rgba(0,0,0,0.08);--shadow-lg: 0 8px 24px rgba(0,0,0,0.12);--radius-sm: 8px;--radius-md: 12px;--radius-lg: 16px;}.stats-grid {display: grid;grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));gap: 1.25rem;margin-bottom: 2rem;}.stat-card-modern {background: white;border-radius: var(--radius-md);padding: 1.75rem 1.5rem;box-shadow: var(--shadow-sm);transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);border: 1px solid #f0f0f0;position: relative;overflow: hidden;}.stat-card-modern:hover {transform: translateY(-4px);box-shadow: var(--shadow-lg);border-color: transparent;}.stat-card-modern::after {content: '';position: absolute;top: 0;right: 0;width: 120px;height: 120px;opacity: 0.05;border-radius: 50%;transform: translate(40px, -40px);transition: all 0.3s ease;}.stat-card-modern.warning::after {background: var(--gradient-warning);}.stat-card-modern.primary::after {background: var(--gradient-primary);}.stat-card-modern.success::after {background: var(--gradient-success);}.stat-card-modern.info::after {background: var(--gradient-info);}.stat-card-modern:hover::after {opacity: 0.08;transform: translate(30px, -30px) scale(1.1);}.stat-content {position: relative;z-index: 1;}.stat-icon-wrapper {width: 56px;height: 56px;border-radius: var(--radius-md);display: flex;align-items: center;justify-content: center;font-size: 1.75rem;margin-bottom: 1rem;position: relative;}.stat-card-modern.warning .stat-icon-wrapper {background: linear-gradient(135deg, rgba(240, 147, 251, 0.15) 0%, rgba(245, 87, 108, 0.15) 100%);color: #f5576c;}.stat-card-modern.primary .stat-icon-wrapper {background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);color: #667eea;}.stat-card-modern.success .stat-icon-wrapper {background: linear-gradient(135deg, rgba(79, 172, 254, 0.15) 0%, rgba(0, 242, 254, 0.15) 100%);color: #4facfe;}.stat-card-modern.info .stat-icon-wrapper {background: linear-gradient(135deg, rgba(67, 233, 123, 0.15) 0%, rgba(56, 249, 215, 0.15) 100%);color: #43e97b;}.stat-card-modern.danger .stat-icon-wrapper {background: linear-gradient(135deg, rgba(245, 87, 108, 0.15) 0%, rgba(255, 107, 107, 0.15) 100%);color: #f5576c;}.stat-card-modern.purple .stat-icon-wrapper {background: linear-gradient(135deg, rgba(118, 75, 162, 0.15) 0%, rgba(102, 126, 234, 0.15) 100%);color: #764ba2;}.stat-card-modern.orange .stat-icon-wrapper {background: linear-gradient(135deg, rgba(255, 107, 107, 0.15) 0%, rgba(245, 166, 35, 0.15) 100%);color: #ff6b6b;}.stat-card-modern.teal .stat-icon-wrapper {background: linear-gradient(135deg, rgba(56, 249, 215, 0.15) 0%, rgba(67, 233, 123, 0.15) 100%);color: #38f9d7;}.stat-label {font-size: 0.8125rem;color: #9ca3af;font-weight: 600;text-transform: uppercase;letter-spacing: 0.5px;margin-bottom: 0.5rem;}.stat-value {font-size: 2.25rem;font-weight: 700;color: #1f2937;line-height: 1;margin-bottom: 0.75rem;}.stat-trend {display: inline-flex;align-items: center;gap: 0.25rem;padding: 0.375rem 0.75rem;border-radius: 20px;font-size: 0.75rem;font-weight: 600;}.trend-up {background: rgba(34, 197, 94, 0.1);color: #16a34a;}.trend-down {background: rgba(239, 68, 68, 0.1);color: #dc2626;}.card-modern {background: white;border-radius: var(--radius-md);box-shadow: var(--shadow-sm);border: 1px solid #f0f0f0;overflow: hidden;transition: all 0.3s ease;}.card-modern:hover {box-shadow: var(--shadow-md);}.card-header-modern {background: linear-gradient(to right, #fafafa 0%, #ffffff 100%);border-bottom: 1px solid #f0f0f0;padding: 1.25rem 1.5rem;font-weight: 600;color: #1f2937;display: flex;align-items: center;gap: 0.5rem;}.card-header-modern i {font-size: 1.125rem;}.contact-item {padding: 1rem 1.25rem;border-bottom: 1px solid #f3f4f6;transition: all 0.2s ease;cursor: pointer;text-decoration: none;color: inherit;display: block;}.contact-item:last-child {border-bottom: none;}.contact-item:hover {background: #f9fafb;padding-left: 1.5rem;}.contact-item.unread {background: linear-gradient(to right, rgba(239, 68, 68, 0.03) 0%, rgba(255, 255, 255, 0) 100%);border-left: 3px solid #ef4444;}.contact-header {display: flex;justify-content: space-between;align-items: start;margin-bottom: 0.5rem;}.contact-name {font-weight: 600;color: #1f2937;font-size: 0.9375rem;margin-bottom: 0.25rem;}.contact-meta {display: flex;flex-direction: column;gap: 0.25rem;font-size: 0.8125rem;color: #6b7280;}.contact-meta i {width: 14px;text-align: center;}.contact-subject {font-size: 0.875rem;color: #374151;margin: 0.5rem 0;font-weight: 500;}.contact-message {font-size: 0.8125rem;color: #6b7280;line-height: 1.5;display: -webkit-box;-webkit-line-clamp: 2;-webkit-box-orient: vertical;overflow: hidden;}.contact-time {font-size: 0.75rem;color: #9ca3af;margin-top: 0.5rem;display: flex;align-items: center;gap: 0.25rem;}.badge-new {background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);color: white;padding: 0.125rem 0.5rem;border-radius: 12px;font-size: 0.6875rem;font-weight: 600;text-transform: uppercase;letter-spacing: 0.5px;}.empty-state {text-align: center;padding: 3rem 1.5rem;color: #9ca3af;}.empty-state i {font-size: 3rem;margin-bottom: 1rem;opacity: 0.3;}.activity-timeline {padding: 0;}.activity-item {position: relative;padding: 1rem 0 1rem 3rem;border-left: 2px solid #f0f0f0;margin-left: 1.5rem;}.activity-item:last-child {border-left-color: transparent;}.activity-icon {position: absolute;left: -1.125rem;top: 1rem;width: 2.25rem;height: 2.25rem;border-radius: 50%;display: flex;align-items: center;justify-content: center;background: white;box-shadow: 0 0 0 3px white, 0 0 0 4px;font-size: 0.875rem;z-index: 1;}.activity-icon.warning {color: #f5576c;box-shadow: 0 0 0 3px white, 0 0 0 4px rgba(245, 87, 108, 0.2);}.activity-icon.info {color: #4facfe;box-shadow: 0 0 0 3px white, 0 0 0 4px rgba(79, 172, 254, 0.2);}.activity-icon.danger {color: #ef4444;box-shadow: 0 0 0 3px white, 0 0 0 4px rgba(239, 68, 68, 0.2);}.activity-icon.secondary {color: #9ca3af;box-shadow: 0 0 0 3px white, 0 0 0 4px rgba(156, 163, 175, 0.2);}.activity-title {font-size: 0.875rem;color: #374151;font-weight: 500;margin-bottom: 0.25rem;text-decoration: none;display: block;}.activity-title:hover {color: #667eea;}.activity-time {font-size: 0.75rem;color: #9ca3af;}.top-items-table {font-size: 0.875rem;}.top-items-table td {padding: 1rem 1.25rem;border-bottom: 1px solid #f3f4f6;vertical-align: middle;}.top-items-table tr {transition: all 0.2s ease;}.top-items-table tr:hover {background: #f9fafb;}.top-items-table tr:last-child td {border-bottom: none;}.item-title {font-weight: 600;color: #1f2937;margin-bottom: 0.25rem;font-size: 0.875rem;}.item-meta {font-size: 0.75rem;color: #9ca3af;}.badge-view {background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);color: white;padding: 0.375rem 0.75rem;border-radius: 20px;font-size: 0.75rem;font-weight: 600;display: inline-flex;align-items: center;gap: 0.375rem;}.quick-actions {display: grid;grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));gap: 1rem;margin-bottom: 2rem;}.quick-action-btn {background: white;border: 2px solid #f0f0f0;border-radius: var(--radius-md);padding: 1.5rem 1rem;text-align: center;transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);text-decoration: none;color: #374151;display: flex;flex-direction: column;align-items: center;gap: 0.75rem;position: relative;overflow: hidden;}.quick-action-btn::before {content: '';position: absolute;top: 0;left: 0;width: 100%;height: 100%;background: var(--gradient-primary);opacity: 0;transition: opacity 0.3s ease;}.quick-action-btn:hover {border-color: #667eea;transform: translateY(-4px);box-shadow: var(--shadow-lg);}.quick-action-btn:hover::before {opacity: 0.05;}.quick-action-btn i {font-size: 2rem;transition: transform 0.3s ease;position: relative;z-index: 1;}.quick-action-btn:hover i {transform: scale(1.1);color: #667eea;}.quick-action-btn span {font-size: 0.875rem;font-weight: 600;position: relative;z-index: 1;}.chart-container {position: relative;height: 320px;padding: 1.5rem 1rem 1rem;}.card-footer {background: #fafafa;border-top: 1px solid #f0f0f0;padding: 0.875rem 1.5rem;text-align: center;}.card-footer a {color: #667eea;text-decoration: none;font-size: 0.875rem;font-weight: 600;display: inline-flex;align-items: center;gap: 0.375rem;transition: all 0.2s ease;}.card-footer a:hover {color: #764ba2;gap: 0.625rem;}@media (max-width: 768px) {.stats-grid {grid-template-columns: 1fr;}.quick-actions {grid-template-columns: repeat(2, 1fr);}.chart-container {height: 250px;padding: 1rem 0.5rem;}.stat-value {font-size: 1.875rem;}}@keyframes fadeInUp {from {opacity: 0;transform: translateY(20px);}to {opacity: 1;transform: translateY(0);}}.stat-card-modern,.card-modern,.quick-action-btn {animation: fadeInUp 0.5s ease backwards;}.stat-card-modern:nth-child(1) {animation-delay: 0.05s;}.stat-card-modern:nth-child(2) {animation-delay: 0.1s;}.stat-card-modern:nth-child(3) {animation-delay: 0.15s;}.stat-card-modern:nth-child(4) {animation-delay: 0.2s;}.stat-card-modern:nth-child(5) {animation-delay: 0.25s;}.stat-card-modern:nth-child(6) {animation-delay: 0.3s;}.stat-card-modern:nth-child(7) {animation-delay: 0.35s;}.stat-card-modern:nth-child(8) {animation-delay: 0.4s;}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- ==================== QUICK ACTIONS ==================== -->
+<div class="quick-actions mb-4">
+    {# ✅ Products #}
+    {% if current_user.has_permission('manage_products') and is_feature_enabled('products') %}
+    <a href="{{ url_for('admin.add_product') }}" class="quick-action-btn">
+        <i class="bi bi-plus-circle-fill"></i>
+        <span>Thêm sản phẩm</span>
+    </a>
+    {% endif %}
+
+    {# ✅ Blogs #}
+    {% if current_user.has_permission('create_blog') and is_feature_enabled('blogs') %}
+    <a href="{{ url_for('admin.add_blog') }}" class="quick-action-btn">
+        <i class="bi bi-file-earmark-plus"></i>
+        <span>Viết bài</span>
+    </a>
+    {% endif %}
+
+    {# ✅ Media #}
+    {% if current_user.has_permission('upload_media') and is_feature_enabled('media') %}
+    <a href="{{ url_for('admin.upload_media') }}" class="quick-action-btn">
+        <i class="bi bi-cloud-upload"></i>
+        <span>Upload Media</span>
+    </a>
+    {% endif %}
+
+    {# ✅ Projects #}
+    {% if current_user.has_permission('manage_projects') and is_feature_enabled('projects') %}
+    <a href="{{ url_for('admin.add_project') }}" class="quick-action-btn">
+        <i class="bi bi-building-add"></i>
+        <span>Thêm dự án</span>
+    </a>
+    {% endif %}
+</div>
+
+<!-- ==================== STATS CARDS ==================== -->
+<div class="stats-grid">
+    {# ✅ Products #}
+    {% if is_feature_enabled('products') and 'products' in stats %}
+    <div class="stat-card-modern warning">
+        <div class="stat-content">
+            <div class="stat-icon-wrapper">
+                <i class="bi bi-box-seam"></i>
+            </div>
+            <div class="stat-label">Sản phẩm</div>
+            <div class="stat-value">{{ stats.products }}</div>
+            {% if trends.products is defined and trends.products != 0 %}
+            <span class="stat-trend {% if trends.products > 0 %}trend-up{% else %}trend-down{% endif %}">
+                <i class="bi bi-arrow-{% if trends.products > 0 %}up{% else %}down{% endif %}"></i>
+                {{ trends.products|abs }}%
+            </span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {# ✅ Categories #}
+    {% if is_feature_enabled('products') and 'categories' in stats %}
+    <div class="stat-card-modern primary">
+        <div class="stat-content">
+            <div class="stat-icon-wrapper">
+                <i class="bi bi-tag"></i>
+            </div>
+            <div class="stat-label">Danh mục</div>
+            <div class="stat-value">{{ stats.categories }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# ✅ Blogs #}
+    {% if is_feature_enabled('blogs') and 'blogs' in stats %}
+    <div class="stat-card-modern success">
+        <div class="stat-content">
+            <div class="stat-icon-wrapper">
+                <i class="bi bi-newspaper"></i>
+            </div>
+            <div class="stat-label">Bài viết</div>
+            <div class="stat-value">{{ stats.blogs }}</div>
+            {% if trends.blogs is defined and trends.blogs != 0 %}
+            <span class="stat-trend {% if trends.blogs > 0 %}trend-up{% else %}trend-down{% endif %}">
+                <i class="bi bi-arrow-{% if trends.blogs > 0 %}up{% else %}down{% endif %}"></i>
+                {{ trends.blogs|abs }}%
+            </span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {# ✅ Contacts #}
+    {% if is_feature_enabled('contacts') and 'contacts_unread' in stats %}
+    <div class="stat-card-modern info">
+        <div class="stat-content">
+            <div class="stat-icon-wrapper">
+                <i class="bi bi-envelope"></i>
+            </div>
+            <div class="stat-label">Liên hệ mới</div>
+            <div class="stat-value">{{ stats.contacts_unread }}</div>
+            {% if trends.contacts is defined and trends.contacts != 0 %}
+            <span class="stat-trend {% if trends.contacts > 0 %}trend-up{% else %}trend-down{% endif %}">
+                <i class="bi bi-arrow-{% if trends.contacts > 0 %}up{% else %}down{% endif %}"></i>
+                {{ trends.contacts|abs }}%
+            </span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {# ✅ Projects #}
+    {% if is_feature_enabled('projects') and 'projects' in stats %}
+    <div class="stat-card-modern danger">
+        <div class="stat-content">
+            <div class="stat-icon-wrapper">
+                <i class="bi bi-building"></i>
+            </div>
+            <div class="stat-label">Dự án</div>
+            <div class="stat-value">{{ stats.projects }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# ✅ Jobs/Careers #}
+    {% if is_feature_enabled('careers') and 'jobs' in stats %}
+    <div class="stat-card-modern purple">
+        <div class="stat-content">
+            <div class="stat-icon-wrapper">
+                <i class="bi bi-briefcase"></i>
+            </div>
+            <div class="stat-label">Tuyển dụng</div>
+            <div class="stat-value">{{ stats.jobs }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# ✅ Media #}
+    {% if is_feature_enabled('media') and 'media' in stats %}
+    <div class="stat-card-modern orange">
+        <div class="stat-content">
+            <div class="stat-icon-wrapper">
+                <i class="bi bi-folder2-open"></i>
+            </div>
+            <div class="stat-label">Media Files</div>
+            <div class="stat-value">{{ stats.media }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# ✅ FAQ #}
+    {% if is_feature_enabled('faqs') and 'faqs' in stats %}
+    <div class="stat-card-modern teal">
+        <div class="stat-content">
+            <div class="stat-icon-wrapper">
+                <i class="bi bi-question-circle"></i>
+            </div>
+            <div class="stat-label">FAQs</div>
+            <div class="stat-value">{{ stats.faqs }}</div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ==================== CHARTS ROW ==================== -->
+<div class="row g-4 mb-4">
+    {# ✅ Blog Activity Chart #}
+    {% if is_feature_enabled('blogs') and blog_views_data %}
+    <div class="col-lg-8">
+        <div class="card-modern">
+            <div class="card-header-modern">
+                <i class="bi bi-graph-up text-primary"></i>
+                <span>Bài viết 7 ngày qua</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="chart-container">
+                    <canvas id="blogChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# ✅ Category Distribution #}
+    {% if is_feature_enabled('products') and category_stats %}
+    <div class="col-lg-4">
+        <div class="card-modern">
+            <div class="card-header-modern">
+                <i class="bi bi-pie-chart" style="color: #f5a623;"></i>
+                <span>Phân bố danh mục</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ==================== CONTENT ROWS ==================== -->
+<div class="row g-4 mb-4">
+    {# ✅ Liên hệ mới nhất #}
+    {% if is_feature_enabled('contacts') %}
+    <div class="col-lg-4">
+        <div class="card-modern">
+            <div class="card-header-modern">
+                <i class="bi bi-envelope-exclamation" style="color: #ef4444;"></i>
+                <span>Liên hệ mới nhất</span>
+                {% if stats.contacts_unread is defined and stats.contacts_unread > 0 %}
+                <span class="ms-auto badge-new">{{ stats.contacts_unread }}</span>
+                {% endif %}
+            </div>
+            <div class="card-body p-0">
+                {% if recent_contacts %}
+                    {% for contact in recent_contacts %}
+                    <a href="{{ url_for('admin.view_contact', id=contact.id) }}"
+                       class="contact-item {% if not contact.is_read %}unread{% endif %}">
+                        <div class="contact-header">
+                            <div class="contact-name">
+                                {{ contact.name }}
+                                {% if not contact.is_read %}
+                                <span class="badge-new ms-2">Mới</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="contact-meta">
+                            <span><i class="bi bi-telephone"></i> {{ contact.phone }}</span>
+                            {% if contact.email %}
+                            <span><i class="bi bi-envelope"></i> {{ contact.email }}</span>
+                            {% endif %}
+                        </div>
+                        {% if contact.subject %}
+                        <div class="contact-subject">{{ contact.subject }}</div>
+                        {% endif %}
+                        <div class="contact-message">{{ contact.message }}</div>
+                        <div class="contact-time">
+                            <i class="bi bi-clock"></i>
+                            {{ contact.created_at|vn_datetime_friendly }}
+                        </div>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-inbox"></i>
+                    <p>Chưa có liên hệ mới</p>
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('admin.contacts') }}">
+                    Xem tất cả <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# Activity Timeline - luôn hiện nếu có activities #}
+    {% if activities %}
+    <div class="col-lg-4">
+        <div class="card-modern">
+            <div class="card-header-modern">
+                <i class="bi bi-clock-history" style="color: #4facfe;"></i>
+                <span>Hoạt động gần đây</span>
+            </div>
+            <div class="card-body">
+                <div class="activity-timeline">
+                    {% for activity in activities %}
+                    <div class="activity-item">
+                        <div class="activity-icon {{ activity.color }}">
+                            <i class="{{ activity.icon }}"></i>
+                        </div>
+                        <a href="{{ activity.link }}" class="activity-title">
+                            {{ activity.title }}
+                        </a>
+                        <div class="activity-time">
+                            <i class="bi bi-clock"></i>
+                            {{ activity.time|vn_datetime_friendly }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# ✅ Top Products #}
+    {% if is_feature_enabled('products') and top_products %}
+    <div class="col-lg-4">
+        <div class="card-modern">
+            <div class="card-header-modern">
+                <i class="bi bi-star-fill" style="color: #f5a623;"></i>
+                <span>Sản phẩm nổi bật</span>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover top-items-table mb-0">
+                    <tbody>
+                        {% for product in top_products %}
+                        <tr>
+                            <td>
+                                <div class="item-title">{{ product.name }}</div>
+                                <div class="item-meta">{{ product.category.name if product.category else 'Chưa phân loại' }}</div>
+                            </td>
+                            <td class="text-end">
+                                <span class="badge-view">
+                                    <i class="bi bi-eye"></i> {{ product.views }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('admin.products') }}">
+                    Xem tất cả <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ==================== BOTTOM ROW ==================== -->
+<div class="row g-4 mb-4">
+    {# ✅ Top Blogs #}
+    {% if is_feature_enabled('blogs') and top_blogs %}
+    <div class="col-lg-6">
+        <div class="card-modern">
+            <div class="card-header-modern">
+                <i class="bi bi-fire" style="color: #ef4444;"></i>
+                <span>Bài viết phổ biến</span>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover top-items-table mb-0">
+                    <tbody>
+                        {% for blog in top_blogs %}
+                        <tr>
+                            <td>
+                                <div class="item-title">{{ blog.title }}</div>
+                                <div class="item-meta">{{ blog.created_at|vn_date }}</div>
+                            </td>
+                            <td class="text-end">
+                                <span class="badge-view">
+                                    <i class="bi bi-eye"></i> {{ blog.views }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('admin.blogs') }}">
+                    Xem tất cả <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# ✅ Contact Chart #}
+    {% if is_feature_enabled('contacts') and contact_weekly %}
+    <div class="col-lg-6">
+        <div class="card-modern">
+            <div class="card-header-modern">
+                <i class="bi bi-bar-chart" style="color: #43e97b;"></i>
+                <span>Liên hệ 4 tuần gần đây</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="chart-container">
+                    <canvas id="contactChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+Chart.defaults.font.family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";Chart.defaults.color='#6b7280';
+
+{% if is_feature_enabled('blogs') and blog_views_data %}
+const blogCtx=document.getElementById('blogChart').getContext('2d');const blogChart=new Chart(blogCtx,{type:'line',data:{labels:{{blog_views_data|map(attribute='date')|list|tojson}},datasets:[{label:'Bài viết mới',data:{{blog_views_data|map(attribute='count')|list|tojson}},borderColor:'#4facfe',backgroundColor:'rgba(79, 172, 254, 0.1)',tension:0.4,fill:!0,pointBackgroundColor:'#4facfe',pointBorderColor:'#fff',pointBorderWidth:3,pointRadius:6,pointHoverRadius:8,pointHoverBackgroundColor:'#4facfe',pointHoverBorderWidth:3}]},options:{responsive:!0,maintainAspectRatio:!1,plugins:{legend:{display:!1},tooltip:{backgroundColor:'rgba(0, 0, 0, 0.8)',padding:12,borderRadius:8,titleFont:{size:13,weight:'600'},bodyFont:{size:12}}},scales:{x:{grid:{display:!1},ticks:{font:{size:11}}},y:{beginAtZero:!0,ticks:{stepSize:1,font:{size:11}},grid:{color:'#f3f4f6'}}},interaction:{intersect:!1,mode:'index'}}});
+{% endif %}
+
+{% if is_feature_enabled('products') and category_stats %}
+const categoryCtx=document.getElementById('categoryChart').getContext('2d');const categoryChart=new Chart(categoryCtx,{type:'doughnut',data:{labels:{{category_stats|map(attribute='0')|list|tojson}},datasets:[{data:{{category_stats|map(attribute='1')|list|tojson}},backgroundColor:['#667eea','#f5a623','#4facfe','#43e97b','#f5576c','#764ba2','#ff6b6b','#38f9d7'],borderWidth:0,hoverOffset:8}]},options:{responsive:!0,maintainAspectRatio:!1,plugins:{legend:{position:'bottom',labels:{padding:15,font:{size:11},usePointStyle:!0,pointStyle:'circle'}},tooltip:{backgroundColor:'rgba(0, 0, 0, 0.8)',padding:12,borderRadius:8,titleFont:{size:13,weight:'600'},bodyFont:{size:12},callbacks:{label:function(context){const label=context.label||'';const value=context.parsed||0;const total=context.dataset.data.reduce((a,b)=>a+b,0);const percentage=((value/total)*100).toFixed(1);return `${label}: ${value} (${percentage}%)`}}}},cutout:'65%'}});
+{% endif %}
+
+{% if is_feature_enabled('contacts') and contact_weekly %}
+const contactCtx=document.getElementById('contactChart').getContext('2d');const weeklyData={{contact_weekly|tojson}};const contactLabels=weeklyData.map(item=>item.week);const contactCounts=weeklyData.map(item=>item.count);const avgCount=contactCounts.reduce((sum,val)=>sum+val,0)/contactCounts.length;const calculateChange=(current,previous)=>{if(previous===0)return current>0?'+100%':'0%';const change=((current-previous)/previous*100).toFixed(0);return change>0?`+${change}%`:`${change}%`};const contactChart=new Chart(contactCtx,{type:'bar',data:{labels:contactLabels,datasets:[{label:'Số liên hệ',data:contactCounts,backgroundColor:(context)=>{const chart=context.chart;const{ctx,chartArea}=chart;if(!chartArea)return'rgba(67, 233, 123, 0.8)';const gradient=ctx.createLinearGradient(0,chartArea.bottom,0,chartArea.top);gradient.addColorStop(0,'rgba(67, 233, 123, 0.6)');gradient.addColorStop(1,'rgba(67, 233, 123, 0.9)');return gradient},borderColor:'#43e97b',borderWidth:2,borderRadius:8,hoverBackgroundColor:'rgba(67, 233, 123, 1)',barThickness:40},{type:'line',label:'Trung bình',data:Array(contactCounts.length).fill(avgCount),borderColor:'#f5576c',borderWidth:2,borderDash:[8,4],backgroundColor:'transparent',pointRadius:0,pointHoverRadius:0,tension:0}]},options:{responsive:!0,maintainAspectRatio:!1,layout:{padding:{top:40,right:10,bottom:10,left:10}},plugins:{legend:{display:!1},tooltip:{backgroundColor:'rgba(0, 0, 0, 0.9)',padding:16,borderRadius:8,titleFont:{size:13,weight:'700'},bodyFont:{size:12,lineHeight:1.6},displayColors:!1,callbacks:{title:(context)=>{return `Tuần: ${context[0].label}`},label:(context)=>{if(context.dataset.label==='Trung bình')return null;const currentValue=context.parsed.y;const currentIndex=context.dataIndex;const previousValue=currentIndex>0?contactCounts[currentIndex-1]:null;const lines=[`Số liên hệ: ${currentValue}`];if(previousValue!==null){const change=calculateChange(currentValue,previousValue);const changeText=change.startsWith('+')?`↑ ${change} so với tuần trước`:change==='0%'?'→ Không thay đổi':`↓ ${change} so với tuần trước`;lines.push(changeText)}
+lines.push(`Trung bình: ${avgCount.toFixed(1)}`);return lines},afterLabel:(context)=>{if(context.dataset.label==='Trung bình')return null;const currentValue=context.parsed.y;if(currentValue>avgCount){return'⭐ Cao hơn trung bình'}else if(currentValue<avgCount){return'⚠️ Thấp hơn trung bình'}
+return'✓ Bằng trung bình'}}}},scales:{x:{grid:{display:!1},ticks:{font:{size:11,weight:'600'},color:'#6b7280'}},y:{beginAtZero:!0,ticks:{stepSize:1,font:{size:11},color:'#6b7280',callback:(value)=>Math.floor(value)},grid:{color:'#f3f4f6',drawBorder:!1}}},animation:{duration:1000,easing:'easeInOutQuart'}},plugins:[{id:'customLabels',afterDatasetsDraw:(chart)=>{const ctx=chart.ctx;chart.data.datasets.forEach((dataset,i)=>{if(dataset.type==='line')return;const meta=chart.getDatasetMeta(i);meta.data.forEach((bar,index)=>{const value=dataset.data[index];ctx.save();ctx.fillStyle='#1f2937';ctx.font='bold 14px "Segoe UI"';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText(value,bar.x,bar.y-8);if(index>0){const prevValue=dataset.data[index-1];let symbol='';let color='';if(value>prevValue){symbol='↑';color='#16a34a'}else if(value<prevValue){symbol='↓';color='#dc2626'}else{symbol='→';color='#9ca3af'}
+ctx.fillStyle=color;ctx.font='bold 16px "Segoe UI"';ctx.fillText(symbol,bar.x,bar.y-25)}
+ctx.restore()})})}}]});
+{% endif %}
+
+const observerOptions={threshold:0.1,rootMargin:'0px 0px -50px 0px'};const observer=new IntersectionObserver((entries)=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.style.opacity='1';entry.target.style.transform='translateY(0)'}})},observerOptions);document.querySelectorAll('.card-modern').forEach(card=>{card.style.opacity='0';card.style.transform='translateY(20px)';card.style.transition='all 0.5s ease';observer.observe(card)})
+</script>
+{% endblock %}

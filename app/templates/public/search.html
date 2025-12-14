@@ -1,0 +1,88 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Kết quả tìm kiếm cho "{{ keyword }}"{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{{ url_for('main.index') }}">
+            Trang chủ
+          </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+          Tìm kiếm
+        </li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<!-- Search Results Section -->
+<section class="py-5">
+  <div class="container">
+    {% if not products and not blogs %}
+    <!-- No Results -->
+    <div class="no-results-container">
+      <h3 class="no-results-title">Không tìm thấy kết quả</h3>
+      <p class="no-results-text">
+        Rất tiếc, chúng tôi không tìm thấy kết quả nào phù hợp với từ khóa
+        <strong>"{{ keyword }}"</strong>
+      </p>
+      <div class="no-results-suggestions">
+        <h4>Gợi ý tìm kiếm:</h4>
+        <ul>
+          <li><i class="bi bi-check-circle"></i> Kiểm tra lỗi chính tả</li>
+          <li><i class="bi bi-check-circle"></i> Thử dùng từ khóa ngắn gọn hơn</li>
+          <li><i class="bi bi-check-circle"></i> Sử dụng từ khóa phổ biến hơn</li>
+          <li><i class="bi bi-check-circle"></i> Liên hệ với chúng tôi để được tư vấn</li>
+        </ul>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if products %}
+    <!-- Products Section -->
+    <div class="search-section mb-5">
+      <div class="section-header mb-4">
+        <div class="d-flex align-items-center gap-2">
+          <h2 class="section-title mb-0">Sản phẩm</h2>
+        </div>
+        <a href="{{ url_for('main.products') }}" class="view-all-link">
+          Xem tất cả
+        </a>
+      </div>
+
+      <div class="row g-3 g-md-4">
+        {% for product in products %}
+          {% include 'components/card_product.html' %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if blogs %}
+    <!-- Blogs Section -->
+    <div class="search-section">
+      <div class="section-header mb-4">
+        <div class="d-flex align-items-center gap-2">
+          <h2 class="section-title mb-0">Bài viết</h2>
+        </div>
+        <a href="{{ url_for('main.blog') }}" class="view-all-link">
+          Xem tất cả
+        </a>
+      </div>
+
+      <div class="row g-3 g-md-4">
+        {% for blog in blogs %}
+          {% include 'components/card_blog.html' %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

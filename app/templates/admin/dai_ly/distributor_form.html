@@ -1,0 +1,240 @@
+{% extends "layouts/admin.html" %}
+
+{% block title %}{% if distributor %}Sửa{% else %}Thêm{% endif %} nhà phân phối{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <!-- Header -->
+  <div class="mb-4">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.distributors') }}">Nhà phân phối</a></li>
+        <li class="breadcrumb-item active">{% if distributor %}Sửa{% else %}Thêm{% endif %}</li>
+      </ol>
+    </nav>
+    <h2><i class="bi bi-shop"></i> {% if distributor %}Sửa{% else %}Thêm{% endif %} nhà phân phối</h2>
+  </div>
+
+  <form method="POST" novalidate>
+    {{ form.hidden_tag() }}
+
+    <div class="row">
+      <!-- Cột trái - Thông tin chính -->
+      <div class="col-lg-8">
+        <!-- Thông tin cơ bản -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-info-circle"></i> Thông tin cơ bản</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-8 mb-3">
+                {{ form.name.label(class="form-label") }} <span class="text-danger">*</span>
+                {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                {% if form.name.errors %}
+                  <div class="invalid-feedback">{{ form.name.errors[0] }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-4 mb-3">
+                {{ form.distributor_type.label(class="form-label") }}
+                {{ form.distributor_type(class="form-select") }}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              {{ form.description.label(class="form-label") }}
+              {{ form.description(class="form-control", rows=4) }}
+              <small class="text-muted">Mô tả ngắn gọn về đại lý</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Địa chỉ -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Địa chỉ</h5>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              {{ form.address.label(class="form-label") }} <span class="text-danger">*</span>
+              {{ form.address(class="form-control" + (" is-invalid" if form.address.errors else "")) }}
+              {% if form.address.errors %}
+                <div class="invalid-feedback">{{ form.address.errors[0] }}</div>
+              {% endif %}
+            </div>
+
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                {{ form.ward.label(class="form-label") }}
+                {{ form.ward(class="form-control") }}
+              </div>
+              <div class="col-md-4 mb-3">
+                {{ form.district.label(class="form-label") }}
+                {{ form.district(class="form-control") }}
+              </div>
+              <div class="col-md-4 mb-3">
+                {{ form.city.label(class="form-label") }} <span class="text-danger">*</span>
+                {{ form.city(class="form-control" + (" is-invalid" if form.city.errors else "")) }}
+                {% if form.city.errors %}
+                  <div class="invalid-feedback">{{ form.city.errors[0] }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Google Maps -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-map"></i> Google Maps</h5>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle"></i>
+              <strong>Hướng dẫn:</strong>
+              <ol class="mb-0 mt-2">
+                <li>Vào <a href="https://www.google.com/maps" target="_blank">Google Maps</a></li>
+                <li>Tìm địa chỉ đại lý</li>
+                <li>Nhấn nút "Chia sẻ" → "Nhúng bản đồ"</li>
+                <li>Copy toàn bộ mã iframe và dán vào ô bên dưới</li>
+              </ol>
+            </div>
+
+            <div class="mb-3">
+              {{ form.map_iframe.label(class="form-label") }}
+              {{ form.map_iframe(class="form-control", rows=4, placeholder='<iframe src="https://www.google.com/maps/embed?pb=..." width="600" height="450"></iframe>') }}
+              <small class="text-muted">Tọa độ sẽ được tự động trích xuất từ iframe</small>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                {{ form.latitude.label(class="form-label") }}
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-geo"></i></span>
+                  {{ form.latitude(class="form-control", placeholder="10.822159") }}
+                </div>
+                <small class="text-muted">Vĩ độ (latitude)</small>
+              </div>
+              <div class="col-md-6 mb-3">
+                {{ form.longitude.label(class="form-label") }}
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-geo"></i></span>
+                  {{ form.longitude(class="form-control", placeholder="106.681929") }}
+                </div>
+                <small class="text-muted">Kinh độ (longitude)</small>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              {{ form.map_url.label(class="form-label") }}
+              {{ form.map_url(class="form-control", placeholder="https://goo.gl/maps/...") }}
+              <small class="text-muted">Link trực tiếp Google Maps (để mở trong app)</small>
+            </div>
+
+            <!-- Preview iframe -->
+            {% if distributor and distributor.map_iframe %}
+            <div class="mt-3">
+              <label class="form-label">Xem trước:</label>
+              <div class="ratio ratio-16x9">
+                {{ distributor.map_iframe|safe }}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Cột phải - Thông tin phụ -->
+      <div class="col-lg-4">
+        <!-- Liên hệ -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-telephone"></i> Liên hệ</h5>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              {{ form.phone.label(class="form-label") }}
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                {{ form.phone(class="form-control", placeholder="0901180094") }}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              {{ form.email.label(class="form-label") }}
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                {{ form.email(class="form-control", placeholder="info@example.com") }}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              {{ form.website.label(class="form-label") }}
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-globe"></i></span>
+                {{ form.website(class="form-control", placeholder="https://example.com") }}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              {{ form.working_hours.label(class="form-label") }}
+              {{ form.working_hours(class="form-control", placeholder="8h - 17h30 (T2-T7)") }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Hình ảnh -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-image"></i> Hình ảnh</h5>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              {{ form.image_url.label(class="form-label") }}
+              {{ form.image_url(class="form-control", placeholder="https://example.com/image.jpg") }}
+              <small class="text-muted">URL hình ảnh đại lý</small>
+            </div>
+
+            {% if distributor and distributor.image_url %}
+            <div class="text-center">
+              <img src="{{ distributor.image_url }}" alt="{{ distributor.name }}" class="img-fluid rounded" style="max-height: 200px">
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Trạng thái -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-toggles"></i> Trạng thái</h5>
+          </div>
+          <div class="card-body">
+            <div class="form-check form-switch mb-3">
+              {{ form.is_active(class="form-check-input", role="switch") }}
+              {{ form.is_active.label(class="form-check-label") }}
+              <small class="d-block text-muted">Hiển thị trên trang công khai</small>
+            </div>
+
+            <div class="form-check form-switch">
+              {{ form.is_featured(class="form-check-input", role="switch") }}
+              {{ form.is_featured.label(class="form-check-label") }}
+              <small class="d-block text-muted">Đại lý được ưu tiên hiển thị</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-primary btn-lg">
+            <i class="bi bi-check-lg"></i> {% if distributor %}Cập nhật{% else %}Thêm mới{% endif %}
+          </button>
+          <a href="{{ url_for('admin.distributors') }}" class="btn btn-secondary">
+            <i class="bi bi-x-lg"></i> Hủy
+          </a>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

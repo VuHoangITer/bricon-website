@@ -1,0 +1,150 @@
+{% extends 'layouts/admin.html' %}
+
+{% block page_title %}Quản lý Permissions{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-key"></i> Danh sách Permissions</h4>
+    <div>
+        <a href="{{ url_for('admin.roles') }}" class="btn btn-info">
+            <i class="bi bi-shield-lock"></i> Quản lý Roles
+        </a>
+        <a href="{{ url_for('admin.add_permission') }}" class="btn btn-warning">
+            <i class="bi bi-plus-circle"></i> Thêm Permission
+        </a>
+    </div>
+</div>
+
+<!-- Statistics Card -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h6>Tổng Permissions</h6>
+                <h3>{{ perms_by_category.values()|map('length')|sum or 0 }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6>Danh mục</h6>
+                <h3>{{ perms_by_category|length }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% for category, perms in perms_by_category.items() %}
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0 text-uppercase">
+                    <i class="bi bi-folder"></i>
+                    {% if category == 'products' %}Sản phẩm
+                    {% elif category == 'blogs' %}Blog
+                    {% elif category == 'media' %}Media
+                    {% elif category == 'users' %}Người dùng
+                    {% elif category == 'contacts' %}Liên hệ
+                    {% elif category == 'projects' %}Dự án
+                    {% elif category == 'jobs' %}Tuyển dụng
+                    {% elif category == 'system' %}Hệ thống
+                    {% elif category == 'quiz' %}Quiz
+                    {% else %}{{ category }}
+                    {% endif %}
+                    <span class="badge bg-secondary">{{ perms|length }}</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th width="40%">Permission</th>
+                                <th width="20%" class="text-center">Roles</th>
+                                <th width="20%" class="text-center">Trạng thái</th>
+                                <th width="20%" class="text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for perm in perms %}
+                            <tr>
+                                <td>
+                                    <i class="{{ perm.icon }} text-primary"></i>
+                                    <strong>{{ perm.display_name }}</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        <code>{{ perm.name }}</code>
+                                    </small>
+                                    {% if perm.description %}
+                                    <br>
+                                    <small class="text-secondary">
+                                        <i class="bi bi-info-circle"></i> {{ perm.description }}
+                                    </small>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-info">
+                                        {{ perm.role_count }} roles
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    {% if perm.is_active %}
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle"></i> Kích hoạt
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">
+                                        <i class="bi bi-x-circle"></i> Tắt
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <!-- Nút Sửa -->
+                                        <a href="{{ url_for('admin.edit_permission', id=perm.id) }}"
+                                           class="btn btn-warning"
+                                           data-bs-toggle="tooltip"
+                                           title="Sửa permission">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+
+                                        <!-- Nút Xóa -->
+                                        <a href="{{ url_for('admin.delete_permission', id=perm.id) }}"
+                                           class="btn btn-danger"
+                                           data-bs-toggle="tooltip"
+                                           title="Xóa permission"
+                                           data-confirm="Xóa permission '{{ perm.display_name }}'? Điều này sẽ gỡ permission khỏi tất cả roles!">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> 
+    <strong>Hướng dẫn:</strong> Permissions được gán cho Roles, không gán trực tiếp cho Users.
+    Để thay đổi quyền của user, hãy chỉnh sửa Role hoặc đổi Role của user đó.
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Initialize Bootstrap tooltips
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+});
+</script>
+{% endblock %}

@@ -1,0 +1,1340 @@
+{% extends 'layouts/admin.html' %}
+
+{% block page_title %}Quản lý Cài đặt Hệ thống{% endblock %}
+
+{% block extra_css %}
+<style>.settings-container {padding: 20px;background-color: #f8f9fa;min-height: 100vh;}.settings-card {background: #ffffff;border-radius: 8px;box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);padding: 20px;margin-bottom: 20px;}.settings-card-header {border-bottom: 1px solid #e9ecef;padding-bottom: 15px;margin-bottom: 20px;}.settings-card-header h3 {margin: 0;font-size: 1.5rem;color: #333;display: flex;align-items: center;gap: 10px;}.settings-tabs {display: flex;flex-wrap: wrap;gap: 10px;margin-bottom: 20px;border-bottom: 1px solid #dee2e6;}.settings-tab {background: #f1f3f5;border: none;padding: 10px 20px;border-radius: 6px 6px 0 0;font-size: 0.9rem;color: #495057;cursor: pointer;transition: all 0.3s ease;display: flex;align-items: center;gap: 8px;}.settings-tab:hover {background: #e9ecef;}.settings-tab.active {background: #007bff;color: #fff;font-weight: 500;}.settings-tab-content {padding: 20px;background: #fff;border: 1px solid #dee2e6;border-radius: 0 6px 6px 6px;}.settings-section-card {margin-bottom: 20px;}.settings-section-title {font-size: 1.2rem;color: #333;margin-bottom: 15px;display: flex;align-items: center;gap: 8px;}.settings-grid {display: grid;gap: 20px;}.settings-grid-2 {grid-template-columns: repeat(2, 1fr);}.settings-grid-3 {grid-template-columns: repeat(3, 1fr);}@media (max-width: 768px) {.settings-grid-2,.settings-grid-3 {grid-template-columns: 1fr;}}.settings-form-group {margin-bottom: 15px;}.settings-form-label {font-size: 0.9rem;color: #495057;margin-bottom: 8px;display: flex;align-items: center;gap: 6px;}.settings-form-control {width: 100%;padding: 8px 12px;border: 1px solid #ced4da;border-radius: 4px;font-size: 0.9rem;transition: border-color 0.3s ease;}.settings-form-control:focus {outline: none;border-color: #007bff;box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);}.settings-form-control::placeholder {color: #6c757d;}.settings-image-preview {margin-top: 10px;}.settings-preview-img,.settings-preview-favicon {max-width: 100%;border-radius: 4px;border: 1px solid #dee2e6;}.settings-preview-favicon {width: 32px;height: 32px;}.settings-color-group {display: flex;align-items: center;gap: 10px;}.settings-color-input {width: 100px;padding: 0;height: 34px;}.settings-color-preview {width: 34px;height: 34px;border: 1px solid #dee2e6;border-radius: 4px;}.settings-color-value {font-size: 0.9rem;color: #495057;}.settings-alert {display: flex;align-items: flex-start;gap: 10px;padding: 15px;border-radius: 4px;margin-bottom: 20px;}.settings-alert-info {background: #e7f3ff;border: 1px solid #b8daff;color: #004085;}.settings-alert-warning {background: #fff3cd;border: 1px solid #ffeeba;color: #856404;}.settings-alert i {font-size: 1.2rem;}.settings-actions {display: flex;gap: 10px;justify-content: flex-end;margin-top: 20px;}.settings-btn {padding: 10px 20px;border-radius: 4px;font-size: 0.9rem;border: none;cursor: pointer;display: flex;align-items: center;gap: 8px;transition: background-color 0.3s ease;}.settings-btn-primary {background: #007bff;color: #fff;}.settings-btn-primary:hover {background: #0056b3;}.settings-btn-secondary {background: #6c757d;color: #fff;}.settings-btn-secondary:hover {background: #5a6268;}.settings-help-text {font-size: 0.8rem;color: #6c757d;margin-top: 5px;display: flex;align-items: center;gap: 5px;}.required {color: #dc3545;font-size: 0.9rem;}.settings-hotline-divider {border-top: 1px solid #e9ecef;margin: 20px 0;}.settings-content-grid {display: grid;grid-template-columns: repeat(2, 1fr);gap: 20px;}.settings-content-full {grid-column: 1 / -1;}@media (max-width: 768px) {.settings-content-grid {grid-template-columns: 1fr;}}</style>
+{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <div class="container-fluid">
+        <div class="settings-card">
+            <div class="settings-card-header">
+                <h3>
+                    <i class="bi bi-gear-fill"></i>
+                    Quản lý Cài đặt Hệ thống
+                </h3>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+
+                <!-- Navigation Tabs -->
+                <div class="settings-tabs" id="settingsTabs" role="tablist">
+                    <button type="button" class="settings-tab active" data-bs-toggle="tab" data-bs-target="#general" role="tab">
+                        <i class="bi bi-house-door"></i>
+                        General
+                    </button>
+                    <button type="button" class="settings-tab" data-bs-toggle="tab" data-bs-target="#theme" role="tab">
+                        <i class="bi bi-palette"></i>
+                        Theme/UI
+                    </button>
+                    <button type="button" class="settings-tab" data-bs-toggle="tab" data-bs-target="#seo" role="tab">
+                        <i class="bi bi-search"></i>
+                        SEO & Meta
+                    </button>
+                    <button type="button" class="settings-tab" data-bs-toggle="tab" data-bs-target="#favicon" role="tab">
+                        <i class="bi bi-star"></i>
+                        Favicon & Images
+                    </button>
+                    <button type="button" class="settings-tab" data-bs-toggle="tab" data-bs-target="#contact" role="tab">
+                        <i class="bi bi-telephone"></i>
+                        Contact & Social
+                    </button>
+                    <button type="button" class="settings-tab" data-bs-toggle="tab" data-bs-target="#system" role="tab">
+                        <i class="bi bi-shield-check"></i>
+                        System & Security
+                    </button>
+                    <button type="button" class="settings-tab" data-bs-toggle="tab" data-bs-target="#integration" role="tab">
+                        <i class="bi bi-plugin"></i>
+                        Integration
+                    </button>
+                    <button type="button" class="settings-tab" data-bs-toggle="tab" data-bs-target="#content" role="tab">
+                        <i class="bi bi-file-text"></i>
+                        Content Defaults
+                    </button>
+                </div>
+
+                <div class="tab-content settings-tab-content">
+                    <!-- ============ GENERAL TAB ============ -->
+                    <div class="tab-pane fade show active" id="general" role="tabpanel">
+                        <div class="settings-section-card">
+                            <h6 class="settings-section-title">
+                                <i class="bi bi-info-circle"></i>
+                                Thông tin chung
+                            </h6>
+
+                            <div class="settings-grid settings-grid-2">
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-globe"></i>
+                                        {{ form.website_name.label.text }}
+                                        <span class="required">*</span>
+                                    </label>
+                                    {{ form.website_name(class="settings-form-control", placeholder="Nhập tên website") }}
+                                    {% if form.website_name.errors %}
+                                        <div class="text-danger small mt-1">{{ form.website_name.errors[0] }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-envelope"></i>
+                                        {{ form.email.label.text }}
+                                        <span class="required">*</span>
+                                    </label>
+                                    {{ form.email(class="settings-form-control", placeholder="info@example.com") }}
+                                    {% if form.email.errors %}
+                                        <div class="text-danger small mt-1">{{ form.email.errors[0] }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="settings-grid settings-grid-2">
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-chat-quote"></i>
+                                        {{ form.slogan.label.text }}
+                                    </label>
+                                    {{ form.slogan(class="settings-form-control", placeholder="Nhập slogan") }}
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-telephone"></i>
+                                        {{ form.hotline.label.text }}
+                                    </label>
+                                    {{ form.hotline(class="settings-form-control", placeholder="0123456789") }}
+                                </div>
+                            </div>
+
+                            <div class="settings-grid settings-grid-2">
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-geo-alt"></i>
+                                        {{ form.address.label.text }}
+                                    </label>
+                                    {{ form.address(class="settings-form-control", placeholder="Nhập địa chỉ") }}
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-link-45deg"></i>
+                                        {{ form.main_url.label.text }}
+                                    </label>
+                                    {{ form.main_url(class="settings-form-control", placeholder="https://example.com") }}
+                                </div>
+                            </div>
+
+                            <div class="settings-form-group">
+                                <label class="settings-form-label">
+                                    <i class="bi bi-building"></i>
+                                    {{ form.company_info.label.text }}
+                                </label>
+                                {{ form.company_info(class="settings-form-control", rows="4", placeholder="Thông tin về công ty") }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============ THEME TAB ============ -->
+                    <div class="tab-pane fade" id="theme" role="tabpanel">
+                        <div class="settings-section-card">
+                            <h6 class="settings-section-title">
+                                <i class="bi bi-image"></i>
+                                Logo & Branding
+                            </h6>
+
+                            <div class="settings-grid settings-grid-2">
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-file-image"></i>
+                                        {{ form.logo.label.text }}
+                                    </label>
+                                    {{ form.logo(class="settings-form-control") }}
+                                    {% if form.logo_url %}
+                                    <div class="settings-image-preview">
+                                        <img src="{{ form.logo_url }}" alt="Logo Preview" class="settings-preview-img" style="max-width: 200px;">
+                                    </div>
+                                    {% endif %}
+                                    <small class="settings-help-text">
+                                        <i class="bi bi-info-circle"></i>
+                                        Kích thước đề xuất: 200x60px
+                                    </small>
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-robot"></i>
+                                        {{ form.logo_chatbot.label.text }}
+                                    </label>
+                                    {{ form.logo_chatbot(class="settings-form-control") }}
+                                    {% if form.logo_chatbot_url %}
+                                    <div class="settings-image-preview">
+                                        <img src="{{ form.logo_chatbot_url }}" alt="Chatbot Logo Preview" class="settings-preview-img" style="max-width: 200px;">
+                                    </div>
+                                    {% endif %}
+                                    <small class="settings-help-text">
+                                        <i class="bi bi-info-circle"></i>
+                                        Kích thước đề xuất: 100x100px
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============ SEO TAB ============ -->
+                    <div class="tab-pane fade" id="seo" role="tabpanel">
+                        <!-- Meta chung - Full width ở trên -->
+                        <div class="settings-section-card">
+                            <h6 class="settings-section-title">
+                                <i class="bi bi-search"></i>
+                                Meta chung
+                            </h6>
+
+                            <div class="settings-grid settings-grid-3">
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        {{ form.meta_title.label.text }}
+                                    </label>
+                                    {{ form.meta_title(class="settings-form-control", placeholder="Meta title mặc định") }}
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        {{ form.meta_description.label.text }}
+                                    </label>
+                                    {{ form.meta_description(class="settings-form-control", rows="3", placeholder="Meta description mặc định") }}
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        {{ form.meta_keywords.label.text }}
+                                    </label>
+                                    {{ form.meta_keywords(class="settings-form-control", placeholder="keyword1, keyword2, keyword3") }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Meta từng trang - Grid 3 cột -->
+                        <div class="settings-section-card">
+                            <h6 class="settings-section-title">
+                                <i class="bi bi-file-earmark-text"></i>
+                                Meta từng trang
+                            </h6>
+
+                            <div class="settings-grid settings-grid-3">
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-house"></i>
+                                        {{ form.index_meta_description.label.text }}
+                                    </label>
+                                    {{ form.index_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang chủ") }}
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-info-circle"></i>
+                                        {{ form.about_meta_description.label.text }}
+                                    </label>
+                                    {{ form.about_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang giới thiệu") }}
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-envelope"></i>
+                                        {{ form.contact_meta_description.label.text }}
+                                    </label>
+                                    {{ form.contact_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang liên hệ") }}
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-box"></i>
+                                        {{ form.products_meta_description.label.text }}
+                                    </label>
+                                    {{ form.products_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang sản phẩm") }}
+                                </div>
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-newspaper"></i>
+                                        {{ form.blog_meta_description.label.text }}
+                                    </label>
+                                    {{ form.blog_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang blog") }}
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-briefcase"></i>
+                                        {{ form.careers_meta_description.label.text }}
+                                    </label>
+                                    {{ form.careers_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang tuyển dụng") }}
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-question-circle"></i>
+                                        {{ form.faq_meta_description.label.text }}
+                                    </label>
+                                    {{ form.faq_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang FAQ") }}
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-folder"></i>
+                                        {{ form.projects_meta_description.label.text }}
+                                    </label>
+                                    {{ form.projects_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang dự án") }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============ FAVICON & IMAGES TAB ============ -->
+                    <div class="tab-pane fade" id="favicon" role="tabpanel">
+                        <div class="settings-section-card">
+                            <h6 class="settings-section-title">
+                                <i class="bi bi-star-fill"></i>
+                                Favicon (Multiple Formats)
+                            </h6>
+
+                            <div class="settings-grid settings-grid-3">
+                                <!-- Favicon ICO (Legacy fallback) -->
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-file-earmark"></i>
+                                        {{ form.favicon.label.text if form.favicon else 'Favicon (.ico)' }}
+                                        <span class="badge bg-secondary ms-2">Fallback</span>
+                                    </label>
+                                    {{ form.favicon(class="settings-form-control") if form.favicon else '<input type="file" name="favicon" class="settings-form-control" accept=".ico">' }}
+                                    {% if form.favicon_url %}
+                                    <div class="settings-image-preview">
+                                        <img src="{{ form.favicon_url }}" alt="Favicon ICO" class="settings-preview-favicon">
+                                    </div>
+                                    {% endif %}
+                                    <small class="settings-help-text">
+                                        <i class="bi bi-info-circle"></i>
+                                        16x16 hoặc 32x32px (.ico)
+                                    </small>
+                                </div>
+
+                                <!-- Favicon ICO New -->
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-file-earmark-check"></i>
+                                        {{ form.favicon_ico.label.text if form.favicon_ico else 'Favicon ICO (Ưu tiên)' }}
+                                        <span class="badge bg-success ms-2">Priority</span>
+                                    </label>
+                                    {{ form.favicon_ico(class="settings-form-control") if form.favicon_ico else '<input type="file" name="favicon_ico" class="settings-form-control" accept=".ico">' }}
+                                    {% if form.favicon_ico_url %}
+                                    <div class="settings-image-preview">
+                                        <img src="{{ form.favicon_ico_url }}" alt="Favicon ICO Priority" class="settings-preview-favicon">
+                                    </div>
+                                    {% endif %}
+                                    <small class="settings-help-text">
+                                        <i class="bi bi-info-circle"></i>
+                                        Multi-size ICO (16, 32, 48px)
+                                    </small>
+                                </div>
+
+                                <!-- Favicon PNG -->
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-file-image"></i>
+                                        {{ form.favicon_png.label.text if form.favicon_png else 'Favicon PNG' }}
+                                    </label>
+                                    {{ form.favicon_png(class="settings-form-control") if form.favicon_png else '<input type="file" name="favicon_png" class="settings-form-control" accept=".png">' }}
+                                    {% if form.favicon_png_url %}
+                                    <div class="settings-image-preview">
+                                        <img src="{{ form.favicon_png_url }}" alt="Favicon PNG" class="settings-preview-favicon">
+                                    </div>
+                                    {% endif %}
+                                    <small class="settings-help-text">
+                                        <i class="bi bi-info-circle"></i>
+                                        96x96px (.png) - Modern fallback
+                                    </small>
+                                </div>
+
+                                <!-- Favicon SVG -->
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-vector-pen"></i>
+                                        {{ form.favicon_svg.label.text if form.favicon_svg else 'Favicon SVG' }}
+                                        <span class="badge bg-info ms-2">Retina</span>
+                                    </label>
+                                    {{ form.favicon_svg(class="settings-form-control") if form.favicon_svg else '<input type="file" name="favicon_svg" class="settings-form-control" accept=".svg">' }}
+                                    {% if form.favicon_svg_url %}
+                                    <div class="settings-image-preview">
+                                        <img src="{{ form.favicon_svg_url }}" alt="Favicon SVG" class="settings-preview-favicon">
+                                    </div>
+                                    {% endif %}
+                                    <small class="settings-help-text">
+                                        <i class="bi bi-info-circle"></i>
+                                        Vector (.svg) - Best for Retina
+                                    </small>
+                                </div>
+
+                                <!-- Apple Touch Icon -->
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-apple"></i>
+                                        {{ form.apple_touch_icon.label.text if form.apple_touch_icon else 'Apple Touch Icon' }}
+                                    </label>
+                                    {{ form.apple_touch_icon(class="settings-form-control") if form.apple_touch_icon else '<input type="file" name="apple_touch_icon" class="settings-form-control" accept=".png">' }}
+                                    {% if form.apple_touch_icon_url %}
+                                    <div class="settings-image-preview">
+                                        <img src="{{ form.apple_touch_icon_url }}" alt="Apple Touch Icon" class="settings-preview-img" style="max-width: 100px;">
+                                    </div>
+                                    {% endif %}
+                                    <small class="settings-help-text">
+                                        <i class="bi bi-info-circle"></i>
+                                        180x180px (.png) - iOS devices
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div class="settings-alert settings-alert-info mt-3">
+                                <i class="bi bi-info-circle-fill"></i>
+                                <div>
+                                    <strong>Thứ tự ưu tiên:</strong> SVG (Retina) → ICO Priority → PNG → ICO Fallback.
+                                    Nên upload đầy đủ để tương thích với mọi trình duyệt và thiết bị.<br>
+                                    Dùng <a href="https://realfavicongenerator.net/"> web này </a> để tạo favicon
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-section-card">
+                            <h6 class="settings-section-title">
+                                <i class="bi bi-share-fill"></i>
+                                Social Share Image
+                            </h6>
+
+                            <div class="settings-grid settings-grid-2">
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        {{ form.default_share_image.label.text if form.default_share_image else 'Default Share Image' }}
+                                    </label>
+                                    {{ form.default_share_image(class="settings-form-control") if form.default_share_image else '<input type="file" name="default_share_image" class="settings-form-control" accept="image/*">' }}
+                                    {% if form.default_share_image_url %}
+                                    <div class="settings-image-preview">
+                                        <img src="{{ form.default_share_image_url }}" alt="Share Image" class="settings-preview-img" style="max-width: 300px;">
+                                    </div>
+                                    {% endif %}
+                                    <small class="settings-help-text">
+                                        <i class="bi bi-info-circle"></i>
+                                        1200x630px (OG Image) - Facebook, LinkedIn
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div class="settings-alert settings-alert-info">
+                                <i class="bi bi-info-circle-fill"></i>
+                                <div>
+                                    <strong>Lưu ý:</strong> Hình ảnh này sẽ được hiển thị khi chia sẻ website trên các mạng xã hội như Facebook, LinkedIn, Twitter.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============ CONTACT TAB ============ -->
+                    <div class="tab-pane fade" id="contact" role="tabpanel">
+                        <div class="settings-section-card">
+                            <h6 class="settings-section-title">
+                                <i class="bi bi-telephone"></i>
+                                Thông tin liên hệ
+                            </h6>
+
+                            <div class="settings-grid settings-grid-2">
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-envelope"></i>
+                                        {{ form.contact_email.label.text }}
+                                    </label>
+                                    {{ form.contact_email(class="settings-form-control", placeholder="contact@example.com") }}
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-clock"></i>
+                                        {{ form.working_hours.label.text }}
+                                    </label>
+                                    {{ form.working_hours(class="settings-form-control", placeholder="8h - 17h30 (Thứ 2 - Thứ 7)") }}
+                                </div>
+                            </div>
+                            <div class="settings-section-card">
+                                <h6 class="settings-section-title">
+                                    <i class="bi bi-building"></i>
+                                    Địa chỉ chi nhánh
+                                </h6>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-geo-alt"></i>
+                                        {{ form.branch_addresses.label.text }}
+                                    </label>
+                                    {{ form.branch_addresses(class="settings-form-control", rows="6",
+                                       placeholder="Mỗi dòng là 1 chi nhánh:\n982/l98/a1 Tân Bình, Tân Phú, Nhà Bè\n123 Đường ABC, Quận 1, TP.HCM\n456 Đường XYZ, Quận 3, TP.HCM") }}
+
+                                    <small class="settings-help-text">
+                                        <i class="bi bi-info-circle"></i>
+                                        Mỗi dòng là một địa chỉ chi nhánh. Nếu có từ 3 chi nhánh trở lên sẽ tự động hiển thị dạng dropdown.
+                                    </small>
+                                </div>
+                            </div>
+
+                            <hr class="settings-hotline-divider">
+
+                            <h6 class="fw-bold mb-3 text-primary">
+                                <i class="bi bi-telephone-fill"></i> Hotlines phân khu vực(Hiện tại bị vô hiệu hóa
+                                không sử dụng)
+                            </h6>
+                        </div>
+
+                        <div class="settings-section-card">
+                            <h6 class="settings-section-title">
+                                <i class="bi bi-share"></i>
+                                Mạng xã hội
+                            </h6>
+
+                            <div class="settings-grid settings-grid-2">
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-facebook"></i>
+                                        {{ form.facebook_url.label.text }}
+                                    </label>
+                                    {{ form.facebook_url(class="settings-form-control", placeholder="https://facebook.com/yourpage") }}
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-messenger"></i>
+                                        {{ form.facebook_messenger_url.label.text }}
+                                    </label>
+                                    {{ form.facebook_messenger_url(class="settings-form-control", placeholder="https://m.me/yourpage") }}
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-chat-dots"></i>
+                                        {{ form.zalo_url.label.text }}
+                                    </label>
+                                    {{ form.zalo_url(class="settings-form-control", placeholder="https://zalo.me/yourpage") }}
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-tiktok"></i>
+                                        {{ form.tiktok_url.label.text }}
+                                    </label>
+                                    {{ form.tiktok_url(class="settings-form-control", placeholder="https://tiktok.com/@yourpage") }}
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-youtube"></i>
+                                        {{ form.youtube_url.label.text }}
+                                    </label>
+                                    {{ form.youtube_url(class="settings-form-control", placeholder="https://youtube.com/@yourchannel") }}
+                                </div>
+                            </div>
+
+                            <div class="settings-form-group">
+                                <label class="settings-form-label">
+                                    <i class="bi bi-map"></i>
+                                    {{ form.google_maps.label.text }}
+                                </label>
+                                {{ form.google_maps(class="settings-form-control", rows="4", placeholder="<iframe src='...'></iframe>") }}
+                                <small class="settings-help-text">
+                                    <i class="bi bi-info-circle"></i>
+                                    Dán mã nhúng iframe từ Google Maps
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============ SYSTEM TAB ============ -->
+<div class="tab-pane fade" id="system" role="tabpanel">
+    <div class="settings-section-card">
+        <h6 class="settings-section-title">
+            <i class="bi bi-shield-lock"></i>
+            Bảo mật & Hệ thống
+        </h6>
+
+        <div class="settings-grid settings-grid-2">
+            <div class="settings-form-group">
+                <label class="settings-form-label">
+                    <i class="bi bi-lock"></i>
+                    {{ form.login_attempt_limit.label.text }}
+                </label>
+                {{ form.login_attempt_limit(class="settings-form-control", placeholder="5") }}
+                <small class="settings-help-text">
+                    <i class="bi bi-info-circle"></i>
+                    Tài khoản sẽ bị khóa 30 phút sau khi vượt quá số lần này
+                </small>
+            </div>
+
+            <div class="settings-form-group">
+                <label class="settings-form-label">
+                    <i class="bi bi-clock-history"></i>
+                    {{ form.cache_time.label.text }}
+                </label>
+                {{ form.cache_time(class="settings-form-control", placeholder="300") }}
+                <small class="settings-help-text">
+                    <i class="bi bi-info-circle"></i>
+                    Đơn vị: giây (300 = 5 phút, 0 = vô thời hạn)
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ CACHE MANAGEMENT SECTION -->
+    <div class="settings-section-card">
+        <h6 class="settings-section-title">
+            <i class="bi bi-database"></i>
+            Quản lý Cache
+        </h6>
+
+        <!-- Cache Statistics -->
+        <div class="cache-stats-grid">
+            <div class="cache-stat-card">
+                <div class="cache-stat-icon cache-stat-success">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div class="cache-stat-content">
+                    <div class="cache-stat-value">{{ cache_stats.hits }}</div>
+                    <div class="cache-stat-label">Cache Hits</div>
+                </div>
+            </div>
+
+            <div class="cache-stat-card">
+                <div class="cache-stat-icon cache-stat-warning">
+                    <i class="bi bi-x-circle-fill"></i>
+                </div>
+                <div class="cache-stat-content">
+                    <div class="cache-stat-value">{{ cache_stats.misses }}</div>
+                    <div class="cache-stat-label">Cache Misses</div>
+                </div>
+            </div>
+
+            <div class="cache-stat-card">
+                <div class="cache-stat-icon cache-stat-info">
+                    <i class="bi bi-percent"></i>
+                </div>
+                <div class="cache-stat-content">
+                    <div class="cache-stat-value">{{ cache_stats.hit_rate }}</div>
+                    <div class="cache-stat-label">Hit Rate</div>
+                </div>
+            </div>
+
+            <div class="cache-stat-card">
+                <div class="cache-stat-icon cache-stat-primary">
+                    <i class="bi bi-key-fill"></i>
+                </div>
+                <div class="cache-stat-content">
+                    <div class="cache-stat-value">{{ cache_stats.cached_keys }}</div>
+                    <div class="cache-stat-label">Cached Keys</div>
+                </div>
+            </div>
+
+            <div class="cache-stat-card">
+                <div class="cache-stat-icon cache-stat-secondary">
+                    <i class="bi bi-clock-fill"></i>
+                </div>
+                <div class="cache-stat-content">
+                    <div class="cache-stat-value">{{ cache_stats.ttl_seconds }}s</div>
+                    <div class="cache-stat-label">TTL (Time to Live)</div>
+                </div>
+            </div>
+
+            <div class="cache-stat-card">
+                <div class="cache-stat-icon cache-stat-danger">
+                    <i class="bi bi-trash-fill"></i>
+                </div>
+                <div class="cache-stat-content">
+                    <div class="cache-stat-value">{{ cache_stats.clears }}</div>
+                    <div class="cache-stat-label">Total Clears</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cache Actions -->
+        <div class="cache-actions-grid">
+            <button type="button" class="cache-action-btn cache-btn-danger" onclick="clearCache('all')">
+                <i class="bi bi-trash3-fill"></i>
+                Xóa toàn bộ cache
+            </button>
+            <button type="button" class="cache-action-btn cache-btn-warning" onclick="clearCache('categories')">
+                <i class="bi bi-folder-fill"></i>
+                Xóa cache Categories
+            </button>
+            <button type="button" class="cache-action-btn cache-btn-warning" onclick="clearCache('products')">
+                <i class="bi bi-box-fill"></i>
+                Xóa cache Products
+            </button>
+            <button type="button" class="cache-action-btn cache-btn-info" onclick="refreshCacheStats()">
+                <i class="bi bi-arrow-clockwise"></i>
+                Refresh Stats
+            </button>
+        </div>
+
+            <!-- Cached Keys List -->
+            {% if cache_stats['keys'] %}
+            <div class="cache-keys-section">
+                <h6 class="cache-keys-title">
+                    <i class="bi bi-list-ul"></i>
+                    Cached Keys ({{ cache_stats['keys']|length }})
+                </h6>
+                <div class="cache-keys-list">
+                    {% for key in cache_stats['keys'] %}
+                    <div class="cache-key-item">
+                        <i class="bi bi-key"></i>
+                        <span>{{ key }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+        <div class="settings-alert settings-alert-info mt-3">
+            <i class="bi bi-info-circle-fill"></i>
+            <div>
+                <strong>Lưu ý:</strong> Cache sẽ tự động được xóa khi:
+                <ul style="margin: 5px 0 0 20px;">
+                    <li>Thay đổi Cache Time trong settings</li>
+                    <li>Thêm/sửa/xóa Categories hoặc Products</li>
+                    <li>Cache đã quá thời gian TTL</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+                    <!-- ============ INTEGRATION TAB ============ -->
+                    <div class="tab-pane fade" id="integration" role="tabpanel">
+                        <div class="settings-section-card">
+                            <h6 class="settings-section-title">
+                                <i class="bi bi-cloud"></i>
+                                Cloud & AI Services
+                            </h6>
+
+                            <div class="settings-grid settings-grid-2">
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-cloud-upload"></i>
+                                        {{ form.cloudinary_api_key.label.text }}
+                                    </label>
+                                    {{ form.cloudinary_api_key(class="settings-form-control", placeholder="API Key", type="password") }}
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-robot"></i>
+                                        {{ form.gemini_api_key.label.text }}
+                                    </label>
+                                    {{ form.gemini_api_key(class="settings-form-control", placeholder="API Key", type="password") }}
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-graph-up"></i>
+                                        {{ form.google_analytics.label.text }}
+                                    </label>
+                                    {{ form.google_analytics(class="settings-form-control", placeholder="G-XXXXXXXXXX") }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-section-card">
+                            <h6 class="settings-section-title">
+                                <i class="bi bi-shop"></i>
+                                E-commerce & Social Commerce
+                            </h6>
+
+                            <div class="settings-grid settings-grid-3">
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-bag"></i>
+                                        {{ form.shopee_api.label.text }}
+                                    </label>
+                                    {{ form.shopee_api(class="settings-form-control", placeholder="Shopee API Key") }}
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-tiktok"></i>
+                                        {{ form.tiktok_api.label.text }}
+                                    </label>
+                                    {{ form.tiktok_api(class="settings-form-control", placeholder="TikTok API Key") }}
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-chat-dots"></i>
+                                        {{ form.zalo_oa.label.text }}
+                                    </label>
+                                    {{ form.zalo_oa(class="settings-form-control", placeholder="Zalo OA ID") }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-alert settings-alert-info">
+                            <i class="bi bi-info-circle-fill"></i>
+                            <div>
+                                <strong>Bảo mật:</strong> Các API key sẽ được mã hóa khi lưu vào database. Không chia sẻ với bất kỳ ai.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============ CONTENT TAB ============ -->
+                    <div class="tab-pane fade" id="content" role="tabpanel">
+                        <!-- Cấu hình chung - Full width -->
+                        <div class="settings-section-card">
+                            <h6 class="settings-section-title">
+                                <i class="bi bi-gear"></i>
+                                Cấu hình chung
+                            </h6>
+                        </div>
+
+                        <!-- Grid 2 cột cho policies -->
+                        <div class="settings-content-grid">
+                            <!-- Điều khoản - Full width -->
+                            <div class="settings-section-card settings-content-full">
+                                <h6 class="settings-section-title">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                    Điều khoản dịch vụ
+                                </h6>
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        {{ form.terms_of_service.label.text }}
+                                    </label>
+                                    {{ form.terms_of_service(class="settings-form-control", rows="6") }}
+                                    <small class="settings-help-text">
+                                        <i class="bi bi-code-slash"></i>
+                                        Hỗ trợ HTML. Hiển thị trên /policy
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Vận chuyển -->
+                            <div class="settings-section-card">
+                                <h6 class="settings-section-title">
+                                    <i class="bi bi-truck"></i>
+                                    Vận chuyển
+                                </h6>
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">{{ form.shipping_policy.label.text }}</label>
+                                    {{ form.shipping_policy(class="settings-form-control", rows="4") }}
+                                </div>
+                            </div>
+
+                            <!-- Đổi trả -->
+                            <div class="settings-section-card">
+                                <h6 class="settings-section-title">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                    Đổi trả
+                                </h6>
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">{{ form.return_policy.label.text }}</label>
+                                    {{ form.return_policy(class="settings-form-control", rows="4") }}
+                                </div>
+                            </div>
+
+                            <!-- Bảo hành -->
+                            <div class="settings-section-card">
+                                <h6 class="settings-section-title">
+                                    <i class="bi bi-shield-check"></i>
+                                    Bảo hành
+                                </h6>
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">{{ form.warranty_policy.label.text }}</label>
+                                    {{ form.warranty_policy(class="settings-form-control", rows="4") }}
+                                </div>
+                            </div>
+
+                            <!-- Bảo mật -->
+                            <div class="settings-section-card">
+                                <h6 class="settings-section-title">
+                                    <i class="bi bi-lock"></i>
+                                    Bảo mật
+                                </h6>
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">{{ form.privacy_policy.label.text }}</label>
+                                    {{ form.privacy_policy(class="settings-form-control", rows="4") }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-alert settings-alert-info">
+                            <i class="bi bi-info-circle-fill"></i>
+                            <div>
+                                <strong>Lưu ý:</strong> Các chính sách hiển thị trên <strong>/policy</strong>. Hỗ trợ HTML.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="settings-actions">
+                    <button type="button" class="settings-btn settings-btn-secondary">
+                        <i class="bi bi-x-circle"></i>
+                        Hủy bỏ
+                    </button>
+                    <button type="submit" class="settings-btn settings-btn-primary">
+                        <i class="bi bi-check-circle"></i>
+                        Lưu cài đặt
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- ==================== TAB SWITCHING LOGIC ==================== -->
+<script>
+!function(){"use strict";document.addEventListener("DOMContentLoaded",(function(){!function(){const t=document.querySelectorAll(".settings-tab"),e=document.querySelectorAll(".tab-pane");function n(n){t.forEach((t=>t.classList.remove("active"))),e.forEach((t=>t.classList.remove("show","active")));const i=document.querySelector(`[data-bs-target="#${n}"]`),a=document.getElementById(n);i&&a&&(i.classList.add("active"),a.classList.add("show","active"))}n(localStorage.getItem("activeSettingsTab")||"general"),t.forEach((t=>{t.addEventListener("click",(function(){const t=this.getAttribute("data-bs-target").substring(1);n(t),localStorage.setItem("activeSettingsTab",t)}))}))}(),function(){function t(t,e){let n=t.closest(".settings-form-group").querySelector(".settings-image-preview");n||(n=document.createElement("div"),n.className="settings-image-preview",t.parentNode.insertBefore(n,t.nextSibling));let i="settings-preview-img";"favicon"===t.name&&(i="settings-preview-favicon"),n.innerHTML=`<img src="${e}" alt="Preview" class="${i}">`}[{input:"logo"},{input:"logo_chatbot"},{input:"favicon"},{input:"favicon_ico"},{input:"favicon_png"},{input:"favicon_svg"},{input:"apple_touch_icon"},{input:"default_share_image"}].forEach((e=>{const n=document.querySelector(`input[name="${e.input}"]`);n&&n.addEventListener("change",(function(e){const i=e.target.files[0];if(!i)return;if(!i.type.startsWith("image/"))return alert("Vui lòng chọn file ảnh hợp lệ"),void(this.value="");const a=5242880;if(i.size>a)return alert("Kích thước ảnh không được vượt quá 5MB"),void(this.value="");const c=new FileReader;c.onload=function(e){t(n,e.target.result)},c.readAsDataURL(i)}))}))}()}))}();
+</script>
+
+<!-- ==================== CACHE MANAGEMENT ==================== -->
+<script>
+// Clear cache function
+async function clearCache(pattern) {
+    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+
+    const messages = {
+        'all': 'Bạn có chắc muốn xóa TOÀN BỘ cache?',
+        'categories': 'Xóa cache Categories?',
+        'products': 'Xóa cache Products?'
+    };
+
+    if (!confirm(messages[pattern] || 'Xác nhận xóa cache?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch('{{ url_for("admin.clear_cache") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ pattern: pattern === 'all' ? null : pattern })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert('✅ ' + data.message);
+            location.reload();
+        } else {
+            alert('❌ Lỗi: ' + (data.error || 'Unknown error'));
+        }
+    } catch (error) {
+        alert('❌ Lỗi kết nối: ' + error.message);
+    }
+}
+
+// Refresh cache stats
+async function refreshCacheStats() {
+    try {
+        const response = await fetch('{{ url_for("admin.cache_stats_api") }}');
+        const data = await response.json();
+
+        if (data.success) {
+            location.reload();
+        }
+    } catch (error) {
+        alert('❌ Lỗi: ' + error.message);
+    }
+}
+</script>
+
+<!-- ==================== CKEDITOR 5 SETUP ==================== -->
+<script src="https://cdn.ckeditor.com/ckeditor5/43.3.1/ckeditor5.umd.js"></script>
+<link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/43.3.1/ckeditor5.css" />
+
+<script>
+const {
+    ClassicEditor, Essentials, Bold, Italic, Underline, Strikethrough,
+    Font, Paragraph, Heading, Link, List, Image, ImageCaption, ImageStyle,
+    ImageToolbar, ImageUpload, ImageResize, LinkImage, Table, TableToolbar,
+    BlockQuote, Code, Alignment, Undo
+} = CKEDITOR;
+
+// Custom Upload Adapter
+class MyUploadAdapter {
+    constructor(loader) {
+        this.loader = loader;
+    }
+
+    upload() {
+        return this.loader.file.then(file => {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('upload', file);
+
+                const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+
+                console.log('🚀 Starting upload:', file.name);
+
+                fetch('{{ url_for("admin.ckeditor_upload_image") }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-CSRFToken': csrfToken }
+                })
+                .then(response => {
+                    console.log('📡 Response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('📦 Response data:', data);
+                    if (data.url) {
+                        console.log('✅ Upload success:', data.url);
+                        resolve({ default: data.url });
+                    } else if (data.error) {
+                        console.error('❌ Upload error:', data.error.message);
+                        reject(data.error.message);
+                    } else {
+                        console.error('❌ Unknown response format');
+                        reject('Upload thất bại');
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Network error:', error);
+                    reject('Lỗi kết nối: ' + error.message);
+                });
+            });
+        });
+    }
+
+    abort() {
+        console.log('⚠️ Upload aborted');
+    }
+}
+
+// Plugin để đăng ký Upload Adapter
+function MyCustomUploadAdapterPlugin(editor) {
+    editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+        console.log('🔌 Creating upload adapter');
+        return new MyUploadAdapter(loader);
+    };
+}
+
+// Cấu hình CKEditor
+const editorConfig = {
+    plugins: [
+        Essentials, Bold, Italic, Underline, Strikethrough, Font,
+        Paragraph, Heading, Link, List, Image, ImageCaption, ImageStyle,
+        ImageToolbar, ImageUpload, ImageResize, LinkImage, Table, TableToolbar,
+        BlockQuote, Code, Alignment, Undo, MyCustomUploadAdapterPlugin
+    ],
+    toolbar: {
+        items: [
+            'heading', '|',
+            'bold', 'italic', 'underline', 'strikethrough', '|',
+            'fontSize', 'fontColor', 'fontBackgroundColor', '|',
+            'link', 'bulletedList', 'numberedList', '|',
+            'uploadImage', 'insertTable', 'blockQuote', 'code', '|',
+            'alignment', '|',
+            'undo', 'redo'
+        ],
+        shouldNotGroupWhenFull: true
+    },
+    image: {
+        toolbar: [
+            'imageStyle:inline', 'imageStyle:wrapText', 'imageStyle:breakText', '|',
+            'toggleImageCaption', '|', 'imageTextAlternative', '|', 'linkImage'
+        ],
+        styles: ['full', 'alignLeft', 'alignCenter', 'alignRight'],
+        upload: { types: ['jpeg', 'png', 'gif', 'webp', 'jpg'] }
+    },
+    fontSize: {
+        options: ['tiny', 'small', 'default', 'big', 'huge']
+    },
+    alignment: {
+        options: ['left', 'center', 'right', 'justify']
+    },
+    table: {
+        contentToolbar: [
+            'tableColumn', 'tableRow', 'mergeTableCells',
+            'tableProperties', 'tableCellProperties'
+        ]
+    },
+    link: {
+        decorators: {
+            openInNewTab: {
+                mode: 'manual',
+                label: 'Mở tab mới',
+                attributes: { target: '_blank', rel: 'noopener noreferrer' }
+            }
+        }
+    }
+};
+
+// Khởi tạo CKEditor cho các trường
+const editorInstances = {};
+const policyFields = [
+    'company_info', 'terms_of_service', 'shipping_policy',
+    'return_policy', 'warranty_policy', 'privacy_policy'
+];
+
+Promise.all(policyFields.map(fieldName => {
+    const textarea = document.querySelector(`textarea[name="${fieldName}"]`);
+    if (textarea) {
+        return ClassicEditor
+            .create(textarea, editorConfig)
+            .then(editor => {
+                console.log(`✅ CKEditor khởi tạo cho ${fieldName}`);
+                editorInstances[fieldName] = editor;
+                textarea.removeAttribute('required');
+            })
+            .catch(error => {
+                console.error(`❌ Lỗi khởi tạo CKEditor cho ${fieldName}:`, error);
+            });
+    }
+    return Promise.resolve();
+}))
+.then(() => {
+    console.log('✅ Tất cả CKEditor đã được khởi tạo!');
+
+    // Xử lý submit form
+    document.querySelector('form').addEventListener('submit', function(e) {
+        Object.keys(editorInstances).forEach(fieldName => {
+            const editor = editorInstances[fieldName];
+            const textarea = document.querySelector(`textarea[name="${fieldName}"]`);
+            if (editor && textarea) {
+                textarea.value = editor.getData();
+            }
+        });
+    });
+})
+.catch(error => {
+    console.error('❌ Lỗi khởi tạo CKEditor:', error);
+    alert('Không thể khởi tạo trình soạn thảo. Vui lòng refresh trang.');
+});
+</script>
+
+<!-- ==================== CUSTOM STYLES ==================== -->
+<style>
+/* CKEditor Image Styles */
+.ck-content img {
+    max-width: 100%;
+    height: auto;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.ck-content img:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.ck-content figure.image {
+    margin: 1em 0;
+}
+
+.ck-content figure.image img {
+    margin: 0 auto;
+}
+
+.ck-content figure.image figcaption {
+    text-align: center;
+    font-style: italic;
+    color: #666;
+    padding: 0.5em;
+    background: #f5f5f5;
+    margin-top: 0.5em;
+}
+
+.ck-content .image-style-align-left,
+.ck-content .image-style-side {
+    float: left;
+    margin-right: 1.5em;
+    max-width: 50%;
+}
+
+.ck-content .image-style-align-right {
+    float: right;
+    margin-left: 1.5em;
+    max-width: 50%;
+}
+
+.ck-content .image-style-align-center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* CKEditor Height Settings */
+.ck-editor__editable {
+    min-height: 200px;
+    max-height: 400px;
+}
+
+textarea[name="terms_of_service"] + .ck-editor .ck-editor__editable {
+    min-height: 300px;
+    max-height: 500px;
+}
+
+textarea[name="shipping_policy"] + .ck-editor .ck-editor__editable,
+textarea[name="return_policy"] + .ck-editor .ck-editor__editable,
+textarea[name="warranty_policy"] + .ck-editor .ck-editor__editable,
+textarea[name="privacy_policy"] + .ck-editor .ck-editor__editable {
+    min-height: 150px;
+    max-height: 300px;
+}
+
+/* Hide original textareas */
+textarea[name="terms_of_service"],
+textarea[name="shipping_policy"],
+textarea[name="return_policy"],
+textarea[name="warranty_policy"],
+textarea[name="privacy_policy"] {
+    display: none;
+}
+
+/* CKEditor Toolbar Styles */
+.ck.ck-toolbar {
+    border-radius: 4px 4px 0 0;
+    background: #f8f9fa;
+}
+
+.ck.ck-editor__main {
+    border-radius: 0 0 4px 4px;
+}
+
+/* Cache Stats Styles */
+.cache-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.cache-stat-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+}
+
+.cache-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.cache-stat-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+}
+
+.cache-stat-success { background: linear-gradient(135deg, #d4edda, #c3e6cb); color: #155724; }
+.cache-stat-warning { background: linear-gradient(135deg, #fff3cd, #ffeaa7); color: #856404; }
+.cache-stat-info { background: linear-gradient(135deg, #d1ecf1, #bee5eb); color: #0c5460; }
+.cache-stat-primary { background: linear-gradient(135deg, #cce5ff, #b8daff); color: #004085; }
+.cache-stat-secondary { background: linear-gradient(135deg, #e2e3e5, #d6d8db); color: #383d41; }
+.cache-stat-danger { background: linear-gradient(135deg, #f8d7da, #f5c6cb); color: #721c24; }
+
+.cache-stat-content { flex: 1; }
+
+.cache-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+    line-height: 1;
+}
+
+.cache-stat-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: 4px;
+}
+
+.cache-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.cache-action-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.cache-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.cache-btn-danger { background: linear-gradient(135deg, #dc3545, #c82333); color: white; }
+.cache-btn-warning { background: linear-gradient(135deg, #ffc107, #e0a800); color: #000; }
+.cache-btn-info { background: linear-gradient(135deg, #17a2b8, #138496); color: white; }
+
+.cache-keys-section {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.cache-keys-title {
+    font-size: 1rem;
+    color: #495057;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cache-keys-list {
+    max-height: 200px;
+    overflow-y: auto;
+    display: grid;
+    gap: 5px;
+}
+
+.cache-key-item {
+    padding: 8px 12px;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-family: 'Courier New', monospace;
+    color: #495057;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cache-key-item i {
+    color: #007bff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .ck-editor__editable {
+        min-height: 150px;
+    }
+}
+</style>
+{% endblock %}

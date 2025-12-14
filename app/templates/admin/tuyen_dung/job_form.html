@@ -1,0 +1,341 @@
+{% extends 'layouts/admin.html' %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-briefcase"></i> {{ title }}</h4>
+    <a href="{{ url_for('admin.jobs') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+</div>
+
+<form method="POST" novalidate id="jobForm">
+    {{ form.hidden_tag() }}
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-3">
+                <div class="card-header bg-warning">
+                    <h6 class="mb-0">Thông tin tuyển dụng</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        {{ form.title.label(class="form-label") }}
+                        {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else ""), placeholder="VD: Nhân viên Kinh doanh") }}
+                        {% if form.title.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.title.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.slug.label(class="form-label") }}
+                        {{ form.slug(class="form-control" + (" is-invalid" if form.slug.errors else "")) }}
+                        {% if form.slug.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.slug.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.department.label(class="form-label") }}
+                            {{ form.department(class="form-control", placeholder="VD: Kinh doanh") }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.location.label(class="form-label") }}
+                            {{ form.location(class="form-control" + (" is-invalid" if form.location.errors else ""), placeholder="VD: TP.HCM") }}
+                            {% if form.location.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.location.errors %}{{ error }}{% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            {{ form.job_type.label(class="form-label") }}
+                            {{ form.job_type(class="form-select") }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form.level.label(class="form-label") }}
+                            {{ form.level(class="form-select") }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form.salary.label(class="form-label") }}
+                            {{ form.salary(class="form-control" + (" is-invalid" if form.salary.errors else ""), placeholder="VD: 10-15 triệu") }}
+                            {% if form.salary.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.salary.errors %}{{ error }}{% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.experience.label(class="form-label") }}
+                        {{ form.experience(class="form-control", placeholder="VD: 1-2 năm kinh nghiệm") }}
+                    </div>
+
+                    <div class="mb-4">
+                        {{ form.description.label(class="form-label") }}
+                        {{ form.description(class="form-control d-none", id="description") }}
+                        <div id="description-editor"></div>
+                        {% if form.description.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.description.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        {{ form.requirements.label(class="form-label") }}
+                        {{ form.requirements(class="form-control d-none", id="requirements") }}
+                        <div id="requirements-editor"></div>
+                        <small class="text-muted">Sử dụng danh sách có dấu đầu dòng</small>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.benefits.label(class="form-label") }}
+                        {{ form.benefits(class="form-control d-none", id="benefits") }}
+                        <div id="benefits-editor"></div>
+                        <small class="text-muted">Quyền lợi được hưởng</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-3">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">Thông tin liên hệ</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        {{ form.contact_email.label(class="form-label") }}
+                        {{ form.contact_email(class="form-control" + (" is-invalid" if form.contact_email.errors else ""), placeholder="hr@tuyendung.com.vn") }}
+                        {% if form.contact_email.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.contact_email.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <small class="text-muted">Email nhận hồ sơ ứng tuyển</small>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.deadline.label(class="form-label") }}
+                        {{ form.deadline(class="form-control", type="date") }}
+                        <small class="text-muted">Hạn cuối nộp hồ sơ</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0">Cài đặt</h6>
+                </div>
+                <div class="card-body">
+                    <div class="form-check mb-2">
+                        {{ form.is_urgent(class="form-check-input") }}
+                        {{ form.is_urgent.label(class="form-check-label") }}
+                    </div>
+
+                    <div class="form-check">
+                        {{ form.is_active(class="form-check-input") }}
+                        {{ form.is_active.label(class="form-check-label") }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                {{ form.submit(class="btn btn-warning btn-lg") }}
+                <a href="{{ url_for('admin.jobs') }}" class="btn btn-secondary">Hủy</a>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.ckeditor.com/ckeditor5/43.3.1/ckeditor5.umd.js"></script>
+<link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/43.3.1/ckeditor5.css" />
+
+<script>
+const {
+    ClassicEditor,
+    Essentials,
+    Bold, Italic, Underline, Strikethrough,
+    Font,
+    Paragraph, Heading,
+    Link, List,
+    Image, ImageCaption, ImageStyle, ImageToolbar, ImageUpload, ImageResize, LinkImage,
+    Table, TableToolbar,
+    BlockQuote, Code,
+    Alignment,
+    Undo
+} = CKEDITOR;
+
+// ✅ CUSTOM UPLOAD ADAPTER (nếu có route upload)
+class MyUploadAdapter {
+    constructor(loader) {
+        this.loader = loader;
+    }
+
+    upload() {
+        return this.loader.file.then(file => {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('upload', file);
+                const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+
+                fetch('{{ url_for("admin.ckeditor_upload_image") }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-CSRFToken': csrfToken }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.url) {
+                        resolve({ default: data.url });
+                    } else {
+                        reject(data.error?.message || 'Upload thất bại');
+                    }
+                })
+                .catch(error => reject('Lỗi kết nối: ' + error.message));
+            });
+        });
+    }
+
+    abort() {}
+}
+
+function MyCustomUploadAdapterPlugin(editor) {
+    editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+        return new MyUploadAdapter(loader);
+    };
+}
+
+// ✅ STORAGE CHO CÁC EDITOR INSTANCES
+const editors = {};
+
+// ✅ CẤU HÌNH CHUNG
+const editorConfig = {
+    plugins: [
+        Essentials,
+        Bold, Italic, Underline, Strikethrough,
+        Font,
+        Paragraph, Heading,
+        Link, List,
+        Image, ImageCaption, ImageStyle, ImageToolbar, ImageUpload, ImageResize, LinkImage,
+        Table, TableToolbar,
+        BlockQuote, Code,
+        Alignment,
+        Undo,
+        MyCustomUploadAdapterPlugin
+    ],
+    toolbar: {
+        items: [
+            'heading', '|',
+            'bold', 'italic', 'underline', '|',
+            'fontSize', 'fontColor', '|',
+            'link', 'bulletedList', 'numberedList', '|',
+            'uploadImage', 'insertTable', 'blockQuote', '|',
+            'alignment', '|',
+            'undo', 'redo'
+        ],
+        shouldNotGroupWhenFull: true
+    },
+    image: {
+        toolbar: ['imageStyle:inline', 'imageStyle:wrapText', '|', 'toggleImageCaption', '|', 'imageTextAlternative', '|', 'linkImage'],
+        upload: { types: ['jpeg', 'png', 'gif', 'webp', 'jpg'] }
+    },
+    fontSize: {
+        options: ['tiny', 'small', 'default', 'big', 'huge']
+    },
+    alignment: {
+        options: ['left', 'center', 'right', 'justify']
+    },
+    table: {
+        contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells']
+    }
+};
+
+// ✅ KHỞI TẠO 3 EDITOR INSTANCES
+const editorFields = ['description', 'requirements', 'benefits'];
+
+Promise.all(editorFields.map(fieldId => {
+    return ClassicEditor
+        .create(document.getElementById(`${fieldId}-editor`), editorConfig)
+        .then(editor => {
+            editors[fieldId] = editor;
+
+            // Load dữ liệu từ textarea (cho chế độ edit)
+            const textarea = document.getElementById(fieldId);
+            if (textarea.value) {
+                editor.setData(textarea.value);
+            }
+
+            // Real-time sync
+            editor.model.document.on('change:data', () => {
+                textarea.value = editor.getData();
+            });
+
+            console.log(`✅ Editor initialized: ${fieldId}`);
+        });
+}))
+.then(() => {
+    console.log('✅ All CKEditor 5 instances initialized successfully!');
+})
+.catch(error => {
+    console.error('❌ Error initializing CKEditor 5:', error);
+    alert('Không thể khởi tạo trình soạn thảo. Vui lòng refresh trang.');
+});
+
+// ✅ AUTO-GENERATE SLUG
+document.querySelector('[name="title"]').addEventListener('input', function() {
+    const slug = this.value
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[đĐ]/g, 'd')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+    document.querySelector('[name="slug"]').value = slug;
+});
+
+// ✅ FORM SUBMIT - SYNC TẤT CẢ EDITORS
+const jobForm = document.getElementById('jobForm');
+let isSynced = false;
+
+jobForm.addEventListener('submit', function(e) {
+    if (isSynced) {
+        return true; // Đã sync rồi, cho submit
+    }
+
+    e.preventDefault();
+    console.log('📝 Syncing all editors before submit...');
+
+    // Sync tất cả editors
+    editorFields.forEach(fieldId => {
+        if (editors[fieldId]) {
+            const textarea = document.getElementById(fieldId);
+            const content = editors[fieldId].getData();
+            textarea.value = content;
+            console.log(`✅ Synced ${fieldId}: ${content.length} chars`);
+        }
+    });
+
+    isSynced = true;
+    console.log('✅ All editors synced, submitting form...');
+
+    // Submit bằng native method
+    HTMLFormElement.prototype.submit.call(jobForm);
+});
+</script>
+{% endblock %}

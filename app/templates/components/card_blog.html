@@ -1,0 +1,76 @@
+<div class="col-lg-4 col-md-6 col-sm-6">
+  <article
+    class="card blog-card h-100 border-0"
+    itemscope
+    itemtype="https://schema.org/BlogPosting"
+  >
+    <!-- Blog Image -->
+    <div class="blog-image">
+      {% set media_info = blog.get_media_seo_info() if blog.image else None %}
+
+      <!-- Link bọc ảnh -->
+      <a href="{{ url_for('main.blog_detail', slug=blog.slug) }}">
+        <img
+          src="{{ blog.image if blog.image else 'https://via.placeholder.com/400x300/FFC107/FFFFFF?text=Blog' }}"
+          alt="{{ media_info.alt_text if media_info and media_info.alt_text else blog.title }}"
+          title="{{ media_info.title if media_info and media_info.title else blog.title }}"
+          itemprop="image"
+          loading="lazy"
+        />
+      </a>
+    </div>
+
+    <!-- Blog Content -->
+    <div class="blog-content">
+      <!-- Title -->
+      <h3 class="blog-title">
+        <a
+          href="{{ url_for('main.blog_detail', slug=blog.slug) }}"
+          class="text-decoration-none"
+          itemprop="headline"
+        >
+          {{ blog.title }}
+        </a>
+      </h3>
+
+      <!-- Excerpt -->
+      <p class="blog-excerpt" itemprop="description">
+        {{ (blog.excerpt or blog.content|striptags)[:120] }}...
+      </p>
+    </div>
+
+    <!-- Meta Row (Date + Button) -->
+    <div class="blog-meta-row">
+      <div class="blog-date">
+        <span class="blog-date-icon">
+          <i class="bi bi-calendar3"></i>
+        </span>
+        <span itemprop="datePublished" content="{{ blog.created_at.strftime('%Y-%m-%d') }}">
+          {{ blog.created_at|vn_date }}
+        </span>
+      </div>
+
+      <a
+        href="{{ url_for('main.blog_detail', slug=blog.slug) }}"
+        class="blog-btn"
+      >
+        Xem chi tiết
+      </a>
+    </div>
+
+    <!-- Hidden SEO metadata -->
+    <meta
+      itemprop="dateModified"
+      content="{{ blog.updated_at|vn_datetime('%Y-%m-%d') if blog.updated_at else blog.created_at|vn_datetime('%Y-%m-%d') }}"
+    />
+    <div itemprop="publisher" itemscope itemtype="https://schema.org/Organization">
+      <meta itemprop="name" content="{{ get_setting('website_name', 'BRICON VIỆT NAM') }}" />
+      <div itemprop="logo" itemscope itemtype="https://schema.org/ImageObject">
+        <meta
+          itemprop="url"
+          content="{{ get_setting('logo_url', url_for('static', filename='img/logo.png', _external=True)) }}"
+        />
+      </div>
+    </div>
+  </article>
+</div>

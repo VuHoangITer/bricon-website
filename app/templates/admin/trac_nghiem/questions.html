@@ -1,0 +1,120 @@
+{% extends 'layouts/admin.html' %}
+
+{% block title %}Quản lý Câu Hỏi - {{ quiz.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.question-card {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+.question-header {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px 8px 0 0;
+}
+.hover-question:hover {
+    background: #FFF8E1;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h2 class="mb-0"><i class="bi bi-question-circle me-2"></i> Câu Hỏi cho Quiz: {{ quiz.title }}</h2>
+        <div class="d-flex gap-2">
+            <!-- 🔙 Quay lại -->
+            <a href="{{ url_for('admin.quizzes') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <!-- Form Thêm Câu Hỏi Nhanh -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">Thêm Câu Hỏi Mới</div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('admin.add_question') }}">
+                <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
+                <div class="mb-3">
+                    <label class="form-label">Câu Hỏi</label>
+                    <textarea name="question_text" class="form-control" rows="2" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Giải Thích Cho Câu Hỏi (Tùy Chọn)</label>
+                    <textarea name="explanation" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Loại Câu Hỏi</label>
+                    <select name="question_type" class="form-select">
+                        <option value="multiple_choice" selected>Trắc nghiệm</option>
+                        <option value="true_false">Đúng / Sai</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Điểm</label>
+                    <input type="number" name="points" class="form-control" value="1" min="1">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Đáp Án (Thêm ít nhất 2, chọn đúng bằng radio)</label>
+                    <div id="answers-container">
+                        <div class="input-group mb-2">
+                            <input type="radio" name="correct_answer" value="0" checked>
+                            <input type="text" name="answers[]" class="form-control" placeholder="Đáp án 1" required>
+                        </div>
+                        <div class="input-group mb-2">
+                            <input type="radio" name="correct_answer" value="1">
+                            <input type="text" name="answers[]" class="form-control" placeholder="Đáp án 2" required>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-info" onclick="addAnswerField()"><i class="bi bi-plus"></i> Thêm Đáp Án</button>
+                </div>
+                <button type="submit" class="btn btn-primary">Thêm Câu Hỏi</button>
+            </form>
+        </div>
+    </div>
+
+        <!-- Danh Sách Câu Hỏi -->
+        <div class="row">
+            {% for question in questions %}
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="question-card h-100">
+                    <div class="question-header d-flex justify-content-between align-items-center">
+                        <strong>Câu {{ loop.index }}:</strong>
+                        <div>
+                            <a href="{{ url_for('admin.edit_question', id=question.id) }}" class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></a>
+                            <a href="{{ url_for('admin.delete_question', id=question.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Xác nhận xóa?')"><i class="bi bi-trash"></i></a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Câu hỏi:</strong> {{ question.question_text }}</p>
+                        <p><strong>Điểm:</strong> {{ question.points }}</p>
+                        <ul>
+                            {% for answer in question.answers.all() %}
+                            <li {% if answer.is_correct %}class="text-success fw-bold"{% endif %}>
+                                {{ answer.answer_text }} {% if answer.is_correct %}(Đúng){% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+</div>
+<script>
+function addAnswerField() {
+    const container = document.getElementById('answers-container');
+    const index = container.children.length;
+    const div = document.createElement('div');
+    div.className = 'input-group mb-2';
+    div.innerHTML = `
+        <input type="radio" name="correct_answer" value="${index}">
+        <input type="text" name="answers[]" class="form-control" placeholder="Đáp án ${index + 1}" required>
+    `;
+    container.appendChild(div);
+}
+</script>
+{% endblock %}

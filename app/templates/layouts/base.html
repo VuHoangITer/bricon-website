@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=5.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- ==================== SECURITY & THEME ==================== -->
+    <meta
+      name="theme-color"
+      content="{{ get_setting('primary_color', '#FFC107') }}"
+    />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- ==================== PERFORMANCE HINTS ==================== -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Preload Critical Resources -->
+    <link
+      rel="preload"
+      href="{{ url_for('static', filename='css/main.min.css') }}"
+      as="style"
+    />
+    <link
+      rel="preload"
+      href="{{ url_for('static', filename='js/main.min.js') }}"
+      as="script"
+    />
+    <link
+      rel="preload"
+      href="{{ get_setting('logo_url', url_for('static', filename='img/logo.png')) }}"
+      as="image"
+    />
+
+    <!-- ==================== META TAGS  ==================== -->
+    <title>
+      {% block title %}{{ get_setting('meta_title', '') }}{% endblock %}
+    </title>
+    <meta
+      name="description"
+      content="{% block meta_description %}{{ get_setting('meta_description', '') }}{% endblock %}"
+    />
+    <meta name="keywords" content="{{ get_setting('meta_keywords', '') }}" />
+    <meta name="author" content="{{ get_setting('website_name', '') }}" />
+
+    <!-- ==================== META ROBOTS ==================== -->
+    <meta
+      name="robots"
+      content="{% block meta_robots %}index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1{% endblock %}"
+    />
+    <meta
+      name="googlebot"
+      content="{% block meta_googlebot %}index, follow{% endblock %}"
+    />
+    <link rel="canonical" href="{{ request.url }}" />
+
+    <!-- ==================== FAVICON - MULTIPLE FORMATS ==================== -->
+    <link
+      rel="icon"
+      type="image/x-icon"
+      sizes="any"
+      href="{{ get_setting('favicon_ico_url', get_setting('favicon_url', url_for('static', filename='img/favicon.ico'))) }}"
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="{{ get_setting('favicon_svg_url', url_for('static', filename='img/favicon.svg')) }}"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="96x96"
+      href="{{ get_setting('favicon_png_url', url_for('static', filename='img/favicon-96x96.png')) }}"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="{{ get_setting('apple_touch_icon_url', url_for('static', filename='img/apple-touch-icon.png')) }}"
+    />
+    <link
+      rel="manifest"
+      href="{{ url_for('static', filename='site.webmanifest') }}"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="{{ url_for('static', filename='web-app-manifest-192x192.png') }}"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="{{ url_for('static', filename='web-app-manifest-512x512.png') }}"
+    />
+
+    <!-- ==================== OG TAGS  ==================== -->
+    <meta
+      property="og:title"
+      content="{{ get_setting('og_title', get_setting('meta_title', 'BRICON VIỆT NAM | Keo của người Việt')) }}"
+    />
+    <meta
+      property="og:description"
+      content="{{ get_setting('og_description', 'Keo dán gạch BRICON - Keo của người Việt, kết dính bền lâu') }}"
+    />
+    <meta
+      property="og:image"
+      content="{{ get_setting('og_image', get_setting('default_share_image', url_for('static', filename='img/default-share.jpg', _external=True))) }}"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="{{ get_setting('website_name', 'BRICON VIỆT NAM') }}"
+    />
+    <meta property="og:url" content="{{ request.url }}" />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:site_name"
+      content="{{ get_setting('website_name', 'BRICON VIỆT NAM') }}"
+    />
+    <meta property="og:locale" content="vi_VN" />
+
+    <!-- ==================== TWITTER CARDS ==================== -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="{{ get_setting('og_title', get_setting('meta_title', 'BRICON VIỆT NAM')) }}"
+    />
+    <meta
+      name="twitter:description"
+      content="{{ get_setting('og_description', 'Keo của người Việt') }}"
+    />
+    <meta
+      name="twitter:image"
+      content="{{ get_setting('og_image', get_setting('default_share_image', url_for('static', filename='img/default-share.jpg', _external=True))) }}"
+    />
+
+    <!-- ==================== SCHEMA.ORG  ==================== -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "{{ get_setting('website_name', 'CÔNG TY TNHH BRICON VIỆT NAM') }}",
+        "url": "{{ get_setting('main_url', request.url_root)|e }}",
+        "logo": "{{ get_setting('logo_url', url_for('static', filename='img/logo.png', _external=True))|e }}",
+        "description": "Keo chà ron, keo dán gạch, vật liệu chống thấm và giải pháp xây dựng chất lượng cao tại Việt Nam.",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+84901180094",
+          "contactType": "customer service",
+          "email": "{{ get_setting('contact_email', 'info@bricon.vn') }}",
+          "availableLanguage": ["Vietnamese"]
+        },
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "171, Đường An Phú Đông 03, Phường An Phú Đông, Quận 12",
+          "addressLocality": "Hồ Chí Minh",
+          "addressCountry": "VN"
+        },
+        "sameAs": [
+          "{{ get_setting('facebook_url', '') }}",
+          "{{ get_setting('zalo_url', '') }}",
+          "{{ get_setting('tiktok_url', '') }}",
+          "{{ get_setting('youtube_url', '') }}"
+        ]
+      }
+    </script>
+
+    <!-- ==================== GOOGLE ANALYTICS  ==================== -->
+    {% if get_setting('google_analytics') %}
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id={{ get_setting('google_analytics') }}"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '{{ get_setting('google_analytics') }}');
+
+      // Track outbound links
+      document.addEventListener('click', function(e) {
+        const link = e.target.closest('a');
+        if (link && link.hostname !== window.location.hostname) {
+          gtag('event', 'click', {
+            'event_category': 'outbound',
+            'event_label': link.href,
+            'transport_type': 'beacon'
+          });
+        }
+      });
+
+      // Track phone calls
+      document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('a[href^="tel:"]').forEach(link => {
+          link.addEventListener('click', function() {
+            gtag('event', 'call', {
+              'event_category': 'engagement',
+              'event_label': this.href
+            });
+          });
+        });
+      });
+    </script>
+    {% endif %}
+
+    <!-- ==================== CSS LIBRARIES ==================== -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://unpkg.com/swiper@9/swiper-bundle.min.css" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/main.min.css') }}"
+    />
+    {% block extra_css %}{% endblock %}
+  </head>
+
+  <body>
+    <!-- ==================== SKIP NAVIGATION (A11Y) ==================== -->
+    <a href="#main-content" class="skip-link visually-hidden-focusable">
+      Bỏ qua đến nội dung chính
+    </a>
+
+    <!-- ==================== PAGE LOADER ==================== -->
+    <div id="page-loader" class="page-loader" aria-hidden="true">
+      <div class="loader-content">
+        <img
+          src="{{ url_for('static', filename='img/logo.png') }}"
+          alt="Bricon"
+          class="loader-logo"
+        />
+        <div class="loader-dots">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+    <!-- ==================== HEADER / NAVBAR  ==================== -->
+      <header class="site-header">
+  <!-- HÀNG TRÊN: Logo + Search + Hotline -->
+  <div class="header-main">
+    <div class="container">
+
+      <!-- Hamburger menu (mobile only) -->
+      <button
+        class="navbar-toggler d-lg-none"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- Logo -->
+      <a class="navbar-brand" href="{{ url_for('main.index') }}">
+        <img
+          src="{{ get_setting('logo_url', url_for('static', filename='img/logo.png')) }}"
+          alt="{{ get_setting('website_name', '') }}"
+          height="46"
+          width="auto"
+          loading="eager"
+        />
+      </a>
+
+      <!-- Ô TÌM KIẾM (desktop) -->
+      <form
+        class="header-search-group d-none d-lg-block"
+        action="{{ url_for('main.search') }}"
+        method="get"
+      >
+        <div class="header-search-box">
+          <input
+            type="text"
+            name="q"
+            class="header-search-input"
+            placeholder="Tìm nhanh"
+            autocomplete="off"
+          />
+          <button type="submit" class="header-search-icon-btn" aria-label="Tìm kiếm">
+            <i class="bi bi-search"></i>
+          </button>
+        </div>
+      </form>
+
+      <!-- Hotline (desktop) -->
+      <div class="header-actions d-none d-lg-flex">
+        <div class="header-hotline-row">
+          <span class="header-hotline-label">Hotline:</span>
+          <a
+            href="tel:{{ get_setting('hotline', '0901180094')|replace('.', '')|replace(' ', '') }}"
+            class="header-hotline-number"
+          >
+            {{ get_setting('hotline', '0901.180.094') }}
+          </a>
+        </div>
+      </div>
+
+      <!-- Nút search mobile -->
+      <button
+        class="btn-mobile-search d-lg-none"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#searchModal"
+        aria-label="Tìm kiếm"
+      >
+        <i class="bi bi-search"></i>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- HÀNG DƯỚI: MENU CHÍNH -->
+  <div class="header-nav mau-thanh-nav">
+    <div class="container">
+      <nav class="navbar navbar-expand-lg" aria-label="Main navigation">
+
+        <!-- SPACER TRÁI (ẩn trên mobile) - cùng width với logo -->
+        <div class="nav-spacer-left d-none d-lg-block"></div>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a
+                class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}"
+                href="{{ url_for('main.index') }}"
+              >
+                Trang Chủ
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a
+                class="nav-link {% if request.endpoint == 'main.about' %}active{% endif %}"
+                href="{{ url_for('main.about') }}"
+              >
+                Về Chúng Tôi
+              </a>
+            </li>
+
+            {% if is_feature_enabled('products') %}
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle {% if request.endpoint == 'main.products' %}active{% endif %}"
+                href="{{ url_for('main.products') }}"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Sản Phẩm
+              </a>
+              <ul class="dropdown-menu">
+                <li>
+                  <a class="dropdown-item fw-semibold" href="{{ url_for('main.products') }}">
+                    <i class="bi bi-grid-3x3-gap"></i>Tất Cả Sản Phẩm
+                  </a>
+                </li>
+                {% if all_categories %}
+                  <li><hr class="dropdown-divider" /></li>
+                  {% for category in all_categories %}
+                  <li>
+                    <a
+                      class="dropdown-item"
+                      href="{{ url_for('main.products', category_slug=category.slug) }}"
+                    >
+                      <i class="bi bi-tag"></i>{{ category.name }}
+                    </a>
+                  </li>
+                  {% endfor %}
+                {% endif %}
+              </ul>
+            </li>
+            {% endif %}
+
+            {% if is_feature_enabled('projects') %}
+            <li class="nav-item">
+              <a
+                class="nav-link {% if request.endpoint == 'main.projects' %}active{% endif %}"
+                href="{{ url_for('main.projects') }}"
+              >
+                Dự Án
+              </a>
+            </li>
+            {% endif %}
+
+            {% if is_feature_enabled('careers') %}
+            <li class="nav-item">
+              <a
+                class="nav-link {% if request.endpoint == 'main.careers' %}active{% endif %}"
+                href="{{ url_for('main.careers') }}"
+              >
+                Tuyển Dụng
+              </a>
+            </li>
+            {% endif %}
+
+            {% if is_feature_enabled('blogs') or is_feature_enabled('faqs') %}
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Tin Tức
+              </a>
+              <ul class="dropdown-menu">
+                {% if is_feature_enabled('blogs') %}
+                <li>
+                  <a class="dropdown-item" href="{{ url_for('main.blog') }}">
+                    <i class="bi bi-journal-text"></i>Kiến Thức Thi Công
+                  </a>
+                </li>
+                {% endif %}
+                {% if is_feature_enabled('faqs') %}
+                <li>
+                  <a class="dropdown-item" href="{{ url_for('main.faq') }}">
+                    <i class="bi bi-question-circle"></i>Câu Hỏi Thường Gặp
+                  </a>
+                </li>
+                {% endif %}
+              </ul>
+            </li>
+            {% endif %}
+
+            {% if is_feature_enabled('contacts') %}
+            <li class="nav-item">
+              <a
+                class="nav-link {% if request.endpoint == 'main.contact' %}active{% endif %}"
+                href="{{ url_for('main.contact') }}"
+              >
+                Liên Hệ
+              </a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+
+        <!-- SPACER PHẢI (ẩn trên mobile) - cùng width với hotline -->
+        <div class="nav-spacer-right d-none d-lg-block"></div>
+
+      </nav>
+    </div>
+  </div>
+</header>
+
+    <!-- ==================== FLASH MESSAGES  ==================== -->
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %}
+    <div class="container mt-4">
+      {% for category, message in messages %}
+      <div
+        class="alert alert-{{ category }} alert-dismissible fade show shadow-sm"
+        role="alert"
+      >
+        {% if category == 'success' %}
+        <i class="bi bi-check-circle-fill me-2"></i>
+        {% elif category == 'danger' %}
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {% elif category == 'warning' %}
+        <i class="bi bi-exclamation-circle-fill me-2"></i>
+        {% else %}
+        <i class="bi bi-info-circle-fill me-2"></i>
+        {% endif %} {{ message }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Đóng thông báo"
+        ></button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %} {% endwith %}
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main id="main-content">{% block content %}{% endblock %}</main>
+
+    <!-- ==================== FOOTER ==================== -->
+     {% include 'components/footer.html' %}
+
+    <!-- ==================== FLOATING ACTION BUTTONS  ==================== -->
+    <div class="floating-buttons">
+      <a
+        href="tel:{{ get_setting('hotline', '0901180094')|replace('.', '')|replace(' ', '') }}"
+        class="floating-btn phone-btn"
+        title="Hotline"
+        aria-label="Gọi điện"
+      >
+        <i class="bi bi-telephone-fill"></i>
+        <span>Hotline</span>
+      </a>
+      <a
+        href="{{ get_setting('zalo_url', 'https://zalo.me/0901180094') }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="floating-btn zalo-btn"
+        title="Chat zalo"
+        aria-label="Chat Zalo"
+      >
+        <img
+          src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/zalo.svg"
+          alt="Zalo"
+          onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Ctext y=%2220%22 font-size=%2220%22%3EZ%3C/text%3E%3C/svg%3E'"
+        />
+        <span>Chat zalo</span>
+      </a>
+      <a
+        href="{{ get_setting('facebook_messenger_url', 'https://m.me/168331056704131') }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="floating-btn messenger-btn"
+        title="Messenger"
+        aria-label="Chat Messenger"
+      >
+        <i class="bi bi-messenger"></i>
+        <span>Messenger</span>
+      </a>
+    </div>
+
+    <!-- ==================== SCROLL TO TOP BUTTON ==================== -->
+    <button class="scroll-to-top" id="scrollToTop" aria-label="Scroll to top">
+      <svg viewBox="0 0 56 56">
+        <circle cx="28" cy="28" r="26"></circle>
+        <circle class="progress" cx="28" cy="28" r="26"></circle>
+      </svg>
+      <i class="bi bi-arrow-up icon"></i>
+    </button>
+
+    <!-- ==================== SEARCH MODAL ==================== -->
+    <div
+      class="modal fade"
+      id="searchModal"
+      tabindex="-1"
+      aria-labelledby="searchModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-warning">
+            <h5 class="modal-title fw-bold" id="searchModalLabel">
+              <i class="bi bi-search me-2"></i>Tìm kiếm sản phẩm
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Đóng"
+            ></button>
+          </div>
+          <div class="modal-body p-4">
+            <form action="{{ url_for('main.search') }}" method="get">
+              <div class="input-group input-group-lg">
+                <input
+                  type="text"
+                  name="q"
+                  class="form-control"
+                  placeholder="Bạn muốn tìm gì ?"
+                  autofocus
+                  required
+                />
+                <button type="submit" class="btn btn-warning px-4">
+                  <i class="bi bi-search me-1"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- LIGHTBOX MODAL -->
+    <div
+      class="modal fade"
+      id="productLightbox"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg overflow-hidden">
+          <div
+            class="modal-header border-0 position-absolute top-0 end-0 z-3 p-2"
+          >
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body p-0">
+            <img
+              id="lightboxImage"
+              src=""
+              alt="Phóng to sản phẩm"
+              class="w-100 h-100 object-fit-contain"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    {% if g.popup %}`
+    {% include 'components/popup.html' with context %}
+    {% endif %}
+
+    <!-- ==================== SCRIPTS ==================== -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/swiper@9/swiper-bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.min.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+
+    <!-- ==================== CHATBOT WIDGET ==================== -->
+    {# ✅ Chatbot - chỉ hiện nếu feature enabled #} {% if
+    is_feature_enabled('chatbot') %} {% include 'components/chatbot.html' %} {%
+    endif %}
+  </body>
+</html>

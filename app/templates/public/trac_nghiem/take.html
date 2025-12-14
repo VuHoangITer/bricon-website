@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ quiz.title }} - Làm bài</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+<style>
+/* ==================== NAMESPACE: dethi-vn ==================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f5f5f5;
+    color: #333;
+}
+
+.dethi-vn {
+    min-height: 100vh;
+}
+
+/* ==================== HEADER ==================== */
+.dethi-vn__header {
+    background: #fff;
+    border-bottom: 1px solid #e5e5e5;
+    padding: 12px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.dethi-vn__header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.dethi-vn__title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dethi-vn__timer {
+    font-size: 18px;
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
+    color: #2563eb;
+    white-space: nowrap;
+}
+
+.dethi-vn__timer.warning {
+    color: #f59e0b;
+}
+
+.dethi-vn__timer.danger {
+    color: #ef4444;
+    animation: dethi-vn-pulse 1s infinite;
+}
+
+@keyframes dethi-vn-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ==================== MAIN LAYOUT ==================== */
+.dethi-vn__layout {
+    display: flex;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.dethi-vn__main {
+    flex: 8;
+    padding: 16px;
+}
+
+/* ==================== QUESTION CARD ==================== */
+.dethi-vn__card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.dethi-vn__question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.dethi-vn__question-num {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2563eb;
+}
+
+.dethi-vn__question-info {
+    font-size: 13px;
+    color: #666;
+}
+
+.dethi-vn__question-text {
+    font-size: 16px;
+    color: #1a1a1a;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+/* ==================== ANSWERS ==================== */
+.dethi-vn__answers {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dethi-vn__answer {
+    border: 1.5px solid #e5e5e5;
+    border-radius: 6px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #fff;
+}
+
+.dethi-vn__answer:hover {
+    border-color: #2563eb;
+    background: #f8faff;
+}
+
+.dethi-vn__answer.selected {
+    border-color: #2563eb;
+    background: #eff6ff;
+}
+
+.dethi-vn__answer-radio {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    cursor: pointer;
+    accent-color: #2563eb;
+}
+
+.dethi-vn__answer-label {
+    font-size: 15px;
+    color: #333;
+    cursor: pointer;
+    flex: 1;
+}
+
+/* ==================== NAVIGATION ==================== */
+.dethi-vn__nav {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.dethi-vn__btn {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dethi-vn__btn--prev {
+    background: #fff;
+    color: #666;
+    border: 1.5px solid #e5e5e5;
+}
+
+.dethi-vn__btn--prev:hover {
+    border-color: #2563eb;
+    color: #2563eb;
+}
+
+.dethi-vn__btn--next {
+    background: #2563eb;
+    color: #fff;
+}
+
+.dethi-vn__btn--next:hover {
+    background: #1d4ed8;
+}
+
+.dethi-vn__btn--submit {
+    background: #10b981;
+    color: #fff;
+}
+
+.dethi-vn__btn--submit:hover {
+    background: #059669;
+}
+
+/* ==================== SIDEBAR (Desktop) ==================== */
+.dethi-vn__sidebar {
+    flex: 4;
+    background: #fff;
+    border-left: 1px solid #e5e5e5;
+    padding: 16px;
+    position: sticky;
+    top: 57px;
+    height: calc(100vh - 57px);
+    overflow-y: auto;
+    display: none;
+}
+
+.dethi-vn__sidebar-section {
+    margin-bottom: 16px;
+}
+
+.dethi-vn__sidebar-title {
+    font-size: 7px;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.dethi-vn__stat {
+    text-align: center;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.dethi-vn__stat-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.dethi-vn__timer-large.warning {
+    color: #f59e0b;
+    background: #fffbeb;
+}
+
+.dethi-vn__timer-large.danger {
+    color: #ef4444;
+    background: #fef2f2;
+    animation: dethi-vn-pulse 1s infinite;
+}
+
+/* ==================== QUESTION GRID ==================== */
+.dethi-vn__grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 3px;
+}
+
+.dethi-vn__grid-item {
+    width: 30px;
+    height: 30px;
+    border: 1.5px solid #e5e5e5;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    background: #fff;
+    color: #666;
+}
+
+
+.dethi-vn__grid-item:hover {
+    border-color: #2563eb;
+    transform: scale(1.05);
+}
+
+.dethi-vn__grid-item.answered {
+    background: #10b981;
+    color: #fff;
+    border-color: #10b981;
+}
+
+.dethi-vn__grid-item.current {
+    background: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+    font-weight: 600;
+}
+
+.dethi-vn__submit-btn {
+    width: 100%;
+    padding: 10px;
+    background: #10b981;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dethi-vn__submit-btn:hover {
+    background: #059669;
+}
+
+/* ==================== MOBILE: TOP BAR ==================== */
+.dethi-vn__topbar {
+    display: block;
+    background: #fff;
+    border-bottom: 1px solid #e5e5e5;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.dethi-vn__topbar:active {
+    background: #f8f9fa;
+}
+
+.dethi-vn__topbar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dethi-vn__topbar-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1a1a1a;
+}
+
+.dethi-vn__topbar-icon {
+    font-size: 18px;
+    color: #666;
+}
+
+/* ==================== MODAL ==================== */
+.dethi-vn__modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    display: none;
+}
+
+.dethi-vn__modal-overlay.active {
+    display: flex;
+    animation: dethi-vn-fadeIn 0.2s ease;
+}
+
+@keyframes dethi-vn-fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.dethi-vn__modal {
+    background: #fff;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    animation: dethi-vn-slideIn 0.3s ease;
+    padding: 0;
+}
+
+@keyframes dethi-vn-slideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.dethi-vn__modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e5e5;
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 10;
+}
+
+.dethi-vn__modal-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.dethi-vn__modal-close {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: #f5f5f5;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 24px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.dethi-vn__modal-body {
+    padding: 20px;
+}
+
+/* ==================== UTILITIES ==================== */
+.d-none {
+    display: none !important;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (min-width: 1024px) {
+    .dethi-vn__sidebar {
+        display: block;
+    }
+
+    .dethi-vn__topbar {
+        display: none;
+    }
+
+    .dethi-vn__main {
+        padding: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .dethi-vn__header-content {
+        padding: 0 4px;
+    }
+
+    .dethi-vn__title {
+        font-size: 14px;
+    }
+
+    .dethi-vn__timer {
+        font-size: 16px;
+    }
+
+    .dethi-vn__main {
+        padding: 12px;
+    }
+
+    .dethi-vn__card {
+        padding: 16px;
+    }
+
+    .dethi-vn__question-text {
+        font-size: 15px;
+    }
+
+    .dethi-vn__grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+/* ==================== HIDE EXTERNAL WIDGETS ==================== */
+.chatbot-widget,
+.floating-buttons,
+.scroll-to-top {
+    display: none !important;
+}
+</style>
+</head>
+<body>
+<div class="dethi-vn">
+    <!-- Header -->
+    <header class="dethi-vn__header">
+        <div class="dethi-vn__header-content">
+            <h1 class="dethi-vn__title">{{ quiz.title }}</h1>
+            <div class="dethi-vn__timer" id="timer-header">
+                {{ '%02d'|format(remaining_seconds // 60) }}:{{ '%02d'|format(remaining_seconds % 60) }}
+            </div>
+        </div>
+    </header>
+
+    <div class="dethi-vn__layout">
+        <!-- Main Content -->
+        <main class="dethi-vn__main">
+            <!-- Mobile Top Bar -->
+            <div class="dethi-vn__topbar" onclick="toggleModal()">
+                <div class="dethi-vn__topbar-content">
+                    <span class="dethi-vn__topbar-text">Mục lục câu hỏi (<span id="answered-count-topbar">{{ answered_questions|length }}</span>/{{ questions|length }})</span>
+                    <span class="dethi-vn__topbar-icon">☰</span>
+                </div>
+            </div>
+
+            <div id="questions-wrapper">
+                {% for question in questions %}
+                <div class="dethi-vn__card question-block {% if loop.first %}active{% else %}d-none{% endif %}"
+                     data-question-id="{{ question.id }}"
+                     data-question-index="{{ loop.index }}">
+
+                    <div class="dethi-vn__question-header">
+                        <span class="dethi-vn__question-num">Câu {{ loop.index }}</span>
+                        <span class="dethi-vn__question-info">1 đáp án</span>
+                    </div>
+
+                    <div class="dethi-vn__question-text">
+                        {{ question.question_text }}
+                    </div>
+
+                    <div class="dethi-vn__answers answers-wrapper">
+                        {% for answer in question.shuffled_answers %}
+                        <div class="dethi-vn__answer answer-option"
+                             data-answer-id="{{ answer.id }}"
+                             data-question-id="{{ question.id }}">
+                            <input type="radio"
+                                   class="dethi-vn__answer-radio"
+                                   name="question_{{ question.id }}"
+                                   id="answer_{{ answer.id }}"
+                                   value="{{ answer.id }}"
+                                   {% if question.id in answered_questions %}checked{% endif %}>
+                            <label class="dethi-vn__answer-label" for="answer_{{ answer.id }}">
+                                {{ 'ABCD'[loop.index0] if loop.index0 < 4 else loop.index0 }}. {{ answer.answer_text }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="dethi-vn__nav">
+                        {% if not loop.first %}
+                        <button class="dethi-vn__btn dethi-vn__btn--prev prev-question">
+                            ← Câu trước
+                        </button>
+                        {% endif %}
+
+                        {% if not loop.last %}
+                        <button class="dethi-vn__btn dethi-vn__btn--next next-question">
+                            Câu sau →
+                        </button>
+                        {% else %}
+                        <button class="dethi-vn__btn dethi-vn__btn--submit" onclick="confirmSubmit()">
+                            Hoàn thành
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+
+        <!-- Desktop Sidebar -->
+        <aside class="dethi-vn__sidebar">
+            <div class="dethi-vn__sidebar-section">
+                <div class="dethi-vn__stat">
+                    <div class="dethi-vn__sidebar-title">Đã làm</div>
+                    <div class="dethi-vn__stat-value">
+                        <span id="answered-count-desktop">{{ answered_questions|length }}</span>/{{ questions|length }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="dethi-vn__sidebar-section">
+                <div class="dethi-vn__sidebar-title">Mục lục câu hỏi</div>
+                <div class="dethi-vn__grid" id="question-navigator-desktop">
+                    {% for question in questions %}
+                    <div class="dethi-vn__grid-item {% if loop.first %}current{% endif %} {% if question.id in answered_questions %}answered{% endif %}"
+                         data-question-index="{{ loop.index }}"
+                         onclick="goToQuestion({{ loop.index }})">
+                        {{ loop.index }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('main.submit_quiz') }}" id="submit-form">
+                <button type="button" class="dethi-vn__submit-btn" onclick="confirmSubmit()">
+                    Nộp bài
+                </button>
+            </form>
+        </aside>
+    </div>
+
+    <!-- Mobile Modal (Full Screen) -->
+    <div class="dethi-vn__modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+        <div class="dethi-vn__modal" onclick="event.stopPropagation()">
+            <div class="dethi-vn__modal-header">
+                <h3 class="dethi-vn__modal-title">Mục lục câu hỏi</h3>
+                <button class="dethi-vn__modal-close" onclick="closeModal()">✕</button>
+            </div>
+
+            <div class="dethi-vn__modal-body">
+
+            <div class="dethi-vn__sidebar-section">
+                <div class="dethi-vn__stat">
+                    <div class="dethi-vn__sidebar-title">Đã làm</div>
+                    <div class="dethi-vn__stat-value">
+                        <span id="answered-count-mobile">{{ answered_questions|length }}</span>/{{ questions|length }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="dethi-vn__sidebar-section">
+                <div class="dethi-vn__grid" id="question-navigator-mobile">
+                    {% for question in questions %}
+                    <div class="dethi-vn__grid-item {% if loop.first %}current{% endif %} {% if question.id in answered_questions %}answered{% endif %}"
+                         data-question-index="{{ loop.index }}"
+                         onclick="goToQuestion({{ loop.index }}); closeModal();">
+                        {{ loop.index }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('main.submit_quiz') }}" id="submit-form-mobile">
+                <button type="button" class="dethi-vn__submit-btn" onclick="confirmSubmit()">
+                    Nộp bài
+                </button>
+            </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==================== GLOBAL VARIABLES ====================
+let currentQuestionIndex = 1;
+const totalQuestions = {{ questions|length }};
+let remainingSeconds = {{ remaining_seconds }};
+let answeredQuestions = new Set({{ answered_questions|list|tojson }});
+
+// ==================== TIMER ====================
+function updateTimer() {
+    if (remainingSeconds <= 0) {
+        alert('⏰ Hết thời gian! Bài thi sẽ được nộp tự động.');
+        document.getElementById('submit-form').submit();
+        return;
+    }
+
+    const minutes = Math.floor(remainingSeconds / 60);
+    const seconds = remainingSeconds % 60;
+    const timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+    const timerHeader = document.getElementById('timer-header');
+    const timerSidebar = document.getElementById('timer-sidebar');
+
+    timerHeader.textContent = timeStr;
+    if (timerSidebar) timerSidebar.textContent = timeStr;
+
+    // Warnings
+    if (remainingSeconds <= 60) {
+        timerHeader.classList.add('danger');
+        if (timerSidebar) timerSidebar.classList.add('danger');
+    } else if (remainingSeconds <= 300) {
+        timerHeader.classList.add('warning');
+        if (timerSidebar) timerSidebar.classList.add('warning');
+    }
+
+    remainingSeconds--;
+    setTimeout(updateTimer, 1000);
+}
+
+updateTimer();
+
+// ==================== ANSWER SELECTION ====================
+document.querySelectorAll('.answer-option').forEach(option => {
+    option.addEventListener('click', function() {
+        const radio = this.querySelector('input[type="radio"]');
+        const questionId = parseInt(this.dataset.questionId);
+        const answerId = parseInt(this.dataset.answerId);
+
+        radio.checked = true;
+
+        this.closest('.answers-wrapper').querySelectorAll('.answer-option').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        this.classList.add('selected');
+
+        saveAnswer(questionId, answerId);
+    });
+});
+
+// ==================== SAVE ANSWER ====================
+function saveAnswer(questionId, answerId) {
+    fetch('{{ url_for("main.save_answer") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            question_id: questionId,
+            answer_id: answerId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            answeredQuestions.add(questionId);
+            updateAnsweredCount();
+            updateQuestionNavigator();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// ==================== UPDATE UI ====================
+function updateAnsweredCount() {
+    const count = answeredQuestions.size;
+    const desktop = document.getElementById('answered-count-desktop');
+    const mobile = document.getElementById('answered-count-mobile');
+    const topbar = document.getElementById('answered-count-topbar');
+    if (desktop) desktop.textContent = count;
+    if (mobile) mobile.textContent = count;
+    if (topbar) topbar.textContent = count;
+}
+
+function updateQuestionNavigator() {
+    document.querySelectorAll('.question-block').forEach((block, index) => {
+        const questionId = parseInt(block.dataset.questionId);
+        const navBtns = document.querySelectorAll(`.dethi-vn__grid-item[data-question-index="${index + 1}"]`);
+
+        if (answeredQuestions.has(questionId)) {
+            navBtns.forEach(btn => btn.classList.add('answered'));
+        }
+    });
+}
+
+// ==================== NAVIGATION ====================
+function goToQuestion(index) {
+    currentQuestionIndex = index;
+
+    document.querySelectorAll('.question-block').forEach(block => {
+        block.classList.add('d-none');
+        block.classList.remove('active');
+    });
+
+    const targetBlock = document.querySelector(`.question-block[data-question-index="${index}"]`);
+    targetBlock.classList.remove('d-none');
+    targetBlock.classList.add('active');
+
+    document.querySelectorAll('.dethi-vn__grid-item').forEach(num => {
+        num.classList.remove('current');
+    });
+    document.querySelectorAll(`.dethi-vn__grid-item[data-question-index="${index}"]`).forEach(num => {
+        num.classList.add('current');
+    });
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Prev/Next buttons
+document.querySelectorAll('.prev-question').forEach(btn => {
+    btn.addEventListener('click', function() {
+        if (currentQuestionIndex > 1) {
+            goToQuestion(currentQuestionIndex - 1);
+        }
+    });
+});
+
+document.querySelectorAll('.next-question').forEach(btn => {
+    btn.addEventListener('click', function() {
+        if (currentQuestionIndex < totalQuestions) {
+            goToQuestion(currentQuestionIndex + 1);
+        }
+    });
+});
+
+// ==================== MODAL ====================
+function toggleModal() {
+    const overlay = document.getElementById('modal-overlay');
+    overlay.classList.toggle('active');
+}
+
+function closeModal(event) {
+    if (!event || event.target === event.currentTarget) {
+        document.getElementById('modal-overlay').classList.remove('active');
+    }
+}
+
+// ==================== CONFIRM SUBMIT ====================
+function confirmSubmit() {
+    const unansweredCount = totalQuestions - answeredQuestions.size;
+
+    if (unansweredCount > 0) {
+        if (!confirm(`⚠️ Bạn còn ${unansweredCount} câu chưa trả lời. Vẫn muốn nộp bài?`)) {
+            return;
+        }
+    }
+
+    if (confirm('✅ Bạn có chắc chắn muốn nộp bài?')) {
+        document.getElementById('submit-form').submit();
+    }
+}
+
+// ==================== AUTO SUBMIT ====================
+setTimeout(() => {
+    if (remainingSeconds <= 0) {
+        document.getElementById('submit-form').submit();
+    }
+}, remainingSeconds * 1000);
+
+// ==================== PREVENT BACK NAVIGATION (BẢO MẬT) ====================
+history.pushState(null, null, location.href);
+window.onpopstate = function () {
+    history.pushState(null, null, location.href);
+};
+
+// ==================== PREVENT PAGE RELOAD/CLOSE ====================
+window.addEventListener('beforeunload', function (e) {
+    e.preventDefault();
+    e.returnValue = '';
+    return '';
+});
+
+// ==================== DISABLE RIGHT CLICK & F12 ====================
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+});
+
+document.addEventListener('keydown', function(e) {
+    // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+    if (e.keyCode === 123 ||
+        (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) ||
+        (e.ctrlKey && e.keyCode === 85)) {
+        e.preventDefault();
+        return false;
+    }
+});
+</script>
+</body>
+</html>

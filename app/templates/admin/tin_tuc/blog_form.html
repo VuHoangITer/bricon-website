@@ -1,0 +1,299 @@
+{% extends 'layouts/admin.html' %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-newspaper"></i> {{ title }}</h4>
+    <a href="{{ url_for('admin.blogs') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" id="blogForm">
+                    {{ form.hidden_tag() }}
+
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Tiêu đề bài viết *</label>
+                            {{ form.title(class="form-control", id="blogTitle", placeholder="Nhập tiêu đề bài viết") }}
+                            {% if form.title.errors %}
+                                <div class="text-danger small mt-1">{{ form.title.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Slug (URL) *</label>
+                            {{ form.slug(class="form-control", id="blogSlug", placeholder="tieu-de-bai-viet") }}
+                            {% if form.slug.errors %}
+                                <div class="text-danger small mt-1">{{ form.slug.errors[0] }}</div>
+                            {% endif %}
+                            <small class="text-muted">Tự động từ tiêu đề</small>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Mô tả ngắn (Excerpt)</label>
+                            {{ form.excerpt(class="form-control", id="blogExcerpt", rows="3", placeholder="Tóm tắt nội dung bài viết") }}
+                            <small class="text-muted">Tối đa 200 ký tự</small>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Nội dung bài viết *</label>
+                            {{ form.content(class="form-control", id="editor", rows="15", placeholder="Viết nội dung đầy đủ ở đây...") }}
+                            {% if form.content.errors %}
+                                <div class="text-danger small mt-1">{{ form.content.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Hình ảnh đại diện</label>
+                            <div class="input-group">
+                                {{ form.image(class="form-control", id="image") }}
+                                {% if is_feature_enabled('media') %}
+                                <button type="button" class="btn btn-warning" onclick="openMediaPicker('image', 'imagePreview')">
+                                    <i class="bi bi-images"></i> Chọn từ thư viện
+                                </button>
+                                {% endif %}
+                            </div>
+                            <small class="text-muted">Khuyến nghị: 800x500px (Max 16MB)</small>
+
+                            <input type="hidden" name="selected_image_path" id="selectedImagePath" value="">
+
+                            <div class="mt-2">
+                                <img id="imagePreview" src="{% if blog and blog.image %}{{ blog.image }}{% endif %}" alt="Preview" class="img-thumbnail" style="max-height: 150px; {% if not blog or not blog.image %}display: none;{% endif %}">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Tác giả</label>
+                            {{ form.author(class="form-control", placeholder="Tên tác giả") }}
+                            <small class="text-muted">Để trống sẽ lấy tên user hiện tại</small>
+                        </div>
+
+                        <!-- ==================== SCHEDULED PUBLISHING ==================== -->
+                        <div class="col-12">
+                            <div class="card bg-light">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="bi bi-clock-history"></i> Lên lịch đăng bài</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Chế độ đăng *</label>
+                                            {{ form.publish_mode(class="form-select", id="publishMode") }}
+                                        </div>
+
+                                        <div class="col-md-6" id="scheduledAtField" style="display: none;">
+                                            <label class="form-label">Thời gian đăng *</label>
+                                            {{ form.scheduled_at(class="form-control") }}
+                                            <small class="text-muted">Chọn ngày giờ đăng tự động</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="alert alert-info mt-3 mb-0" id="publishHint">
+                                        <i class="bi bi-info-circle"></i>
+                                        <span id="hintText">Bài viết sẽ được đăng ngay sau khi lưu</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                {{ form.is_featured(class="form-check-input") }}
+                                <label class="form-check-label" for="{{ form.is_featured.id }}">
+                                    <i class="bi bi-star"></i> Đánh dấu là bài viết nổi bật
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            {{ form.submit(class="btn btn-warning px-5") }}
+                            <a href="{{ url_for('admin.blogs') }}" class="btn btn-secondary">Hủy</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if is_feature_enabled('media') %}
+{% include 'components/media_picker.html' %}
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-generate slug from title
+document.querySelector('input[name="title"]').addEventListener('input', function(e) {
+    const slug = e.target.value
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+    document.querySelector('input[name="slug"]').value = slug;
+});
+
+// ==================== PUBLISH MODE HANDLER ====================
+const publishModeSelect = document.getElementById('publishMode');
+const scheduledAtField = document.getElementById('scheduledAtField');
+const hintText = document.getElementById('hintText');
+
+publishModeSelect.addEventListener('change', function() {
+    const mode = this.value;
+
+    if (mode === 'schedule') {
+        scheduledAtField.style.display = 'block';
+        hintText.textContent = 'Bài viết sẽ tự động đăng vào thời gian đã chọn';
+    } else {
+        scheduledAtField.style.display = 'none';
+
+        if (mode === 'publish_now') {
+            hintText.textContent = 'Bài viết sẽ được đăng ngay sau khi lưu';
+        } else if (mode === 'draft') {
+            hintText.textContent = 'Bài viết sẽ được lưu dưới dạng bản nháp (chưa hiển thị)';
+        }
+    }
+});
+
+// Trigger change event on load
+publishModeSelect.dispatchEvent(new Event('change'));
+</script>
+
+<!-- ==================== CKEDITOR 5 ==================== -->
+<script src="https://cdn.ckeditor.com/ckeditor5/43.3.1/ckeditor5.umd.js"></script>
+<link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/43.3.1/ckeditor5.css" />
+
+<script>
+const {
+    ClassicEditor,
+    Essentials,
+    Bold,
+    Italic,
+    Underline,
+    Strikethrough,
+    Font,
+    Paragraph,
+    Heading,
+    Link,
+    List,
+    Image,
+    ImageCaption,
+    ImageStyle,
+    ImageToolbar,
+    ImageUpload,
+    ImageResize,
+    LinkImage,
+    Table,
+    TableToolbar,
+    BlockQuote,
+    Code,
+    Alignment,
+    Undo
+} = CKEDITOR;
+
+let editorInstance;
+
+class MyUploadAdapter {
+    constructor(loader) {
+        this.loader = loader;
+    }
+
+    upload() {
+        return this.loader.file.then(file => {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('upload', file);
+                const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+
+                fetch('{{ url_for("admin.ckeditor_upload_image") }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-CSRFToken': csrfToken }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.url) {
+                        resolve({ default: data.url });
+                    } else {
+                        reject(data.error.message);
+                    }
+                })
+                .catch(error => reject('Lỗi kết nối: ' + error.message));
+            });
+        });
+    }
+
+    abort() {}
+}
+
+function MyCustomUploadAdapterPlugin(editor) {
+    editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+        return new MyUploadAdapter(loader);
+    };
+}
+
+ClassicEditor
+    .create(document.querySelector('#editor'), {
+        plugins: [
+            Essentials, Bold, Italic, Underline, Strikethrough,
+            Font, Paragraph, Heading, Link, List,
+            Image, ImageCaption, ImageStyle, ImageToolbar, ImageUpload, ImageResize, LinkImage,
+            Table, TableToolbar, BlockQuote, Code, Alignment, Undo,
+            MyCustomUploadAdapterPlugin
+        ],
+        toolbar: {
+            items: [
+                'heading', '|',
+                'bold', 'italic', 'underline', 'strikethrough', '|',
+                'fontSize', 'fontColor', 'fontBackgroundColor', '|',
+                'link', 'bulletedList', 'numberedList', '|',
+                'uploadImage', 'insertTable', 'blockQuote', 'code', '|',
+                'alignment', '|',
+                'undo', 'redo'
+            ],
+            shouldNotGroupWhenFull: true
+        },
+        image: {
+            toolbar: [
+                'imageStyle:inline', 'imageStyle:wrapText', 'imageStyle:breakText', '|',
+                'toggleImageCaption', '|',
+                'imageTextAlternative', '|',
+                'linkImage'
+            ]
+        }
+    })
+    .then(editor => {
+        editorInstance = editor;
+        document.querySelector('#editor').removeAttribute('required');
+
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const content = editorInstance.getData().trim();
+            document.querySelector('#editor').value = content;
+            if (!content) {
+                e.preventDefault();
+                alert('Vui lòng nhập nội dung bài viết');
+                return false;
+            }
+        });
+    })
+    .catch(error => {
+        console.error('❌ Lỗi khởi tạo CKEditor:', error);
+    });
+</script>
+
+<style>
+.ck-content img {
+    max-width: 100%;
+    height: auto;
+}
+</style>
+{% endblock %}

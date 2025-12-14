@@ -1,0 +1,646 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}
+    {{ blog.title }} - {{ get_setting('website_name', '') }}
+{% endblock %}
+
+{% block meta_description %}
+    {{ blog.excerpt[:160] if blog.excerpt else blog.content[:160]|striptags }}
+{% endblock %}
+
+<!-- ==================== CUSTOM OG TAGS FOR BLOG ==================== -->
+{% block extra_css %}
+<meta property="og:title" content="{{ blog.title }}" />
+<meta
+  property="og:description"
+  content="{{ blog.excerpt[:200] if blog.excerpt else blog.content[:200]|striptags }}"
+/>
+<meta
+  property="og:image"
+  content="{{ blog.image if blog.image else get_setting('default_share_image', '/static/img/default-share.jpg') }}"
+/>
+<meta property="og:url" content="{{ request.url }}" />
+<meta property="og:type" content="article" />
+<meta
+  property="article:published_time"
+  content="{{ blog.created_at|vn_datetime('%Y-%m-%dT%H:%M:%S') }}"
+/>
+{% if blog.updated_at %}
+<meta
+  property="article:modified_time"
+  content="{{ blog.updated_at|vn_datetime('%Y-%m-%dT%H:%M:%S') }}"
+/>
+{% endif %} {% if blog.author %}
+<meta property="article:author" content="{{ blog.author }}" />
+{% endif %} {% endblock %} {% block content %}
+<!-- ==================== BREADCRUMB & PAGE HEADER ==================== -->
+<div class="page-header bg-light py-4">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item">
+          <a href="{{ url_for('main.index') }}">Trang chủ</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{{ url_for('main.blog') }}">Tin tức</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+          {{ blog.title[:50] }}{% if blog.title|length > 50 %}...{% endif %}
+        </li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<!-- ==================== BLOG DETAIL ==================== -->
+<section class="py-5">
+  <div class="container">
+    <div class="row">
+      <!-- ==================== MAIN CONTENT ==================== -->
+      <div class="col-lg-9">
+        <article itemscope itemtype="https://schema.org/BlogPosting">
+          <!-- Blog Header -->
+          <header class="mb-4">
+            <!-- Featured Image -->
+            {% if blog.image %}
+            <figure class="mb-4">
+              {% set media_info = blog.get_media_seo_info() %}
+
+              <img
+                src="{{ blog.image }}"
+                class="img-fluid rounded shadow-sm"
+                alt="{{ media_info.alt_text if media_info and media_info.alt_text else blog.title }}"
+                title="{{ media_info.title if media_info and media_info.title else blog.title }}"
+                itemprop="image"
+                loading="eager"
+              />
+
+              {# Caption hiển thị #} {% if media_info and media_info.caption %}
+              <figcaption class="text-muted small mt-2 fst-italic text-center">
+                {{ media_info.caption }}
+              </figcaption>
+              {% endif %}
+            </figure>
+            {% endif %}
+            <h1 class="fw-bold mb-3">{{ blog.title }}</h1>
+
+            <!-- Meta Info -->
+            <div class="d-flex flex-wrap gap-3 text-muted mb-3">
+              <span
+                itemprop="datePublished"
+                content="{{ blog.created_at.strftime('%Y-%m-%d') }}"
+              >
+                <i class="bi bi-calendar text-warning"></i>
+                {{ blog.created_at|vn_date }}
+              </span>
+              {% if blog.author %}
+              <span
+                itemprop="author"
+                itemscope
+                itemtype="https://schema.org/Person"
+              >
+                <i class="bi bi-person text-warning"></i>
+                <span itemprop="name">{{ blog.author }}</span>
+              </span>
+              {% endif %}
+            </div>
+
+            <!-- Inline Table of Contents -->
+            <div class="blog-inline-toc card border-warning" id="blog-inline-toc-container">
+              <div class="card-body">
+                <h5 class="card-title mb-3">
+                  <i class="bi bi-list-ul text-warning me-2"></i>
+                  Nội dung bài viết
+                </h5>
+                <div id="blog-inline-toc-content">
+                  <!-- TOC sẽ được tạo tự động bởi JavaScript -->
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <!-- Blog Content -->
+          <div class="blog-content-detail" itemprop="articleBody">
+            {{ blog.content|safe }}
+          </div>
+
+          <!-- Social Share -->
+          <div class="border-top border-bottom py-3 my-4">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <i class="bi bi-tags text-warning"></i>
+              <span class="text-muted small">Tags:</span>
+              <span class="badge bg-light text-dark">Tin tức</span>
+              <span class="badge bg-light text-dark">Kiến thức</span>
+              <a
+                href="https://www.facebook.com/sharer/sharer.php?u={{ request.url }}"
+                target="_blank"
+                class="btn btn-sm btn-outline-primary"
+                title="Chia sẻ lên Facebook"
+              >
+                <i class="bi bi-facebook"></i>
+              </a>
+              <a
+                href="https://zalo.me/share?url={{ request.url }}"
+                target="_blank"
+                class="btn btn-sm btn-outline-info"
+                title="Chia sẻ qua Zalo"
+              >
+                <i class="bi bi-chat-dots-fill"></i>
+              </a>
+              <a
+                href="https://twitter.com/intent/tweet?url={{ request.url }}&text={{ blog.title }}"
+                target="_blank"
+                class="btn btn-sm btn-outline-dark"
+                title="Chia sẻ lên Twitter"
+              >
+                <i class="bi bi-twitter"></i>
+              </a>
+              <button
+                onclick="copyLink()"
+                class="btn btn-sm btn-outline-secondary"
+                title="Sao chép link"
+              >
+                <i class="bi bi-link-45deg"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Hidden Schema Data -->
+          <meta
+            itemprop="dateModified"
+            content="{{ blog.updated_at|vn_datetime('%Y-%m-%d') if blog.updated_at else blog.created_at|vn_datetime('%Y-%m-%d') }}"
+          />
+          <div
+            itemprop="publisher"
+            itemscope
+            itemtype="https://schema.org/Organization"
+          >
+            <meta
+              itemprop="name"
+              content="{{ get_setting('website_name', 'Hoangvn') }}"
+            />
+            <div
+              itemprop="logo"
+              itemscope
+              itemtype="https://schema.org/ImageObject"
+            >
+              <meta
+                itemprop="url"
+                content="{{ get_setting('logo_url', url_for('static', filename='img/logo.png', _external=True)) }}"
+              />
+            </div>
+          </div>
+          <meta itemprop="mainEntityOfPage" content="{{ request.url }}" />
+        </article>
+
+        <!-- Related Blogs -->
+        {% if related_blogs %}
+        <div class="mt-5">
+          <h4 class="fw-bold mb-4">
+            <i class="bi bi-newspaper text-warning me-2"></i>Bài viết liên quan
+          </h4>
+          <div class="row g-4">
+            {% for blog in related_blogs %}
+            <div class="col-lg-6 col-md-6">
+              {% include 'components/card_blog_related.html' with context %}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- ==================== SIDEBAR ==================== -->
+      <div class="col-lg-3">
+        <div class="blog-sidebar-sticky">
+        <!-- Table of Contents Card -->
+        <div class="blog-toc-card">
+          <div class="blog-toc-header">
+            <h5>
+              <i class="bi bi-list-ul"></i>
+              Mục lục
+            </h5>
+          </div>
+          <div class="blog-toc-body" id="blog-toc-container">
+            <!-- TOC sẽ được tự động tạo bởi JavaScript -->
+          </div>
+        </div>
+
+        <!-- Featured Blogs -->
+        {% if featured_blogs %}
+        <div class="card featured-blogs-card shadow-sm border-0">
+          <div class="card-header bg-white border-0 pb-0">
+            <h6 class="fw-bold mb-0">
+              <i class="bi bi-star text-warning me-2"></i>Tin Tức Nổi Bật
+            </h6>
+          </div>
+          <div class="list-group list-group-flush featured-blogs-list">
+            {% for fb in featured_blogs %}
+            <a
+              href="{{ url_for('main.blog_detail', slug=fb.slug) }}"
+              class="list-group-item list-group-item-action d-flex align-items-center px-3 py-2 featured-blog-item"
+            >
+              {% if fb.image %}
+              <div class="featured-thumb flex-shrink-0 me-2">
+                <img
+                  src="{{ fb.image }}"
+                  alt="{{ fb.title }}"
+                  class="img-fluid rounded"
+                />
+              </div>
+              {% endif %}
+              <div class="flex-grow-1">
+                <p class="featured-title mb-1 small fw-semibold text-dark">
+                  {{ fb.title }}
+                </p>
+                <div class="d-flex align-items-center small text-muted">
+                  <i class="bi bi-calendar me-1"></i>
+                  <span>{{ fb.created_at|vn_date }}</span>
+                </div>
+              </div>
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Tags Card -->
+        <div class="card shadow-sm border-0">
+          <div class="card-header bg-white border-0">
+            <h6 class="fw-bold mb-0">
+              <i class="bi bi-tags text-warning me-2"></i>Tags liên quan
+            </h6>
+          </div>
+          <div class="card-body">
+            <div class="d-flex flex-wrap gap-2">
+              <a href="{{ url_for('main.blog', search='keo dán gạch') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
+                <i class="bi bi-tag-fill me-1"></i>Keo dán gạch
+              </a>
+              <a href="{{ url_for('main.blog', search='keo chà ron') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
+                <i class="bi bi-tag-fill me-1"></i>Keo chà ron
+              </a>
+              <a href="{{ url_for('main.blog', search='chống thấm') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
+                <i class="bi bi-tag-fill me-1"></i>Chống thấm
+              </a>
+              <a href="{{ url_for('main.blog', search='xi măng') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
+                <i class="bi bi-tag-fill me-1"></i>Xi măng
+              </a>
+              <a href="{{ url_for('main.blog', search='gạch ốp lát') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
+                <i class="bi bi-tag-fill me-1"></i>Gạch ốp lát
+              </a>
+              <a href="{{ url_for('main.blog', search='vữa xây') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
+                <i class="bi bi-tag-fill me-1"></i>Vữa xây
+              </a>
+              <a href="{{ url_for('main.blog', search='sơn tường') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
+                <i class="bi bi-tag-fill me-1"></i>Sơn tường
+              </a>
+              <a href="{{ url_for('main.blog', search='xây dựng') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
+                <i class="bi bi-tag-fill me-1"></i>Xây dựng
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SCHEMA.ORG - ARTICLE ==================== -->
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "{{ blog.title|e }}",
+    "image": "{{ blog.image|e }}",
+    "datePublished": "{{ blog.created_at|vn_datetime('%Y-%m-%dT%H:%M:%S') }}",
+    "dateModified": "{{ blog.updated_at|vn_datetime('%Y-%m-%dT%H:%M:%S') if blog.updated_at else blog.created_at|vn_datetime('%Y-%m-%dT%H:%M:%S') }}",
+    "author": {
+      "@type": "Person",
+      "name": "{{ blog.author if blog.author else get_setting('website_name', '')|e }}"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "{{ get_setting('website_name', '')|e }}",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "{{ get_setting('logo_url', url_for('static', filename='img/logo.png', _external=True))|e }}"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "{{ request.url }}"
+    },
+    "description": "{{ (blog.excerpt if blog.excerpt else blog.content[:200]|striptags)|e }}"
+  }
+</script>
+
+<!-- ==================== SCHEMA.ORG - BREADCRUMB ==================== -->
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Trang chủ",
+        "item": "{{ url_for('main.index', _external=True) }}"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Tin tức",
+        "item": "{{ url_for('main.blog', _external=True) }}"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "{{ blog.title|e }}",
+        "item": "{{ request.url }}"
+      }
+    ]
+  }
+</script>
+
+<!-- Custom Styles -->
+<style>
+  .blog-content-detail {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #333;
+  }
+
+  .blog-content-detail img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+  }
+
+  .blog-content-detail h2,
+  .blog-content-detail h3 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    scroll-margin-top: 120px; /* Offset cho sticky navbar + TOC */
+  }
+
+  .blog-content-detail ul,
+  .blog-content-detail ol {
+    margin: 1rem 0;
+    padding-left: 2rem;
+  }
+
+  .blog-content-detail blockquote {
+    border-left: 4px solid #ffc107;
+    padding-left: 1.5rem;
+    margin: 1.5rem 0;
+    font-style: italic;
+    color: #666;
+  }
+
+  /* Caption ảnh - giống CKEditor */
+  .blog-content-detail figure.image {
+    margin: 1.5rem 0;
+  }
+
+  .blog-content-detail figure.image figcaption {
+    text-align: center;
+    font-style: italic;
+    color: #888;
+    padding: 0.35rem 0;
+    margin-top: 0.1rem;
+    font-size: 0.95rem;
+  }
+
+  /* Căn chỉnh ảnh trái/phải */
+  .blog-content-detail .image-style-align-left,
+  .blog-content-detail .image-style-side {
+    float: left;
+    margin-right: 1.5em;
+    max-width: 50%;
+  }
+
+  .blog-content-detail .image-style-align-right {
+    float: right;
+    margin-left: 1.5em;
+    max-width: 50%;
+  }
+
+  .blog-content-detail .image-style-align-center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Featured Blogs Sidebar */
+  .featured-blogs-card {
+    border-radius: 12px;
+    margin-bottom: 1rem;
+  }
+
+  .featured-blogs-list .featured-blog-item {
+    border: 0;
+    border-left: 2px solid transparent;
+    background-color: transparent;
+    transition: all 0.2s ease;
+  }
+
+  .featured-blogs-list .featured-blog-item:hover {
+    background-color: #fff7e6;
+    border-left-color: #ffc107;
+    transform: translateX(2px);
+  }
+
+  .featured-thumb {
+    width: 50px;
+    height: 50px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #f3f4f6;
+  }
+
+  .featured-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .featured-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.3;
+  }
+
+  /* Tags */
+  .tag-item {
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+  }
+
+  .tag-item:hover {
+    background: #ffc107 !important;
+    color: white !important;
+    border-color: #ffc107;
+    transform: translateY(-2px);
+  }
+
+  .tag-item i {
+    font-size: 0.75rem;
+  }
+
+/* Inline TOC – giống style hình mẫu */
+.blog-inline-toc {
+  border-radius: 8px;
+  border: 1px solid #e5e7eb !important;
+  background-color: #ffffff;
+  margin-bottom: 1.5rem;
+}
+
+.blog-inline-toc .card-body {
+  padding: 1rem 1.25rem;
+}
+
+.blog-inline-toc .card-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase; /* NỘI DUNG BÀI VIẾT */
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.blog-inline-toc .card-title i {
+  font-size: 1rem;
+}
+
+/* Danh sách mục lục */
+.blog-inline-toc-list-simple {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.95rem;
+}
+
+.blog-inline-toc-list-simple li {
+  margin-bottom: 0.25rem;
+}
+
+.blog-inline-toc-list-simple ol {
+  margin-top: 0.2rem;
+  margin-bottom: 0.2rem;
+  padding-left: 1.1rem;
+}
+
+/* Link trong mục lục */
+.blog-inline-toc-list-simple a {
+  color: #0d6efd;
+  text-decoration: none;
+}
+
+.blog-inline-toc-list-simple a:hover {
+  text-decoration: underline;
+}
+/* ==================== INLINE TOC (NỘI DUNG BÀI VIẾT) ==================== */
+
+.blog-inline-toc-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.blog-inline-toc-item {
+  margin-bottom: 6px;
+}
+
+.blog-inline-toc-link {
+  display: inline-block;
+  color: #111;
+  line-height: 1.6;
+  text-decoration: none !important;
+}
+
+.blog-inline-toc-item.inline-toc-level-2 {
+  margin-left: 0;
+  font-weight: 600;
+}
+
+.blog-inline-toc-item.inline-toc-level-3 {
+  margin-left: 1.5rem;
+}
+
+.blog-inline-toc-item.inline-toc-level-4 {
+  margin-left: 3rem;
+  font-size: 0.95rem;
+}
+
+/* Hover vẫn không gạch dưới, giữ màu đen */
+.blog-inline-toc-link:hover {
+  color: #111;
+  text-decoration: none !important;
+}
+</style>
+
+<!-- Copy Link Script -->
+<script>
+  // Copy link function
+  function copyLink() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      // Tạo thông báo tạm thời
+      const notification = document.createElement('div');
+      notification.textContent = '✓ Đã sao chép link bài viết!';
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #28a745;
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 9999;
+        font-weight: 500;
+        animation: slideIn 0.3s ease;
+      `;
+
+      document.body.appendChild(notification);
+
+      // Tự động xóa sau 2 giây
+      setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+      }, 2000);
+    });
+  }
+
+  // CSS animations
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+</script>
+{% endblock %}

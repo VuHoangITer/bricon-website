@@ -1,0 +1,247 @@
+{% extends 'layouts/admin.html' %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-key"></i> {{ title }}</h4>
+    <a href="{{ url_for('admin.permissions') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Tên permission (code) *</label>
+                    {{ form.name(class="form-control", placeholder="manage_products") }}
+                    {% if form.name.errors %}
+                        <div class="text-danger small mt-1">{{ form.name.errors[0] }}</div>
+                    {% endif %}
+                    <small class="text-muted">Chỉ chữ thường, không dấu, dùng underscore</small>
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label">Tên hiển thị *</label>
+                    {{ form.display_name(class="form-control", placeholder="Quản lý sản phẩm") }}
+                    {% if form.display_name.errors %}
+                        <div class="text-danger small mt-1">{{ form.display_name.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-12">
+                    <label class="form-label">Mô tả</label>
+                    {{ form.description(class="form-control", rows="2", placeholder="Cho phép thêm, sửa, xóa sản phẩm...") }}
+                    {% if form.description.errors %}
+                        <div class="text-danger small mt-1">{{ form.description.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label">Danh mục *</label>
+                    {{ form.category(class="form-select") }}
+                    {% if form.category.errors %}
+                        <div class="text-danger small mt-1">{{ form.category.errors[0] }}</div>
+                    {% endif %}
+                    <small class="text-muted">Nhóm chức năng liên quan</small>
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label">Icon (Bootstrap Icons)</label>
+                    {{ form.icon(class="form-control", placeholder="bi-box-seam") }}
+                    {% if form.icon.errors %}
+                        <div class="text-danger small mt-1">{{ form.icon.errors[0] }}</div>
+                    {% endif %}
+                    <small class="text-muted">
+                        VD: bi-box-seam, bi-newspaper, bi-people 
+                        <a href="https://icons.getbootstrap.com/" target="_blank" class="text-primary">
+                            <i class="bi bi-search"></i> Tìm icon
+                        </a>
+                    </small>
+                </div>
+                
+                <div class="col-12">
+                    <div class="form-check form-switch">
+                        {{ form.is_active(class="form-check-input") }}
+                        <label class="form-check-label" for="{{ form.is_active.id }}">
+                            Kích hoạt
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="col-12 mt-4">
+                    {{ form.submit(class="btn btn-warning px-5") }}
+                    <a href="{{ url_for('admin.permissions') }}" class="btn btn-secondary">Hủy</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Preview Icon -->
+<div class="card mt-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">
+            <i class="bi bi-eye"></i> Preview Icon
+        </h5>
+    </div>
+    <div class="card-body text-center">
+        <div id="icon-preview" class="fs-1 text-primary mb-2">
+            <i class="bi-key"></i>
+        </div>
+        <small class="text-muted">Icon sẽ hiển thị như trên</small>
+    </div>
+</div>
+
+<!-- Naming Convention Guide -->
+<div class="card mt-4">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-lightbulb"></i> Quy tắc đặt tên Permission
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6 class="text-success"><i class="bi bi-check-circle"></i> Đúng:</h6>
+                <ul class="list-unstyled">
+                    <li><code>manage_products</code> - Quản lý toàn bộ sản phẩm</li>
+                    <li><code>view_products</code> - Chỉ xem sản phẩm</li>
+                    <li><code>create_blog</code> - Tạo blog mới</li>
+                    <li><code>edit_all_blogs</code> - Sửa tất cả blog</li>
+                    <li><code>delete_own_blog</code> - Xóa blog của mình</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6 class="text-danger"><i class="bi bi-x-circle"></i> Sai:</h6>
+                <ul class="list-unstyled">
+                    <li><code>ManageProducts</code> - Viết hoa</li>
+                    <li><code>manage-products</code> - Dùng dấu gạch ngang</li>
+                    <li><code>manage products</code> - Có khoảng trắng</li>
+                    <li><code>product</code> - Quá ngắn, không rõ nghĩa</li>
+                </ul>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <h6 class="mb-3"><i class="bi bi-tags"></i> Các động từ thường dùng:</h6>
+        <div class="row">
+            <div class="col-md-3">
+                <span class="badge bg-primary mb-1">view_*</span> - Xem
+            </div>
+            <div class="col-md-3">
+                <span class="badge bg-success mb-1">create_*</span> - Tạo mới
+            </div>
+            <div class="col-md-3">
+                <span class="badge bg-warning mb-1">edit_*</span> - Chỉnh sửa
+            </div>
+            <div class="col-md-3">
+                <span class="badge bg-danger mb-1">delete_*</span> - Xóa
+            </div>
+            <div class="col-md-3">
+                <span class="badge bg-info mb-1">manage_*</span> - Quản lý toàn bộ
+            </div>
+            <div class="col-md-3">
+                <span class="badge bg-secondary mb-1">upload_*</span> - Tải lên
+            </div>
+            <div class="col-md-3">
+                <span class="badge bg-dark mb-1">approve_*</span> - Phê duyệt
+            </div>
+            <div class="col-md-3">
+                <span class="badge bg-primary mb-1">export_*</span> - Xuất dữ liệu
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Thông tin khi đang Edit -->
+{% if perm %}
+<div class="card mt-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">
+            <i class="bi bi-info-circle"></i> Thông tin bổ sung
+        </h5>
+    </div>
+    <div class="card-body">
+        <ul class="list-unstyled mb-3">
+            <li><strong>Đang được sử dụng bởi:</strong> {{ perm.role_count }} roles</li>
+            <li><strong>Ngày tạo:</strong> {{ perm.created_at.strftime('%d/%m/%Y %H:%M') if perm.created_at else 'N/A' }}</li>
+        </ul>
+
+        {% if perm.roles.count() > 0 %}
+        <div class="alert alert-warning">
+            <strong><i class="bi bi-exclamation-triangle"></i> Lưu ý:</strong>
+            Permission này đang được sử dụng bởi:
+            {% for role in perm.roles.all()[:5] %}
+                <span class="badge" style="background-color: {{ role.color }}">{{ role.display_name }}</span>
+            {% endfor %}
+            {% if perm.roles.count() > 5 %}
+                <span class="badge bg-secondary">+{{ perm.roles.count() - 5 }} khác</span>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Live icon preview
+document.addEventListener('DOMContentLoaded', function() {
+    const iconInput = document.querySelector('input[name="icon"]');
+    const iconPreview = document.querySelector('#icon-preview i');
+    
+    if (iconInput && iconPreview) {
+        iconInput.addEventListener('input', function() {
+            let iconClass = this.value.trim();
+            
+            // Auto-add bi- prefix if not present
+            if (iconClass && !iconClass.startsWith('bi-')) {
+                iconClass = 'bi-' + iconClass;
+            }
+            
+            // Update preview
+            iconPreview.className = iconClass || 'bi-key';
+        });
+        
+        // Initial preview
+        if (iconInput.value) {
+            iconInput.dispatchEvent(new Event('input'));
+        }
+    }
+    
+    // Auto-generate permission name from display name
+    const displayNameInput = document.querySelector('input[name="display_name"]');
+    const nameInput = document.querySelector('input[name="name"]');
+    
+    if (displayNameInput && nameInput && !nameInput.value) {
+        displayNameInput.addEventListener('blur', function() {
+            if (!nameInput.value) {
+                // Convert "Quản lý sản phẩm" -> "manage_products"
+                let suggestion = this.value
+                    .toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '') // Remove Vietnamese diacritics
+                    .replace(/đ/g, 'd')
+                    .replace(/[^a-z0-9\s]/g, '')
+                    .trim()
+                    .replace(/\s+/g, '_');
+                
+                if (suggestion) {
+                    nameInput.value = suggestion;
+                    nameInput.focus();
+                    nameInput.select();
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

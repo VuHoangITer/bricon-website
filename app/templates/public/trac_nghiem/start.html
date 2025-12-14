@@ -1,0 +1,193 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}{{ quiz.title }} - Nhập thông tin{% endblock %}
+
+{% block content %}
+<div class="container my-3">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-xl-6">
+            <!-- Quiz Info Card -->
+            <div class="card border">
+                <div class="card-header bg-light text-center py-2">
+                    <h4 class="mb-0 fw-semibold">{{ quiz.title }}</h4>
+                </div>
+                <div class="card-body p-3">
+                    {% if quiz.description %}
+                    <p class="text-muted mb-2 small">{{ quiz.description }}</p>
+                    {% endif %}
+
+                    <!-- Quiz Details & Form in 2 columns -->
+                    <div class="row g-3">
+                        <!-- Left Column: Quiz Info -->
+                        <div class="col-md-5">
+                            <div class="quiz-stats mb-2">
+                                <div class="stat-item">
+                                    <span class="stat-text"> Tổng: {{ quiz.total_questions }} câu</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-text"> Thời gian: {{ quiz.duration_minutes }} phút</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-text">Đạt: {{ quiz.pass_score }}%</span>
+                                </div>
+                            </div>
+
+                            <!-- Important Notes -->
+                            <div class="alert alert-light border mb-0 p-2">
+                                <div class="fw-semibold mb-1 small">⚠️ Lưu ý:</div>
+                                <ul class="mb-0" style="font-size: 0.8rem; padding-left: 1.25rem;">
+                                    <li>Chuyển tab sẽ tự nộp bài</li>
+                                    <li>Không tạm dừng được</li>
+                                    <li>1 câu = 1 đáp án đúng</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Form -->
+                        <div class="col-md-7">
+                            <form method="POST">
+                                <h6 class="mb-2 fw-semibold">Thông tin của bạn</h6>
+
+                                <div class="mb-2">
+                                    <label class="form-label mb-1">
+                                        Họ và tên <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text"
+                                           name="user_name"
+                                           class="form-control form-control-sm"
+                                           placeholder="Nhập họ và tên"
+                                           required
+                                           minlength="2">
+                                </div>
+
+                                <div class="mb-2">
+                                    <label class="form-label mb-1">
+                                        Email <small class="text-muted">(tùy chọn)</small>
+                                    </label>
+                                    <input type="email"
+                                           name="user_email"
+                                           class="form-control form-control-sm"
+                                           placeholder="email@example.com">
+                                </div>
+
+                                <div class="mb-2">
+                                    <label class="form-label mb-1">
+                                        Số điện thoại <small class="text-muted">(tùy chọn)</small>
+                                    </label>
+                                    <input type="tel"
+                                           name="user_phone"
+                                           class="form-control form-control-sm"
+                                           placeholder="0912345678">
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100 fw-semibold mt-2">
+                                    Bắt đầu làm bài →
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.card-header {
+    border-bottom: 1px solid #e0e0e0;
+    background-color: #f8f9fa !important;
+}
+
+/* Quiz Stats */
+.quiz-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.stat-icon {
+    font-size: 1.1rem;
+}
+
+.stat-text {
+    color: #333;
+}
+
+/* Form Styling */
+.form-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-control-sm {
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.875rem;
+}
+
+.form-control-sm:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.1);
+}
+
+.btn-primary {
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+/* Alert */
+.alert {
+    border-radius: 6px;
+}
+
+.alert ul {
+    margin-bottom: 0;
+}
+
+.alert li {
+    margin-bottom: 0.15rem;
+    line-height: 1.4;
+}
+
+.alert li:last-child {
+    margin-bottom: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .row.g-3 {
+        flex-direction: column;
+    }
+
+    .container {
+        padding: 0 0.75rem;
+    }
+
+    .card-body {
+        padding: 1rem !important;
+    }
+
+    h4 {
+        font-size: 1.1rem;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,530 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Hướng Dẫn Thi Công - {{ get_setting('website_name', 'BRICON') }}{% endblock %}
+
+{% block meta_description %}Hướng dẫn thi công chi tiết các sản phẩm keo dán gạch, keo chà ron BRICON - Chuẩn kỹ thuật, chuẩn công trình{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="bg-light py-3">
+  <div class="container">
+    <ol class="breadcrumb mb-0">
+      <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Trang chủ</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Hướng Dẫn Thi Công</li>
+    </ol>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<section class="py-5">
+  <div class="container">
+    <!-- Header -->
+    <div class="text-center mb-5">
+      <h1 class="display-4 fw-bold mb-3">
+        Hướng Dẫn Thi Công
+      </h1>
+      <p class="lead text-muted">
+        Chuẩn kỹ thuật - Chuẩn công trình với <span class="text-warning fw-bold">{{ get_setting('website_name', 'BRICON') }}</span>
+      </p>
+      <div class="d-inline-block bg-warning" style="width: 100px; height: 4px; border-radius: 2px;"></div>
+    </div>
+
+    <!-- ==================== TABS THEO LOẠI SẢN PHẨM ==================== -->
+    <ul class="nav nav-pills nav-fill mb-4 shadow-sm" id="productTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active fw-bold" id="tab-keo-dan-gach" data-bs-toggle="pill"
+                data-bs-target="#content-keo-dan-gach" type="button" role="tab">
+          <i class="bi bi-grid-3x3-gap me-2"></i>
+          Keo Dán Gạch
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link fw-bold" id="tab-keo-cha-ron" data-bs-toggle="pill"
+                data-bs-target="#content-keo-cha-ron" type="button" role="tab">
+          <i class="bi bi-brush me-2"></i>
+          Keo Chà Ron
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link fw-bold" id="tab-chong-tham" data-bs-toggle="pill"
+                data-bs-target="#content-chong-tham" type="button" role="tab">
+          <i class="bi bi-shield-check me-2"></i>
+          Chống Thấm
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link fw-bold" id="tab-khac" data-bs-toggle="pill"
+                data-bs-target="#content-khac" type="button" role="tab">
+          <i class="bi bi-box-seam me-2"></i>
+          Sản Phẩm Khác
+        </button>
+      </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="productTabsContent">
+
+      <!-- ==================== TAB 1: KEO DÁN GẠCH ==================== -->
+      <div class="tab-pane fade show active" id="content-keo-dan-gach" role="tabpanel">
+
+        <!-- Video Section -->
+        <div class="row mb-5">
+          <div class="col-12">
+            <h2 class="fw-bold mb-4">
+              <i class="bi bi-play-circle-fill text-warning me-2"></i>
+              Video Hướng Dẫn - Keo Dán Gạch
+            </h2>
+            <div class="card shadow-sm">
+              <div class="card-body p-4">
+                <div class="ratio ratio-16x9">
+                  <!-- ✅ THAY VIDEO_ID BẰNG ID VIDEO YOUTUBE CỦA BẠN -->
+                  <iframe src="https://www.youtube.com/embed/VIDEO_ID_KEO_DAN_GACH"
+                          title="Hướng dẫn thi công keo dán gạch"
+                          allowfullscreen></iframe>
+                </div>
+                <p class="text-muted mt-3 mb-0">
+                  <i class="bi bi-info-circle me-2"></i>
+                  Video hướng dẫn chi tiết cách thi công keo dán gạch chuyên nghiệp
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quy trình thi công -->
+        <div class="row mb-5">
+          <div class="col-12">
+            <h2 class="fw-bold mb-4">
+              <i class="bi bi-list-ol text-warning me-2"></i>
+              Quy Trình Thi Công Keo Dán Gạch
+            </h2>
+
+            <!-- Bước 1 -->
+            <div class="card mb-3 border-start border-warning border-4 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title fw-bold">
+                  <span class="badge bg-warning text-dark me-2">Bước 1</span>
+                  Chuẩn bị bề mặt
+                </h5>
+                <ul class="mb-0">
+                  <li>Làm sạch bề mặt, loại bỏ bụi bẩn, dầu mỡ</li>
+                  <li>Bề mặt phải khô ráo, không có vết nứt</li>
+                  <li>Làm ướt bề mặt trước khi thi công (không ngâm nước)</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Bước 2 -->
+            <div class="card mb-3 border-start border-warning border-4 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title fw-bold">
+                  <span class="badge bg-warning text-dark me-2">Bước 2</span>
+                  Pha trộn keo dán gạch
+                </h5>
+                <ul class="mb-0">
+                  <li>Trộn keo theo tỉ lệ 3 keo : 1 nước</li>
+                  <li>Dùng máy trộn tốc độ chậm 3–4 phút.</li>
+                  <li>Để yên 5-10 phút, khuấy lại trước khi dùng</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Bước 3 -->
+            <div class="card mb-3 border-start border-warning border-4 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title fw-bold">
+                  <span class="badge bg-warning text-dark me-2">Bước 3</span>
+                  Thi công dán gạch
+                </h5>
+                <ul class="mb-0">
+                  <li>Trét keo lên tường bằng bay răng cưa (răng 6-10mm)</li>
+                  <li>Trét đều một lớp mỏng lên mặt sau gạch</li>
+                  <li>Dán gạch và gõ nhẹ để keo phân bố đều</li>
+                  <li>Điều chỉnh vị trí trong vòng 10-15 phút</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Bước 4 -->
+            <div class="card mb-3 border-start border-warning border-4 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title fw-bold">
+                  <span class="badge bg-warning text-dark me-2">Bước 4</span>
+                  Hoàn thiện
+                </h5>
+                <ul class="mb-0">
+                  <li>Chờ 24 giờ trước khi chà ron</li>
+                  <li>Không đi lại trong 24 giờ đầu</li>
+                  <li>Vệ sinh bề mặt sau khi hoàn thành</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lưu ý kỹ thuật -->
+        <div class="row mb-5">
+          <div class="col-12">
+            <h2 class="fw-bold mb-4">
+              <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+              Lưu Ý Kỹ Thuật - Keo Dán Gạch
+            </h2>
+            <div class="card shadow-sm">
+              <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                  <li class="mb-3">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    Nhiệt độ thi công: 5°C - 40°C
+                  </li>
+                  <li class="mb-3">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    Thời gian sử dụng keo sau khi pha: 2-3 giờ
+                  </li>
+                  <li class="mb-3">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    Độ dày lớp keo: 3-6mm (tùy loại gạch)
+                  </li>
+                  <li class="mb-0">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    Không pha thêm xi măng hoặc cát
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 2: KEO CHÀ RON ==================== -->
+      <div class="tab-pane fade" id="content-keo-cha-ron" role="tabpanel">
+
+        <!-- Video Section -->
+        <div class="row mb-5">
+          <div class="col-12">
+            <h2 class="fw-bold mb-4">
+              <i class="bi bi-play-circle-fill text-warning me-2"></i>
+              Video Hướng Dẫn - Keo Chà Ron
+            </h2>
+            <div class="card shadow-sm">
+              <div class="card-body p-4">
+                <div class="ratio ratio-16x9">
+                  <!-- ✅ THAY VIDEO_ID -->
+                  <iframe src="https://www.youtube.com/embed/VIDEO_ID_KEO_CHA_RON"
+                          title="Hướng dẫn thi công keo chà ron"
+                          allowfullscreen></iframe>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quy trình -->
+        <div class="row mb-5">
+          <div class="col-12">
+            <h2 class="fw-bold mb-4">
+              <i class="bi bi-list-ol text-warning me-2"></i>
+              Quy Trình Thi Công Keo Chà Ron
+            </h2>
+
+            <div class="card mb-3 border-start border-warning border-4 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title fw-bold">
+                  <span class="badge bg-warning text-dark me-2">Bước 1</span>
+                  Chuẩn bị
+                </h5>
+                <ul class="mb-0">
+                  <li>Đảm bảo keo dán gạch đã khô hoàn toàn (24-48 giờ)</li>
+                  <li>Làm sạch mạch ron, loại bỏ keo dán thừa</li>
+                  <li>Làm ướt nhẹ mạch ron trước khi chà</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="card mb-3 border-start border-warning border-4 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title fw-bold">
+                  <span class="badge bg-warning text-dark me-2">Bước 2</span>
+                  Pha keo chà ron
+                </h5>
+                <ul class="mb-0">
+                  <li>Tỷ lệ pha: 1 kg bột : 0.30 - 0.35 lít nước</li>
+                  <li>Khuấy đều đến khi mịn, không vón cục</li>
+                  <li>Để yên 5 phút rồi khuấy lại</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="card mb-3 border-start border-warning border-4 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title fw-bold">
+                  <span class="badge bg-warning text-dark me-2">Bước 3</span>
+                  Chà ron
+                </h5>
+                <ul class="mb-0">
+                  <li>Dùng bay cao su chà chéo góc 45° so với mạch ron</li>
+                  <li>Ép mạnh để keo lấp đầy mạch ron</li>
+                  <li>Chà nhiều lần để keo đều và chắc</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="card mb-3 border-start border-warning border-4 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title fw-bold">
+                  <span class="badge bg-warning text-dark me-2">Bước 4</span>
+                  Vệ sinh hoàn thiện
+                </h5>
+                <ul class="mb-0">
+                  <li>Sau 15-30 phút, dùng bọt biển ẩm lau sạch mặt gạch</li>
+                  <li>Không để keo khô cứng trên mặt gạch</li>
+                  <li>Đánh bóng bằng khăn khô sau khi lau</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lưu ý -->
+        <div class="row mb-5">
+          <div class="col-12">
+            <h2 class="fw-bold mb-4">
+              <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+              Lưu Ý Kỹ Thuật - Keo Chà Ron
+            </h2>
+            <div class="card shadow-sm">
+              <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                  <li class="mb-3">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    Độ rộng mạch ron: 2-15mm tùy loại gạch
+                  </li>
+                  <li class="mb-3">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    Thời gian sử dụng sau pha: 1-2 giờ
+                  </li>
+                  <li class="mb-3">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    Chờ 24 giờ trước khi cho nước chạy qua
+                  </li>
+                  <li class="mb-0">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    Không thi công dưới ánh nắng trực tiếp
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 3: CHỐNG THẤM ==================== -->
+      <div class="tab-pane fade" id="content-chong-tham" role="tabpanel">
+
+        <!-- Video Section -->
+        <div class="row mb-5">
+          <div class="col-12">
+            <h2 class="fw-bold mb-4">
+              <i class="bi bi-play-circle-fill text-warning me-2"></i>
+              Video Hướng Dẫn - Sản Phẩm Chống Thấm
+            </h2>
+            <div class="card shadow-sm">
+              <div class="card-body p-4">
+                <div class="ratio ratio-16x9">
+                  <!-- ✅ THAY VIDEO_ID -->
+                  <iframe src="https://www.youtube.com/embed/VIDEO_ID_CHONG_THAM"
+                          title="Hướng dẫn thi công chống thấm"
+                          allowfullscreen></iframe>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quy trình -->
+        <div class="row mb-5">
+          <div class="col-12">
+            <h2 class="fw-bold mb-4">
+              <i class="bi bi-list-ol text-warning me-2"></i>
+              Quy Trình Thi Công Chống Thấm
+            </h2>
+
+            <div class="card mb-3 border-start border-warning border-4 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title fw-bold">
+                  <span class="badge bg-warning text-dark me-2">Bước 1</span>
+                  Xử lý bề mặt
+                </h5>
+                <p class="card-text text-muted mb-0">
+                  Bề mặt phải sạch, khô, không có vết nứt lớn. Vá các vết nứt trước khi thi công.
+                </p>
+              </div>
+            </div>
+
+            <div class="card mb-3 border-start border-warning border-4 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title fw-bold">
+                  <span class="badge bg-warning text-dark me-2">Bước 2</span>
+                  Pha chế sản phẩm
+                </h5>
+                <p class="card-text text-muted mb-0">
+                  Tỷ lệ pha theo hướng dẫn trên bao bì sản phẩm (thường 1:0.3 - 1:0.4)
+                </p>
+              </div>
+            </div>
+
+            <div class="card mb-3 border-start border-warning border-4 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title fw-bold">
+                  <span class="badge bg-warning text-dark me-2">Bước 3</span>
+                  Thi công lớp chống thấm
+                </h5>
+                <p class="card-text text-muted mb-0">
+                  Quét 2-3 lớp, mỗi lớp cách nhau 4-6 giờ. Tổng độ dày khuyến nghị: 1.5-2mm
+                </p>
+              </div>
+            </div>
+
+            <div class="card mb-3 border-start border-warning border-4 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title fw-bold">
+                  <span class="badge bg-warning text-dark me-2">Bước 4</span>
+                  Bảo dưỡng
+                </h5>
+                <p class="card-text text-muted mb-0">
+                  Dưỡng ẩm trong 7 ngày. Chờ 14 ngày trước khi cho nước sử dụng.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 4: SẢN PHẨM KHÁC ==================== -->
+      <div class="tab-pane fade" id="content-khac" role="tabpanel">
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle-fill me-2"></i>
+          Nội dung hướng dẫn cho các sản phẩm khác sẽ được cập nhật sớm...
+        </div>
+      </div>
+
+    </div>
+    <!-- End Tab Content -->
+
+    <!-- Download Section (chung cho tất cả tabs) -->
+    <div class="row mb-5 mt-5">
+      <div class="col-12">
+        <h2 class="fw-bold mb-4">
+          <i class="bi bi-download text-warning me-2"></i>
+          Tài Liệu Kỹ Thuật
+        </h2>
+        <div class="row g-3">
+          <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body text-center">
+                <i class="bi bi-file-pdf-fill text-danger mb-3" style="font-size: 3rem;"></i>
+                <h5 class="card-title">Catalogue</h5>
+                <p class="card-text text-muted small">Thông tin sản phẩm</p>
+                <a href="{{ url_for('static', filename='downloads/catalogue.pdf') }}"
+                   class="btn btn-outline-warning btn-sm"
+                   download="BRICON-Catalogue.pdf"
+                   target="_blank">
+                  <i class="bi bi-download me-1"></i>Tải xuống
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body text-center">
+                <i class="bi bi-file-pdf-fill text-danger mb-3" style="font-size: 3rem;"></i>
+                <h5 class="card-title">TDS</h5>
+                <p class="card-text text-muted small">Thông số kỹ thuật</p>
+                <a href="{{ url_for('static', filename='downloads/tds.pdf') }}"
+                   class="btn btn-outline-warning btn-sm"
+                   download="BRICON-TDS.pdf"
+                   target="_blank">
+                  <i class="bi bi-download me-1"></i>Tải xuống
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body text-center">
+                <i class="bi bi-file-pdf-fill text-danger mb-3" style="font-size: 3rem;"></i>
+                <h5 class="card-title">MSDS</h5>
+                <p class="card-text text-muted small">An toàn hóa chất</p>
+                <a href="{{ url_for('static', filename='downloads/msds.pdf') }}"
+                   class="btn btn-outline-warning btn-sm"
+                   download="BRICON-MSDS.pdf"
+                   target="_blank">
+                  <i class="bi bi-download me-1"></i>Tải xuống
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body text-center">
+                <i class="bi bi-file-pdf-fill text-danger mb-3" style="font-size: 3rem;"></i>
+                <h5 class="card-title">Quy trình</h5>
+                <p class="card-text text-muted small">Hướng dẫn chi tiết</p>
+                <a href="{{ url_for('static', filename='downloads/quy-trinh.pdf') }}"
+                   class="btn btn-outline-warning btn-sm"
+                   download="BRICON-Quy-Trinh.pdf"
+                   target="_blank">
+                  <i class="bi bi-download me-1"></i>Tải xuống
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Custom Styles for Tabs -->
+<style>
+.nav-pills .nav-link {
+  border-radius: 12px;
+  padding: 12px 20px;
+  transition: all 0.3s ease;
+  color: #6b7280;
+  background: #fff;
+  border: 2px solid #e5e7eb;
+  margin: 0 4px;
+}
+
+.nav-pills .nav-link:hover {
+  background: #fef3c7;
+  border-color: #ffc107;
+  color: #0b0f1a;
+}
+
+.nav-pills .nav-link.active {
+  background: linear-gradient(135deg, #ffc107, #ffd86a);
+  border-color: #ffc107;
+  color: #0b0f1a;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+
+@media (max-width: 768px) {
+  .nav-pills .nav-link {
+    font-size: 14px;
+    padding: 10px 12px;
+    margin: 4px 2px;
+  }
+}
+</style>
+
+<!-- Schema Markup -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "Hướng dẫn thi công sản phẩm {{ get_setting('website_name', 'BRICON') }}",
+  "description": "Hướng dẫn chi tiết cách thi công các sản phẩm keo dán gạch, keo chà ron, chống thấm BRICON"
+}
+</script>
+{% endblock %}

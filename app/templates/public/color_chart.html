@@ -1,0 +1,48 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Bảng Màu Sản Phẩm - {{ get_setting('website_name', 'BRICON') }}{% endblock %}
+
+{% block meta_description %}Bảng màu đầy đủ các sản phẩm keo chà ron BRICON - Lựa chọn màu sắc phù hợp cho công trình của bạn{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="bg-light py-3">
+  <div class="container">
+    <ol class="breadcrumb mb-0">
+      <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Trang chủ</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Bảng Màu</li>
+    </ol>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<section class="py-5">
+  <div class="container">
+    <!-- Header -->
+    <div class="text-center mb-5">
+      <h1 class="display-4 fw-bold mb-3">
+        <i class="bi bi-palette-fill text-warning me-2"></i>
+        Bảng Màu Sản Phẩm
+      </h1>
+      <div class="d-inline-block bg-warning" style="width: 100px; height: 4px; border-radius: 2px;"></div>
+    </div>
+
+    <!-- Color Chart Image -->
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="card border-0 shadow-lg">
+          <div class="card-body p-0">
+            <img 
+              src="https://res.cloudinary.com/dsslzfmqr/image/upload/v1760776574/enterprise/products/san_pham/ma-mau-20251018083614.webp"
+              alt="Bảng màu sản phẩm BRICON"
+              class="img-fluid w-100"
+              style="border-radius: 12px;"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

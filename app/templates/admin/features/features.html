@@ -1,0 +1,240 @@
+{% extends 'layouts/admin.html' %}
+
+{% block title %}{{ title }} - Admin{% endblock %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-1">
+                                <i class="bi bi-toggle-on me-2 text-primary"></i>
+                                Quản lý chức năng hệ thống
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Actions -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('admin.features_bulk_toggle') }}" id="bulkForm">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="selectAll">
+                                    <label class="form-check-label fw-bold" for="selectAll">
+                                        Chọn tất cả
+                                    </label>
+                                </div>
+                                <span class="text-muted ms-3" id="selectedCount">0 chức năng được chọn</span>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <button type="submit" name="action" value="enable" class="btn btn-success btn-sm me-2">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    Bật đã chọn
+                                </button>
+                                <button type="submit" name="action" value="disable" class="btn btn-warning btn-sm">
+                                    <i class="bi bi-x-circle me-1"></i>
+                                    Tắt đã chọn
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features by Group -->
+    {% for group_key, features in features_by_group.items() %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header" style="background: black; color: white;">
+                    <h5 class="mb-0">{{ group_labels.get(group_key, group_key) }}</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="50" class="text-center">
+                                        <input type="checkbox" class="form-check-input group-select" data-group="{{ group_key }}">
+                                    </th>
+                                    <th width="60" class="text-center">Icon</th>
+                                    <th>Tên chức năng</th>
+                                    <th>Mô tả</th>
+                                    <th width="120" class="text-center">Trạng thái</th>
+                                    <th width="150" class="text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for feature in features %}
+                                <tr>
+                                    <td class="text-center">
+                                        <input type="checkbox"
+                                               class="form-check-input feature-checkbox"
+                                               form="bulkForm"
+                                               name="features"
+                                               value="{{ feature.key }}"
+                                               data-group="{{ group_key }}">
+                                    </td>
+                                    <td class="text-center">
+                                        <i class="bi {{ feature.icon }} fs-4 text-primary"></i>
+                                    </td>
+                                    <td>
+                                        <strong>{{ feature.name }}</strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            <code>{{ feature.key }}</code>
+                                        </small>
+                                    </td>
+                                    <td>{{ feature.description }}</td>
+                                    <td class="text-center">
+                                        {% if feature.enabled %}
+                                        <span class="badge bg-success px-3 py-2">
+                                            <i class="bi bi-check-circle me-1"></i>
+                                            Đang bật
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-secondary px-3 py-2">
+                                            <i class="bi bi-x-circle me-1"></i>
+                                            Đã tắt
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <form method="POST"
+                                              action="{{ url_for('admin.feature_toggle', feature_key=feature.key) }}"
+                                              class="d-inline toggle-form"
+                                              data-feature-name="{{ feature.name }}">
+                                            {% if feature.enabled %}
+                                            <button type="submit"
+                                                    name="action"
+                                                    value="disable"
+                                                    class="btn btn-sm btn-warning">
+                                                <i class="bi bi-toggle-off me-1"></i>
+                                                Tắt
+                                            </button>
+                                            {% else %}
+                                            <button type="submit"
+                                                    name="action"
+                                                    value="enable"
+                                                    class="btn btn-sm btn-success">
+                                                <i class="bi bi-toggle-on me-1"></i>
+                                                Bật
+                                            </button>
+                                            {% endif %}
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Warning Notice -->
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Lưu ý quan trọng:</strong>
+                <ul class="mb-0 mt-2">
+                    <li>Khi tắt một chức năng, tất cả routes liên quan sẽ trả về lỗi 404</li>
+                    <li>Menu tương ứng sẽ tự động ẩn trong admin và frontend</li>
+                    <li>Dữ liệu vẫn được giữ nguyên trong database, chỉ không thể truy cập</li>
+                    <li>Bạn có thể bật lại bất cứ lúc nào mà không mất dữ liệu</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const featureCheckboxes = document.querySelectorAll('.feature-checkbox');
+    const selectedCountSpan = document.getElementById('selectedCount');
+
+    // Update count
+    function updateSelectedCount() {
+        const count = document.querySelectorAll('.feature-checkbox:checked').length;
+        selectedCountSpan.textContent = `${count} chức năng được chọn`;
+    }
+
+    // Select/Deselect all
+    selectAllCheckbox.addEventListener('change', function() {
+        featureCheckboxes.forEach(cb => {
+            cb.checked = this.checked;
+        });
+        updateSelectedCount();
+    });
+
+    // Individual checkbox change
+    featureCheckboxes.forEach(cb => {
+        cb.addEventListener('change', updateSelectedCount);
+    });
+
+    // Group select
+    document.querySelectorAll('.group-select').forEach(groupCheckbox => {
+        groupCheckbox.addEventListener('change', function() {
+            const group = this.dataset.group;
+            const groupCheckboxes = document.querySelectorAll(`.feature-checkbox[data-group="${group}"]`);
+            groupCheckboxes.forEach(cb => {
+                cb.checked = this.checked;
+            });
+            updateSelectedCount();
+        });
+    });
+
+    // Toggle form confirmation
+    document.querySelectorAll('.toggle-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const featureName = this.dataset.featureName;
+            const action = e.submitter.value;
+            const actionText = action === 'disable' ? 'TẮT' : 'BẬT';
+
+            if (!confirm(`Bạn có chắc muốn ${actionText} chức năng "${featureName}"?`)) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    // Bulk form confirmation
+    document.getElementById('bulkForm').addEventListener('submit', function(e) {
+        const selectedCount = document.querySelectorAll('.feature-checkbox:checked').length;
+        if (selectedCount === 0) {
+            e.preventDefault();
+            alert('Vui lòng chọn ít nhất một chức năng');
+            return;
+        }
+
+        const action = e.submitter.value;
+        const actionText = action === 'disable' ? 'TẮT' : 'BẬT';
+
+        if (!confirm(`Bạn có chắc muốn ${actionText} ${selectedCount} chức năng đã chọn?`)) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}
