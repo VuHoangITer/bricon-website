@@ -28,18 +28,12 @@
             <h5 class="mb-0"><i class="bi bi-info-circle"></i> Thông tin cơ bản</h5>
           </div>
           <div class="card-body">
-            <div class="row">
-              <div class="col-md-8 mb-3">
-                {{ form.name.label(class="form-label") }} <span class="text-danger">*</span>
-                {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
-                {% if form.name.errors %}
-                  <div class="invalid-feedback">{{ form.name.errors[0] }}</div>
-                {% endif %}
-              </div>
-              <div class="col-md-4 mb-3">
-                {{ form.distributor_type.label(class="form-label") }}
-                {{ form.distributor_type(class="form-select") }}
-              </div>
+            <div class="mb-3">
+              {{ form.name.label(class="form-label") }} <span class="text-danger">*</span>
+              {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+              {% if form.name.errors %}
+                <div class="invalid-feedback">{{ form.name.errors[0] }}</div>
+              {% endif %}
             </div>
 
             <div class="mb-3">

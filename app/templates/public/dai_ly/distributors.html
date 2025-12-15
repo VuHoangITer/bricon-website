@@ -693,15 +693,8 @@ a.contact-item:hover{
       </div>
 
       <div class="filter-row">
-        <select class="filter-select" id="filterCity">
+        <select class="filter-select" id="filterCity" style="grid-column: 1 / -1;">
           <option value="">Tất cả tỉnh/thành</option>
-        </select>
-        <select class="filter-select" id="filterType">
-          <option value="">Tất cả loại</option>
-          <option value="authorized">Đại lý ủy quyền</option>
-          <option value="partner">Đối tác</option>
-          <option value="retail">Bán lẻ</option>
-          <option value="wholesale">Bán sỉ</option>
         </select>
       </div>
 
@@ -884,7 +877,6 @@ function renderDistributorsList(distributors) {
         <div class="distributor-icon"><i class="bi bi-shop"></i></div>
         <div class="distributor-info">
           <h3 class="distributor-name">${d.name}</h3>
-          ${d.distributor_type ? `<span class="distributor-type">${getTypeLabel(d.distributor_type)}</span>` : ''}
         </div>
       </div>
       <p class="distributor-address"><i class="bi bi-geo-alt"></i> ${d.full_address || d.address}</p>
@@ -979,16 +971,6 @@ function updateResultCount(count) {
   document.getElementById('resultCount').innerHTML = `<strong>${count}</strong> đại lý`;
 }
 
-function getTypeLabel(type) {
-  const labels = {
-    'authorized': 'Đại lý ủy quyền',
-    'partner': 'Đối tác',
-    'retail': 'Bán lẻ',
-    'wholesale': 'Bán sỉ'
-  };
-  return labels[type] || type;
-}
-
 function showError(message) {
   document.getElementById('distributorsList').innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><p>${message}</p></div>`;
 }
@@ -1000,14 +982,12 @@ function setupEventListeners() {
     searchTimeout = setTimeout(() => performSearch(), 500);
   });
   document.getElementById('filterCity').addEventListener('change', performSearch);
-  document.getElementById('filterType').addEventListener('change', performSearch);
 }
 
 function performSearch() {
   const params = {
     search: document.getElementById('searchInput').value.trim(),
-    city: document.getElementById('filterCity').value,
-    type: document.getElementById('filterType').value
+    city: document.getElementById('filterCity').value
   };
   selectedDistributor = null;
   loadDistributors(params);

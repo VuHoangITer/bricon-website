@@ -17,7 +17,6 @@ def api_distributors():
     # Parameters
     search = request.args.get('search', '').strip()
     city = request.args.get('city', '')
-    distributor_type = request.args.get('type', '')
 
     # Query
     query = Distributor.query.filter_by(is_active=True)
@@ -36,10 +35,6 @@ def api_distributors():
     # Filter theo city
     if city:
         query = query.filter_by(city=city)
-
-    # Filter theo type
-    if distributor_type:
-        query = query.filter_by(distributor_type=distributor_type)
 
     # Sắp xếp: featured trước, sau đó theo tên
     distributors = query.order_by(

@@ -9,16 +9,6 @@ class DistributorForm(FlaskForm):
 
     # Thông tin cơ bản
     name = StringField('Tên nhà phân phối', validators=[DataRequired()])
-    distributor_type = SelectField(
-        'Loại đại lý',
-        choices=[
-            ('authorized', 'Đại lý ủy quyền'),
-            ('partner', 'Đối tác phân phối'),
-            ('retail', 'Cửa hàng bán lẻ'),
-            ('wholesale', 'Nhà phân phối sỉ'),
-        ],
-        validators=[Optional()]
-    )
 
     # Liên hệ
     phone = StringField('Số điện thoại', validators=[Optional()])
