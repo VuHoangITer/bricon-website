@@ -15,11 +15,11 @@
   {% include 'plug-in-section/banner.html' %}
 {% endif %}
 
+{% include 'plug-in-section/quick-access.html' %}
+
 {% if is_feature_enabled('products') and categories %}
   {% include 'plug-in-section/product-lines.html' %}
 {% endif %}
-
-{% include 'plug-in-section/quick-access.html' %}
 
 {% if is_feature_enabled('products') and featured_products %}
   {% include 'plug-in-section/featured-products.html' %}
