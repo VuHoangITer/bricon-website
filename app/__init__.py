@@ -279,17 +279,18 @@ def create_app(config_class=Config):
         if os.getenv('FLASK_ENV') == 'production' and not is_admin:
             csp_directives = [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://www.googletagmanager.com https://cdnjs.cloudflare.com https://www.google-analytics.com",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://www.googletagmanager.com https://cdnjs.cloudflare.com https://www.google-analytics.com https://connect.facebook.net",
                 "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://fonts.googleapis.com",
                 "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net",
                 "img-src 'self' data: https: http: blob:",
-                "connect-src 'self' https://www.google-analytics.com https://res.cloudinary.com https://cdn.jsdelivr.net",
-                "frame-src 'self' https://www.youtube.com https://www.google.com",
+                "connect-src 'self' https://www.google-analytics.com https://res.cloudinary.com https://cdn.jsdelivr.net https://www.facebook.com",
+                "frame-src 'self' https://www.youtube.com https://www.google.com https://www.facebook.com",
                 "media-src 'self' https: data:",
                 "object-src 'none'",
                 "base-uri 'self'",
                 "form-action 'self'",
-                "frame-ancestors 'self'"
+                "frame-ancestors 'self'",
+                "upgrade-insecure-requests"
             ]
             response.headers['Content-Security-Policy'] = "; ".join(csp_directives)
 
