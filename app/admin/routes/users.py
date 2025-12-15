@@ -3,6 +3,7 @@
 """
 from flask import render_template, request, flash, redirect, url_for
 from flask_login import current_user
+from sqlalchemy.exc import IntegrityError
 from app import db
 from app.models.user import User
 from app.forms.user import UserForm
@@ -252,7 +253,7 @@ def edit_user(id):
 @admin_bp.route('/users/delete/<int:id>')
 @permission_required('manage_users')
 def delete_user(id):
-    """Xóa người dùng - CHỈ được xóa users có priority thấp hơn"""
+    """Xóa người dùng - TỰ ĐỘNG chuyển blogs cho user hiện tại"""
     # 🔒 SECURITY CHECK 1: Không được xóa chính mình
     if id == current_user.id:
         flash('⛔ Không thể xóa tài khoản của chính mình!', 'danger')
@@ -271,8 +272,31 @@ def delete_user(id):
         return redirect(url_for('admin.users'))
 
     username = user.username
-    db.session.delete(user)
-    db.session.commit()
 
-    flash(f'✅ Đã xóa người dùng "{username}" thành công!', 'success')
+    try:
+        # ✅ CHUYỂN TẤT CẢ BLOGS CỦA USER NÀY CHO USER HIỆN TẠI
+        from app.models.content import Blog
+
+        blog_count = user.blogs.count()
+
+        if blog_count > 0:
+            # Chuyển tất cả blogs cho current_user
+            Blog.query.filter_by(author_id=user.id).update({'author_id': current_user.id})
+            db.session.flush()  # Flush để update ngay
+
+            flash(f'ℹ️ Đã chuyển {blog_count} bài viết của "{username}" cho bạn.', 'info')
+
+        # Xóa user
+        db.session.delete(user)
+        db.session.commit()
+
+        flash(f'✅ Đã xóa người dùng "{username}" thành công!', 'success')
+
+    except IntegrityError as e:
+        db.session.rollback()
+        flash(f'❌ Không thể xóa người dùng "{username}": {str(e)}', 'danger')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'❌ Lỗi khi xóa người dùng: {str(e)}', 'danger')
+
     return redirect(url_for('admin.users'))
