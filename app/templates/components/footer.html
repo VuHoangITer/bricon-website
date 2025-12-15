@@ -71,6 +71,18 @@
             </a>
             {% endif %}
 
+              {% if get_setting('youtube_url') %}
+              <a class="social-btn" href="{{ get_setting('youtube_url') }}" target="_blank" aria-label="YouTube">
+                <i class="bi bi-youtube"></i>
+              </a>
+              {% endif %}
+
+              {% if get_setting('zalo_url') %}
+              <a class="social-btn" href="{{ get_setting('zalo_url') }}" target="_blank" aria-label="Zalo">
+                <span class="social-text">Zalo</span>
+              </a>
+              {% endif %}
+
             {% if get_setting('instagram_url') %}
             <a class="social-btn" href="{{ get_setting('instagram_url') }}" target="_blank" aria-label="Instagram">
               <i class="bi bi-instagram"></i>
