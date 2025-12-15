@@ -86,38 +86,36 @@
           <div class="card-body">
             <div class="alert alert-info">
               <i class="bi bi-info-circle"></i>
-              <strong>Hướng dẫn:</strong>
+              <strong>Hướng dẫn lấy tọa độ:</strong>
               <ol class="mb-0 mt-2">
                 <li>Vào <a href="https://www.google.com/maps" target="_blank">Google Maps</a></li>
-                <li>Tìm địa chỉ đại lý</li>
-                <li>Nhấn nút "Chia sẻ" → "Nhúng bản đồ"</li>
-                <li>Copy toàn bộ mã iframe và dán vào ô bên dưới</li>
+                <li>Tìm địa chỉ đại lý, click chuột phải → chọn tọa độ để copy</li>
+                <li>Dán vào ô bên dưới (định dạng: <code>10.799938, 106.587440</code>)</li>
               </ol>
             </div>
+
+            <!-- Ô nhập tọa độ duy nhất -->
+            <div class="mb-3">
+              {{ form.coordinates.label(class="form-label") }}
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                {{ form.coordinates(
+                  class="form-control",
+                  placeholder="10.799938, 106.587440",
+                  id="coordinates-input"
+                ) }}
+              </div>
+              <small class="text-muted">Nhập dạng: Vĩ độ, Kinh độ (có thể copy trực tiếp từ Google Maps)</small>
+            </div>
+
+            <!-- Hidden fields -->
+            {{ form.latitude() }}
+            {{ form.longitude() }}
 
             <div class="mb-3">
               {{ form.map_iframe.label(class="form-label") }}
               {{ form.map_iframe(class="form-control", rows=4, placeholder='<iframe src="https://www.google.com/maps/embed?pb=..." width="600" height="450"></iframe>') }}
-              <small class="text-muted">Tọa độ sẽ được tự động trích xuất từ iframe</small>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                {{ form.latitude.label(class="form-label") }}
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-geo"></i></span>
-                  {{ form.latitude(class="form-control", placeholder="10.822159") }}
-                </div>
-                <small class="text-muted">Vĩ độ (latitude)</small>
-              </div>
-              <div class="col-md-6 mb-3">
-                {{ form.longitude.label(class="form-label") }}
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-geo"></i></span>
-                  {{ form.longitude(class="form-control", placeholder="106.681929") }}
-                </div>
-                <small class="text-muted">Kinh độ (longitude)</small>
-              </div>
+              <small class="text-muted">Mã nhúng bản đồ (tùy chọn)</small>
             </div>
 
             <div class="mb-3">
@@ -231,4 +229,44 @@
     </div>
   </form>
 </div>
+
+<!-- JavaScript tự động tách tọa độ -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const coordInput = document.getElementById('coordinates-input');
+  const latField = document.getElementById('latitude');
+  const lngField = document.getElementById('longitude');
+
+  // Load giá trị ban đầu nếu đã có
+  if (latField.value && lngField.value) {
+    coordInput.value = `${latField.value}, ${lngField.value}`;
+  }
+
+  // Tự động tách khi nhập xong
+  coordInput.addEventListener('blur', function() {
+    const value = this.value.trim();
+    if (!value) return;
+
+    // Tách theo dấu phẩy
+    const parts = value.split(',').map(p => p.trim());
+    if (parts.length === 2) {
+      const lat = parseFloat(parts[0]);
+      const lng = parseFloat(parts[1]);
+
+      if (!isNaN(lat) && !isNaN(lng)) {
+        latField.value = lat;
+        lngField.value = lng;
+        this.classList.add('is-valid');
+        this.classList.remove('is-invalid');
+      } else {
+        this.classList.add('is-invalid');
+        this.classList.remove('is-valid');
+      }
+    } else {
+      this.classList.add('is-invalid');
+      this.classList.remove('is-valid');
+    }
+  });
+});
+</script>
 {% endblock %}

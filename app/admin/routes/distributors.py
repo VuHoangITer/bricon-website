@@ -88,6 +88,10 @@ def edit_distributor(id):
     distributor = Distributor.query.get_or_404(id)
     form = DistributorForm(obj=distributor)
 
+    # Load tọa độ hiện có vào ô coordinates khi GET
+    if request.method == 'GET' and distributor.latitude and distributor.longitude:
+        form.coordinates.data = f"{distributor.latitude}, {distributor.longitude}"
+
     if form.validate_on_submit():
         form.populate_obj(distributor)
 
@@ -108,7 +112,7 @@ def edit_distributor(id):
 @admin_bp.route('/distributors/<int:id>/delete', methods=['POST'])
 @login_required
 @admin_required
-@csrf.exempt  # ← THÊM DÒNG NÀY
+@csrf.exempt
 def delete_distributor(id):
     """Xóa nhà phân phối"""
     distributor = Distributor.query.get_or_404(id)
@@ -127,7 +131,7 @@ def delete_distributor(id):
 @admin_bp.route('/distributors/delete-all', methods=['POST'])
 @login_required
 @admin_required
-@csrf.exempt  # ← THÊM DÒNG NÀY
+@csrf.exempt
 def delete_all_distributors():
     """Xóa tất cả nhà phân phối - CHỈ DÙNG TẠM THỜI"""
     try:
@@ -145,7 +149,7 @@ def delete_all_distributors():
 @admin_bp.route('/distributors/<int:id>/toggle-active', methods=['POST'])
 @login_required
 @admin_required
-@csrf.exempt  # ← THÊM DÒNG NÀY
+@csrf.exempt
 def toggle_distributor_active(id):
     """Bật/tắt trạng thái active"""
     distributor = Distributor.query.get_or_404(id)
@@ -157,7 +161,7 @@ def toggle_distributor_active(id):
 @admin_bp.route('/distributors/<int:id>/toggle-featured', methods=['POST'])
 @login_required
 @admin_required
-@csrf.exempt  # ← THÊM DÒNG NÀY
+@csrf.exempt
 def toggle_distributor_featured(id):
     """Bật/tắt đại lý nổi bật"""
     distributor = Distributor.query.get_or_404(id)

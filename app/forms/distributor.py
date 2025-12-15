@@ -1,7 +1,7 @@
 # app/forms/distributor.py
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SelectField, BooleanField, FloatField
-from wtforms.validators import DataRequired, Email, Optional, URL, NumberRange
+from wtforms import StringField, TextAreaField, BooleanField, HiddenField
+from wtforms.validators import DataRequired, Email, Optional, URL
 
 
 class DistributorForm(FlaskForm):
@@ -21,15 +21,10 @@ class DistributorForm(FlaskForm):
     district = StringField('Quận/Huyện', validators=[Optional()])
     city = StringField('Tỉnh/Thành phố', validators=[DataRequired()])
 
-    # Tọa độ
-    latitude = FloatField(
-        'Vĩ độ (Latitude)',
-        validators=[Optional(), NumberRange(min=-90, max=90)]
-    )
-    longitude = FloatField(
-        'Kinh độ (Longitude)',
-        validators=[Optional(), NumberRange(min=-180, max=180)]
-    )
+    # Tọa độ - CHỈ 1 Ô INPUT
+    coordinates = StringField('Tọa độ (Lat, Lng)', validators=[Optional()])
+    latitude = HiddenField()
+    longitude = HiddenField()
 
     # Google Maps
     map_iframe = TextAreaField('Google Maps Iframe', validators=[Optional()])
