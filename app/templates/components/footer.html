@@ -1,5 +1,5 @@
 <!-- FOOTER (BRICON Minimal) -->
-<footer class="footer-hero" style="--footer-bg:url('{{ url_for('static', filename='img/tau.webp') }}');">
+<footer class="footer-hero" style="--footer-bg:url('{{ url_for('static', filename='img/thi-cong.webp') }}');">
   <div class="footer-wrap">
     <div class="footer-card">
 
@@ -149,25 +149,12 @@
           </ul>
         </div>
 
-        <!-- Cột 4: Fanpage (giữ lại) -->
+        <!-- Cột 4: Fanpage FB -->
         <div class="footer-col footer-right">
           <h5 class="footer-title">Fanpage Facebook</h5>
           <div class="mini-block">
             <div class="fanpage-box">
-              <div class="fanpage-placeholder">
-                <div class="fp-logo">
-                  <img
-                    src="{{ url_for('static', filename='img/logo-fanpage.webp') }}"
-                    alt="Logo Fanpage"
-                    style="width:100%;height:100%;object-fit:cover;border-radius:50%;"
-                  />
-                </div>
-                <div class="fp-name">{{ get_setting('website_name', 'BRICON') }}</div>
-                <div class="fp-meta">{{ get_setting('facebook_followers', '80K') }} người theo dõi</div>
-                <a href="{{ get_setting('facebook_url', '#') }}" target="_blank" class="fp-follow">
-                  Theo dõi Trang
-                </a>
-              </div>
+              <iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fkeoxaydungvachongthambricon&tabs=tin%20nh%E1%BA%AFn&width=340&height=70&small_header=true&adapt_container_width=true&hide_cover=true&show_facepile=true&appId" width="340" height="70" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
             </div>
           </div>
         </div>

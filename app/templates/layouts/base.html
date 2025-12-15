@@ -254,23 +254,10 @@
       </div>
     </div>
     <!-- ==================== HEADER / NAVBAR  ==================== -->
-      <header class="site-header">
-  <!-- HÀNG TRÊN: Logo + Search + Hotline -->
-  <div class="header-main">
-    <div class="container">
-
-      <!-- Hamburger menu (mobile only) -->
-      <button
-        class="navbar-toggler d-lg-none"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarNav"
-        aria-controls="navbarNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
+    <!-- ==================== HEADER / NAVBAR  ==================== -->
+<header class="site-header">
+  <div class="container">
+    <nav class="navbar navbar-expand-lg" aria-label="Main navigation">
 
       <!-- Logo -->
       <a class="navbar-brand" href="{{ url_for('main.index') }}">
@@ -283,185 +270,174 @@
         />
       </a>
 
-      <!-- Ô TÌM KIẾM (desktop) -->
-      <form
-        class="header-search-group d-none d-lg-block"
-        action="{{ url_for('main.search') }}"
-        method="get"
-      >
-        <div class="header-search-box">
-          <input
-            type="text"
-            name="q"
-            class="header-search-input"
-            placeholder="Tìm nhanh"
-            autocomplete="off"
-          />
-          <button type="submit" class="header-search-icon-btn" aria-label="Tìm kiếm">
-            <i class="bi bi-search"></i>
-          </button>
-        </div>
-      </form>
-
-      <!-- Hotline (desktop) -->
-      <div class="header-actions d-none d-lg-flex">
-        <div class="header-hotline-row">
-          <span class="header-hotline-label">Hotline:</span>
-          <a
-            href="tel:{{ get_setting('hotline', '0901180094')|replace('.', '')|replace(' ', '') }}"
-            class="header-hotline-number"
-          >
-            {{ get_setting('hotline', '0901.180.094') }}
-          </a>
-        </div>
-      </div>
-
-      <!-- Nút search mobile -->
+      <!-- Hamburger menu (mobile only) -->
       <button
-        class="btn-mobile-search d-lg-none"
+        class="navbar-toggler"
         type="button"
-        data-bs-toggle="modal"
-        data-bs-target="#searchModal"
-        aria-label="Tìm kiếm"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
       >
-        <i class="bi bi-search"></i>
+        <span class="navbar-toggler-icon"></span>
       </button>
 
-    </div>
-  </div>
+      <!-- Menu chính (desktop: căn giữa) -->
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a
+              class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}"
+              href="{{ url_for('main.index') }}"
+            >
+              Trang Chủ
+            </a>
+          </li>
 
-  <!-- HÀNG DƯỚI: MENU CHÍNH -->
-  <div class="header-nav mau-thanh-nav">
-    <div class="container">
-      <nav class="navbar navbar-expand-lg" aria-label="Main navigation">
+          <li class="nav-item">
+            <a
+              class="nav-link {% if request.endpoint == 'main.about' %}active{% endif %}"
+              href="{{ url_for('main.about') }}"
+            >
+              Về Chúng Tôi
+            </a>
+          </li>
 
-        <!-- SPACER TRÁI (ẩn trên mobile) - cùng width với logo -->
-        <div class="nav-spacer-left d-none d-lg-block"></div>
-
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a
-                class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}"
-                href="{{ url_for('main.index') }}"
-              >
-                Trang Chủ
-              </a>
-            </li>
-
-            <li class="nav-item">
-              <a
-                class="nav-link {% if request.endpoint == 'main.about' %}active{% endif %}"
-                href="{{ url_for('main.about') }}"
-              >
-                Về Chúng Tôi
-              </a>
-            </li>
-
-            {% if is_feature_enabled('products') %}
-            <li class="nav-item dropdown">
-              <a
-                class="nav-link dropdown-toggle {% if request.endpoint == 'main.products' %}active{% endif %}"
-                href="{{ url_for('main.products') }}"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                Sản Phẩm
-              </a>
-              <ul class="dropdown-menu">
+          {% if is_feature_enabled('products') %}
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle {% if request.endpoint == 'main.products' %}active{% endif %}"
+              href="{{ url_for('main.products') }}"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              Sản Phẩm
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class="dropdown-item fw-semibold" href="{{ url_for('main.products') }}">
+                  <i class="bi bi-grid-3x3-gap"></i>Tất Cả Sản Phẩm
+                </a>
+              </li>
+              {% if all_categories %}
+                <li><hr class="dropdown-divider" /></li>
+                {% for category in all_categories %}
                 <li>
-                  <a class="dropdown-item fw-semibold" href="{{ url_for('main.products') }}">
-                    <i class="bi bi-grid-3x3-gap"></i>Tất Cả Sản Phẩm
+                  <a
+                    class="dropdown-item"
+                    href="{{ url_for('main.products', category_slug=category.slug) }}"
+                  >
+                    <i class="bi bi-tag"></i>{{ category.name }}
                   </a>
                 </li>
-                {% if all_categories %}
-                  <li><hr class="dropdown-divider" /></li>
-                  {% for category in all_categories %}
-                  <li>
-                    <a
-                      class="dropdown-item"
-                      href="{{ url_for('main.products', category_slug=category.slug) }}"
-                    >
-                      <i class="bi bi-tag"></i>{{ category.name }}
-                    </a>
-                  </li>
-                  {% endfor %}
-                {% endif %}
-              </ul>
-            </li>
-            {% endif %}
+                {% endfor %}
+              {% endif %}
+            </ul>
+          </li>
+          {% endif %}
 
-            {% if is_feature_enabled('projects') %}
-            <li class="nav-item">
-              <a
-                class="nav-link {% if request.endpoint == 'main.projects' %}active{% endif %}"
-                href="{{ url_for('main.projects') }}"
-              >
-                Dự Án
-              </a>
-            </li>
-            {% endif %}
+          {% if is_feature_enabled('projects') %}
+          <li class="nav-item">
+            <a
+              class="nav-link {% if request.endpoint == 'main.projects' %}active{% endif %}"
+              href="{{ url_for('main.projects') }}"
+            >
+              Dự Án
+            </a>
+          </li>
+          {% endif %}
 
-            {% if is_feature_enabled('careers') %}
-            <li class="nav-item">
-              <a
-                class="nav-link {% if request.endpoint == 'main.careers' %}active{% endif %}"
-                href="{{ url_for('main.careers') }}"
-              >
-                Tuyển Dụng
-              </a>
-            </li>
-            {% endif %}
+          {% if is_feature_enabled('careers') %}
+          <li class="nav-item">
+            <a
+              class="nav-link {% if request.endpoint == 'main.careers' %}active{% endif %}"
+              href="{{ url_for('main.careers') }}"
+            >
+              Tuyển Dụng
+            </a>
+          </li>
+          {% endif %}
 
-            {% if is_feature_enabled('blogs') or is_feature_enabled('faqs') %}
-            <li class="nav-item dropdown">
-              <a
-                class="nav-link dropdown-toggle"
-                href="#"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                Tin Tức
-              </a>
-              <ul class="dropdown-menu">
-                {% if is_feature_enabled('blogs') %}
-                <li>
-                  <a class="dropdown-item" href="{{ url_for('main.blog') }}">
-                    <i class="bi bi-journal-text"></i>Kiến Thức Thi Công
-                  </a>
-                </li>
-                {% endif %}
-                {% if is_feature_enabled('faqs') %}
-                <li>
-                  <a class="dropdown-item" href="{{ url_for('main.faq') }}">
-                    <i class="bi bi-question-circle"></i>Câu Hỏi Thường Gặp
-                  </a>
-                </li>
-                {% endif %}
-              </ul>
-            </li>
-            {% endif %}
+          {% if is_feature_enabled('blogs') or is_feature_enabled('faqs') %}
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              Tin Tức
+            </a>
+            <ul class="dropdown-menu">
+              {% if is_feature_enabled('blogs') %}
+              <li>
+                <a class="dropdown-item" href="{{ url_for('main.blog') }}">
+                  <i class="bi bi-journal-text"></i>Kiến Thức Thi Công
+                </a>
+              </li>
+              {% endif %}
+              {% if is_feature_enabled('faqs') %}
+              <li>
+                <a class="dropdown-item" href="{{ url_for('main.faq') }}">
+                  <i class="bi bi-question-circle"></i>Câu Hỏi Thường Gặp
+                </a>
+              </li>
+              {% endif %}
+            </ul>
+          </li>
+          {% endif %}
 
-            {% if is_feature_enabled('contacts') %}
-            <li class="nav-item">
-              <a
-                class="nav-link {% if request.endpoint == 'main.contact' %}active{% endif %}"
-                href="{{ url_for('main.contact') }}"
-              >
-                Liên Hệ
-              </a>
-            </li>
-            {% endif %}
-          </ul>
-        </div>
+          {% if is_feature_enabled('contacts') %}
+          <li class="nav-item">
+            <a
+              class="nav-link {% if request.endpoint == 'main.contact' %}active{% endif %}"
+              href="{{ url_for('main.contact') }}"
+            >
+              Liên Hệ
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
 
-        <!-- SPACER PHẢI (ẩn trên mobile) - cùng width với hotline -->
-        <div class="nav-spacer-right d-none d-lg-block"></div>
+      <!-- Search + Icons (bên phải) -->
+      <div class="header-actions">
+        <!-- Search form (desktop) -->
+        <form
+          class="header-search d-none d-lg-flex"
+          action="{{ url_for('main.search') }}"
+          method="get"
+        >
+          <div class="header-search-box">
+            <input
+              type="text"
+              name="q"
+              class="header-search-input"
+              placeholder="Tìm kiếm..."
+              autocomplete="off"
+            />
+            <button type="submit" class="header-search-btn" aria-label="Tìm kiếm">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
+        </form>
 
-      </nav>
-    </div>
+        <!-- Search icon (mobile) -->
+        <button
+          class="btn-icon d-lg-none"
+          type="button"
+          data-bs-toggle="modal"
+          data-bs-target="#searchModal"
+          aria-label="Tìm kiếm"
+        >
+          <i class="bi bi-search"></i>
+        </button>
+      </div>
+
+    </nav>
   </div>
 </header>
 
