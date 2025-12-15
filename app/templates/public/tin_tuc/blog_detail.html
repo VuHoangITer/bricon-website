@@ -61,27 +61,6 @@
         <article itemscope itemtype="https://schema.org/BlogPosting">
           <!-- Blog Header -->
           <header class="mb-4">
-            <!-- Featured Image -->
-            {% if blog.image %}
-            <figure class="mb-4">
-              {% set media_info = blog.get_media_seo_info() %}
-
-              <img
-                src="{{ blog.image }}"
-                class="img-fluid rounded shadow-sm"
-                alt="{{ media_info.alt_text if media_info and media_info.alt_text else blog.title }}"
-                title="{{ media_info.title if media_info and media_info.title else blog.title }}"
-                itemprop="image"
-                loading="eager"
-              />
-
-              {# Caption hiển thị #} {% if media_info and media_info.caption %}
-              <figcaption class="text-muted small mt-2 fst-italic text-center">
-                {{ media_info.caption }}
-              </figcaption>
-              {% endif %}
-            </figure>
-            {% endif %}
             <h1 class="fw-bold mb-3">{{ blog.title }}</h1>
 
             <!-- Meta Info -->
@@ -118,7 +97,27 @@
               </div>
             </div>
           </header>
+            <!-- Featured Image -->
+            {% if blog.image %}
+            <figure class="mb-4">
+              {% set media_info = blog.get_media_seo_info() %}
 
+              <img
+                src="{{ blog.image }}"
+                class="img-fluid rounded shadow-sm"
+                alt="{{ media_info.alt_text if media_info and media_info.alt_text else blog.title }}"
+                title="{{ media_info.title if media_info and media_info.title else blog.title }}"
+                itemprop="image"
+                loading="eager"
+              />
+
+              {# Caption hiển thị #} {% if media_info and media_info.caption %}
+              <figcaption class="text-muted small mt-2 fst-italic text-center">
+                {{ media_info.caption }}
+              </figcaption>
+              {% endif %}
+            </figure>
+            {% endif %}
           <!-- Blog Content -->
           <div class="blog-content-detail" itemprop="articleBody">
             {{ blog.content|safe }}
@@ -213,96 +212,84 @@
       <!-- ==================== SIDEBAR ==================== -->
       <div class="col-lg-3">
         <div class="blog-sidebar-sticky">
-        <!-- Table of Contents Card -->
-        <div class="blog-toc-card">
-          <div class="blog-toc-header">
-            <h5>
-              <i class="bi bi-list-ul"></i>
-              Mục lục
-            </h5>
-          </div>
-          <div class="blog-toc-body" id="blog-toc-container">
-            <!-- TOC sẽ được tự động tạo bởi JavaScript -->
-          </div>
-        </div>
-
-        <!-- Featured Blogs -->
-        {% if featured_blogs %}
-        <div class="card featured-blogs-card shadow-sm border-0">
-          <div class="card-header bg-white border-0 pb-0">
-            <h6 class="fw-bold mb-0">
-              <i class="bi bi-star text-warning me-2"></i>Tin Tức Nổi Bật
-            </h6>
-          </div>
-          <div class="list-group list-group-flush featured-blogs-list">
-            {% for fb in featured_blogs[:3] %}
-            <a
-              href="{{ url_for('main.blog_detail', slug=fb.slug) }}"
-              class="list-group-item list-group-item-action d-flex align-items-center px-3 py-2 featured-blog-item"
-            >
-              {% if fb.image %}
-              <div class="featured-thumb flex-shrink-0 me-2">
-                <img
-                  src="{{ fb.image }}"
-                  alt="{{ fb.title }}"
-                  class="img-fluid rounded"
-                />
-              </div>
-              {% endif %}
-              <div class="flex-grow-1">
-                <p class="featured-title mb-1 small fw-semibold text-dark">
-                  {{ fb.title }}
-                </p>
-                <div class="d-flex align-items-center small text-muted">
-                  <i class="bi bi-calendar me-1"></i>
-                  <span>{{ fb.created_at|vn_date }}</span>
+          <!-- Featured Blogs -->
+          {% if featured_blogs %}
+          <div class="card featured-blogs-card shadow-sm border-0">
+            <div class="card-header bg-white border-0 pb-0">
+              <h6 class="fw-bold mb-0">
+                <i class="bi bi-star text-warning me-2"></i>Tin Tức Nổi Bật
+              </h6>
+            </div>
+            <div class="list-group list-group-flush featured-blogs-list">
+              {% for fb in featured_blogs[:3] %}
+              <a
+                href="{{ url_for('main.blog_detail', slug=fb.slug) }}"
+                class="list-group-item list-group-item-action d-flex align-items-center px-3 py-2 featured-blog-item"
+              >
+                {% if fb.image %}
+                <div class="featured-thumb flex-shrink-0 me-2">
+                  <img
+                    src="{{ fb.image }}"
+                    alt="{{ fb.title }}"
+                    class="img-fluid rounded"
+                  />
                 </div>
-              </div>
-            </a>
-            {% endfor %}
+                {% endif %}
+                <div class="flex-grow-1">
+                  <p class="featured-title mb-1 small fw-semibold text-dark">
+                    {{ fb.title }}
+                  </p>
+                  <div class="d-flex align-items-center small text-muted">
+                    <i class="bi bi-calendar me-1"></i>
+                    <span>{{ fb.created_at|vn_date }}</span>
+                  </div>
+                </div>
+              </a>
+              {% endfor %}
+            </div>
           </div>
-        </div>
-        {% endif %}
+          {% endif %}
 
-        <!-- Tags Card -->
-        <div class="card shadow-sm border-0">
-          <div class="card-header bg-white border-0">
-            <h6 class="fw-bold mb-0">
-              <i class="bi bi-tags text-warning me-2"></i>Tags liên quan
-            </h6>
-          </div>
-          <div class="card-body">
-            <div class="d-flex flex-wrap gap-2">
-              <a href="{{ url_for('main.blog', search='keo dán gạch') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
-                <i class="bi bi-tag-fill me-1"></i>Keo dán gạch
-              </a>
-              <a href="{{ url_for('main.blog', search='keo chà ron') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
-                <i class="bi bi-tag-fill me-1"></i>Keo chà ron
-              </a>
-              <a href="{{ url_for('main.blog', search='chống thấm') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
-                <i class="bi bi-tag-fill me-1"></i>Chống thấm
-              </a>
-              <a href="{{ url_for('main.blog', search='xi măng') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
-                <i class="bi bi-tag-fill me-1"></i>Xi măng
-              </a>
-              <a href="{{ url_for('main.blog', search='gạch ốp lát') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
-                <i class="bi bi-tag-fill me-1"></i>Gạch ốp lát
-              </a>
-              <a href="{{ url_for('main.blog', search='vữa xây') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
-                <i class="bi bi-tag-fill me-1"></i>Vữa xây
-              </a>
-              <a href="{{ url_for('main.blog', search='sơn tường') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
-                <i class="bi bi-tag-fill me-1"></i>Sơn tường
-              </a>
-              <a href="{{ url_for('main.blog', search='xây dựng') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
-                <i class="bi bi-tag-fill me-1"></i>Xây dựng
-              </a>
+          <!-- Tags Card -->
+          <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0">
+              <h6 class="fw-bold mb-0">
+                <i class="bi bi-tags text-warning me-2"></i>Tags liên quan
+              </h6>
+            </div>
+            <div class="card-body">
+              <div class="d-flex flex-wrap gap-2">
+                <a href="{{ url_for('main.blog', search='keo dán gạch') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
+                  <i class="bi bi-tag-fill me-1"></i>Keo dán gạch
+                </a>
+                <a href="{{ url_for('main.blog', search='keo chà ron') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
+                  <i class="bi bi-tag-fill me-1"></i>Keo chà ron
+                </a>
+                <a href="{{ url_for('main.blog', search='chống thấm') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
+                  <i class="bi bi-tag-fill me-1"></i>Chống thấm
+                </a>
+                <a href="{{ url_for('main.blog', search='xi măng') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
+                  <i class="bi bi-tag-fill me-1"></i>Xi măng
+                </a>
+                <a href="{{ url_for('main.blog', search='gạch ốp lát') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
+                  <i class="bi bi-tag-fill me-1"></i>Gạch ốp lát
+                </a>
+                <a href="{{ url_for('main.blog', search='vữa xây') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
+                  <i class="bi bi-tag-fill me-1"></i>Vữa xây
+                </a>
+                <a href="{{ url_for('main.blog', search='sơn tường') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
+                  <i class="bi bi-tag-fill me-1"></i>Sơn tường
+                </a>
+                <a href="{{ url_for('main.blog', search='xây dựng') }}" class="badge bg-light text-dark px-3 py-2 text-decoration-none tag-item">
+                  <i class="bi bi-tag-fill me-1"></i>Xây dựng
+                </a>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
   </div>
+    </div>
 </section>
 
 <!-- ==================== SCHEMA.ORG - ARTICLE ==================== -->
