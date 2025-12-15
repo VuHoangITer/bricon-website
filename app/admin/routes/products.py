@@ -28,8 +28,12 @@ def products():
     """Danh sách sản phẩm"""
     page = request.args.get('page', 1, type=int)
 
-    # ✅ KHÔNG DÙNG CACHE - QUERY TRỰC TIẾP
-    products_list = Product.query.order_by(Product.created_at.desc()).all()
+    cache_key = 'admin_products_all'
+    products_list = cache_manager.get(cache_key)
+
+    if products_list is None:
+        products_list = Product.query.order_by(Product.created_at.desc()).all()
+        cache_manager.set(cache_key, products_list)
 
     # Phân trang
     per_page = 20

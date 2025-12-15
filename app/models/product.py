@@ -93,35 +93,17 @@ class Product(db.Model):
 @event.listens_for(Category, 'after_update')
 @event.listens_for(Category, 'after_delete')
 def clear_category_cache(mapper, connection, target):
-    """Clear cache khi category thay đổi"""
     from app import cache_manager
-
-    # Clear tất cả cache liên quan đến categories
     cache_manager.clear('categories')
-    cache_manager.clear('categories_active')
-
-    # Clear luôn products vì products có liên kết với categories
     cache_manager.clear('products')
-    cache_manager.clear('products_all')
-    cache_manager.clear('products_featured')
 
 
 @event.listens_for(Product, 'after_insert')
 @event.listens_for(Product, 'after_update')
 @event.listens_for(Product, 'after_delete')
 def clear_product_cache(mapper, connection, target):
-    """Clear cache khi product thay đổi"""
     from app import cache_manager
-
-    # ✅ Clear TẤT CẢ các cache keys liên quan đến products
     cache_manager.clear('products')
-    cache_manager.clear('products_all')
-    cache_manager.clear('products_featured')
-    cache_manager.clear('admin_products_all')
-
-    # Clear cache theo category nếu có
-    if target.category_id:
-        cache_manager.clear(f'products_cat_{target.category_id}')
 
 
 # ==================== HELPER FUNCTIONS ====================
@@ -129,24 +111,19 @@ def clear_product_cache(mapper, connection, target):
 def get_cached_categories():
     """Lấy categories từ cache hoặc DB"""
     from app import cache_manager
-
-    cache_key = 'categories_active'
-    cached = cache_manager.get(cache_key)
-
+    cached = cache_manager.get('categories_active')
     if cached is not None:
         return cached
 
-    categories = Category.query.filter_by(is_active=True).order_by(Category.name).all()
-    cache_manager.set(cache_key, categories, timeout=300)  # Cache 5 phút
-
+    categories = Category.query.filter_by(is_active=True).all()
+    cache_manager.set('categories_active', categories)
     return categories
 
 
-def get_cached_products(category_id=None, featured_only=False, active_only=True):
+def get_cached_products(category_id=None, featured_only=False):
     """Lấy products từ cache hoặc DB"""
     from app import cache_manager
 
-    # Tạo cache key dựa trên parameters
     if featured_only:
         cache_key = 'products_featured'
     elif category_id:
@@ -158,24 +135,12 @@ def get_cached_products(category_id=None, featured_only=False, active_only=True)
     if cached is not None:
         return cached
 
-    # Query products
-    query = Product.query
-
-    if active_only:
-        query = query.filter_by(is_active=True)
-
+    query = Product.query.filter_by(is_active=True)
     if featured_only:
         query = query.filter_by(is_featured=True)
-
     if category_id:
         query = query.filter_by(category_id=category_id)
 
-    # Order by created_at descending
-    query = query.order_by(Product.created_at.desc())
-
     products = query.all()
-
-    # Cache kết quả (5 phút)
-    cache_manager.set(cache_key, products, timeout=300)
-
+    cache_manager.set(cache_key, products)
     return products
