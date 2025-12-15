@@ -235,7 +235,7 @@
             </h6>
           </div>
           <div class="list-group list-group-flush featured-blogs-list">
-            {% for fb in featured_blogs %}
+            {% for fb in featured_blogs[:3] %}
             <a
               href="{{ url_for('main.blog_detail', slug=fb.slug) }}"
               class="list-group-item list-group-item-action d-flex align-items-center px-3 py-2 featured-blog-item"
