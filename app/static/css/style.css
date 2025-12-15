@@ -1959,10 +1959,19 @@ section h2 {
 .footer-copy .dot{ margin: 0 8px; opacity: .6; }
 
 /* Responsive */
+/* Responsive */
 @media (max-width: 992px){
   .footer-card{ padding: 28px 20px 16px; }
   .footer-grid{ grid-template-columns: 1fr 1fr; gap: 22px; }
+
+  /* Xử lý fanpage iframe */
+  .fanpage-box iframe{
+    width: 100% !important;
+    max-width: 100%;
+    height: 400px;
+  }
 }
+
 @media (max-width: 600px){
   .footer-hero{ padding: 34px 14px; }
   .footer-grid{ grid-template-columns: 1fr; }
@@ -1973,6 +1982,75 @@ section h2 {
     align-items:center;
   }
   .brand-logo{ height: 56px; }
+
+  /* QUAN TRỌNG: Xử lý text dài và fanpage */
+  .footer-card{
+    padding: 20px 16px 14px;
+    overflow: hidden; /* Ngăn tràn */
+  }
+
+  /* Text wrap cho địa chỉ dài */
+  .contact-list li{
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .brand-desc{
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  /* Fanpage responsive */
+  .fanpage-box{
+    padding: 8px;
+    overflow: hidden;
+  }
+
+  .fanpage-box iframe{
+    width: 100% !important;
+    max-width: 100%;
+    height: 350px;
+    border-radius: 8px;
+  }
+
+  /* Footer links wrap */
+  .footer-links-list a{
+    font-size: 13px;
+    word-break: break-word;
+  }
+
+  /* Social buttons */
+  .social-row{
+    flex-wrap: wrap;
+  }
+}
+
+/* Thêm breakpoint cho màn hình rất nhỏ */
+@media (max-width: 400px){
+  .footer-card{
+    padding: 16px 12px 12px;
+  }
+
+  .fanpage-box iframe{
+    height: 300px;
+  }
+
+  .brand-logo{ height: 48px; }
+
+  .contact-list{
+    font-size: 13px;
+  }
+
+  .footer-bottom{
+    padding: 12px 14px;
+    font-size: 12px;
+  }
+
+  .footer-bottom-links{
+    font-size: 12px;
+    gap: 12px;
+  }
 }
 
 
@@ -2571,10 +2649,6 @@ section h2 {
     font-size: 11px;
   }
 }
-
-/* ==================== WORK PROCESS SECTION ==================== */
-
-/* ==================== ABOUT COMPANY SECTION ==================== */
 
 /* ==================== WHY CHOOSE US SECTION ==================== */
 .bricon-why-section {
