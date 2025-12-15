@@ -5,7 +5,7 @@
 
 from flask import render_template, request, flash, redirect, url_for
 from app import db, cache_manager
-from app.models.product import Product
+from app.models.product import Product, get_cached_products
 from app.forms.product import ProductForm
 from app.decorators import permission_required
 from app.admin import admin_bp
@@ -25,21 +25,55 @@ from app.admin.utils.technical_parser import (
 @permission_required('view_products')
 @feature_required('products')
 def products():
-    """Danh sách sản phẩm với cache được fix"""
+    """Danh sách sản phẩm"""
     page = request.args.get('page', 1, type=int)
+
+    # ✅ KHÔNG DÙNG CACHE - QUERY TRỰC TIẾP
+    products_list = Product.query.order_by(Product.created_at.desc()).all()
+
+    # Phân trang
     per_page = 20
+    total = len(products_list)
+    start = (page - 1) * per_page
+    end = start + per_page
+    products_page = products_list[start:end]
 
-    # ✅ QUERY TRỰC TIẾP TỪ DATABASE - KHÔNG DÙNG CACHE
-    # Cache có thể gây vấn đề với pagination và real-time updates
-    query = Product.query.order_by(Product.created_at.desc())
+    class SimplePagination:
+        def __init__(self, items, page, per_page, total):
+            self.items = items
+            self.page = page
+            self.per_page = per_page
+            self.total = total
+            self.pages = (total + per_page - 1) // per_page
 
-    # Sử dụng paginate của SQLAlchemy
-    pagination = query.paginate(
-        page=page,
-        per_page=per_page,
-        error_out=False
-    )
+        @property
+        def has_prev(self):
+            return self.page > 1
 
+        @property
+        def has_next(self):
+            return self.page < self.pages
+
+        @property
+        def prev_num(self):
+            return self.page - 1 if self.has_prev else None
+
+        @property
+        def next_num(self):
+            return self.page + 1 if self.has_next else None
+
+        def iter_pages(self, left_edge=2, left_current=2, right_current=3, right_edge=2):
+            last = 0
+            for num in range(1, self.pages + 1):
+                if (num <= left_edge or
+                    (self.page - left_current <= num <= self.page + right_current) or
+                    num > self.pages - right_edge):
+                    if last + 1 != num:
+                        yield None
+                    yield num
+                    last = num
+
+    pagination = SimplePagination(products_page, page, per_page, total)
     return render_template('admin/san_pham/products.html', products=pagination)
 
 
@@ -58,7 +92,7 @@ def add_product():
             if not is_valid:
                 flash(f'❌ Lỗi định dạng:\n{message}', 'danger')
                 return render_template('admin/san_pham/product_form.html',
-                                       form=form, title='Thêm sản phẩm')
+                                     form=form, title='Thêm sản phẩm')
 
         # Xử lý hình ảnh
         image_path = get_image_from_form(form.image, 'image', folder='products')
@@ -84,10 +118,6 @@ def add_product():
         try:
             db.session.add(product)
             db.session.commit()
-
-            # ✅ CLEAR CACHE SAU KHI THÊM
-            cache_manager.clear('products')
-
             flash(f'✅ Đã thêm sản phẩm "{product.name}"!', 'success')
             return redirect(url_for('admin.products'))
         except Exception as e:
@@ -95,7 +125,7 @@ def add_product():
             flash(f'❌ Lỗi: {str(e)}', 'danger')
 
     return render_template('admin/san_pham/product_form.html',
-                           form=form, title='Thêm sản phẩm')
+                          form=form, title='Thêm sản phẩm')
 
 
 # ==================== SỬA SẢN PHẨM ====================
@@ -114,9 +144,9 @@ def edit_product(id):
             if not is_valid:
                 flash(f'❌ Lỗi định dạng:\n{message}', 'danger')
                 return render_template('admin/san_pham/product_form.html',
-                                       form=form,
-                                       title=f'Sửa: {product.name}',
-                                       product=product)
+                                     form=form,
+                                     title=f'Sửa: {product.name}',
+                                     product=product)
 
         # Xử lý hình ảnh
         new_image = get_image_from_form(form.image, 'image', folder='products')
@@ -142,10 +172,6 @@ def edit_product(id):
         # Lưu
         try:
             db.session.commit()
-
-            # ✅ CLEAR CACHE SAU KHI SỬA
-            cache_manager.clear('products')
-
             flash(f'✅ Đã cập nhật "{product.name}"!', 'success')
             return redirect(url_for('admin.products'))
         except Exception as e:
@@ -158,9 +184,9 @@ def edit_product(id):
             form.technical_info_raw.data = technical_info_to_text(product.technical_info)
 
     return render_template('admin/san_pham/product_form.html',
-                           form=form,
-                           title=f'Sửa: {product.name}',
-                           product=product)
+                          form=form,
+                          title=f'Sửa: {product.name}',
+                          product=product)
 
 
 # ==================== XÓA SẢN PHẨM ====================
@@ -170,17 +196,7 @@ def edit_product(id):
 def delete_product(id):
     """Xóa sản phẩm"""
     product = Product.query.get_or_404(id)
-
-    try:
-        db.session.delete(product)
-        db.session.commit()
-
-        # ✅ CLEAR CACHE SAU KHI XÓA
-        cache_manager.clear('products')
-
-        flash('✅ Đã xóa sản phẩm!', 'success')
-    except Exception as e:
-        db.session.rollback()
-        flash(f'❌ Lỗi khi xóa: {str(e)}', 'danger')
-
+    db.session.delete(product)
+    db.session.commit()
+    flash('✅ Đã xóa sản phẩm!', 'success')
     return redirect(url_for('admin.products'))
