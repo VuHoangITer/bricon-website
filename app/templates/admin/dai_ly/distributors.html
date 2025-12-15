@@ -10,9 +10,14 @@
       <h2 class="mb-1"><i class="bi bi-shop"></i> Nhà phân phối</h2>
       <p class="text-muted mb-0">Quản lý danh sách đại lý và nhà phân phối</p>
     </div>
-    <a href="{{ url_for('admin.add_distributor') }}" class="btn btn-primary">
-      <i class="bi bi-plus-lg"></i> Thêm đại lý
-    </a>
+    <div>
+      <button onclick="deleteAll()" class="btn btn-danger me-2">
+        <i class="bi bi-trash"></i> Xóa tất cả
+      </button>
+      <a href="{{ url_for('admin.add_distributor') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Thêm đại lý
+      </a>
+    </div>
   </div>
 
   <!-- Filter & Search -->
@@ -173,14 +178,30 @@
 
 <!-- Delete Form (hidden) -->
 <form id="deleteForm" method="POST" style="display: none;">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+</form>
+
+<!-- Delete All Form (hidden) -->
+<form id="deleteAllForm" method="POST" action="{{ url_for('admin.delete_all_distributors') }}" style="display: none;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 </form>
 
 <script>
-// Get CSRF token
+// Get CSRF token from meta tag or form
 function getCsrfToken() {
-  const token = document.querySelector('meta[name="csrf-token"]');
-  return token ? token.content : '';
+  // Try meta tag first
+  const metaToken = document.querySelector('meta[name="csrf-token"]');
+  if (metaToken) {
+    return metaToken.content;
+  }
+
+  // Fallback to form hidden input
+  const formToken = document.querySelector('input[name="csrf_token"]');
+  if (formToken) {
+    return formToken.value;
+  }
+
+  return '';
 }
 
 function toggleActive(id, btn) {
@@ -236,6 +257,18 @@ function deleteDistributor(id, name) {
   const form = document.getElementById('deleteForm');
   form.action = `/admin/distributors/${id}/delete`;
   form.submit();
+}
+
+function deleteAll() {
+  const confirmMsg = '⚠️ CẢNH BÁO: Bạn có CHẮC CHẮN muốn xóa TẤT CẢ đại lý?\n\nHành động này KHÔNG THỂ HOÀN TÁC!\n\nGõ "XOA TAT CA" để xác nhận:';
+  const userInput = prompt(confirmMsg);
+
+  if (userInput === 'XOA TAT CA') {
+    const form = document.getElementById('deleteAllForm');
+    form.submit();
+  } else if (userInput !== null) {
+    alert('Đã hủy. Vui lòng gõ chính xác "XOA TAT CA" để xác nhận.');
+  }
 }
 </script>
 {% endblock %}

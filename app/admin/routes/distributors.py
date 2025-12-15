@@ -9,7 +9,7 @@ from app.admin import admin_bp
 import re
 
 
-@admin_bp.route('/admin/distributors')
+@admin_bp.route('/distributors')
 @login_required
 @admin_required
 def distributors():
@@ -50,7 +50,7 @@ def distributors():
     )
 
 
-@admin_bp.route('/admin/distributors/add', methods=['GET', 'POST'])
+@admin_bp.route('/distributors/add', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def add_distributor():
@@ -80,7 +80,7 @@ def add_distributor():
     return render_template('admin/dai_ly/distributor_form.html', form=form, distributor=None)
 
 
-@admin_bp.route('/admin/distributors/<int:id>/edit', methods=['GET', 'POST'])
+@admin_bp.route('/distributors/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def edit_distributor(id):
@@ -105,19 +105,42 @@ def edit_distributor(id):
     return render_template('admin/dai_ly/distributor_form.html', form=form, distributor=distributor)
 
 
-@admin_bp.route('/admin/distributors/<int:id>/delete', methods=['POST'])
+@admin_bp.route('/distributors/<int:id>/delete', methods=['POST'])
 @login_required
 @admin_required
 def delete_distributor(id):
     """Xóa nhà phân phối"""
     distributor = Distributor.query.get_or_404(id)
-    db.session.delete(distributor)
-    db.session.commit()
-    flash('Đã xóa nhà phân phối!', 'success')
+
+    try:
+        db.session.delete(distributor)
+        db.session.commit()
+        flash('Đã xóa nhà phân phối thành công!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Lỗi khi xóa: {str(e)}', 'danger')
+
     return redirect(url_for('admin.distributors'))
 
 
-@admin_bp.route('/admin/distributors/<int:id>/toggle-active', methods=['POST'])
+@admin_bp.route('/distributors/delete-all', methods=['POST'])
+@login_required
+@admin_required
+def delete_all_distributors():
+    """Xóa tất cả nhà phân phối - CHỈ DÙNG TẠM THỜI"""
+    try:
+        count = Distributor.query.count()
+        Distributor.query.delete()
+        db.session.commit()
+        flash(f'Đã xóa tất cả {count} nhà phân phối!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Lỗi khi xóa tất cả: {str(e)}', 'danger')
+
+    return redirect(url_for('admin.distributors'))
+
+
+@admin_bp.route('/distributors/<int:id>/toggle-active', methods=['POST'])
 @login_required
 @admin_required
 def toggle_distributor_active(id):
@@ -128,7 +151,7 @@ def toggle_distributor_active(id):
     return jsonify({'success': True, 'is_active': distributor.is_active})
 
 
-@admin_bp.route('/admin/distributors/<int:id>/toggle-featured', methods=['POST'])
+@admin_bp.route('/distributors/<int:id>/toggle-featured', methods=['POST'])
 @login_required
 @admin_required
 def toggle_distributor_featured(id):

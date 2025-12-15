@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_compress import Compress
+from flask_wtf.csrf import CSRFProtect  # THÊM DÒNG NÀY
 from app.config import Config
 import cloudinary
 import os
@@ -15,6 +16,7 @@ db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
 compress = Compress()
+csrf = CSRFProtect()  # THÊM DÒNG NÀY
 
 # Timezone Việt Nam
 VN_TZ = pytz.timezone('Asia/Ho_Chi_Minh')
@@ -122,6 +124,7 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     login_manager.init_app(app)
     compress.init_app(app)
+    csrf.init_app(app)  # THÊM DÒNG NÀY
 
     # ==================== CLOUDINARY ====================
     cloudinary.config(
