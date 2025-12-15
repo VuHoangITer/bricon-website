@@ -274,19 +274,25 @@ def delete_user(id):
     username = user.username
 
     try:
-        # ✅ CHUYỂN TẤT CẢ BLOGS CỦA USER NÀY CHO USER HIỆN TẠI
+        # ✅ CHUYỂN TẤT CẢ DỮ LIỆU CỦA USER CHO USER HIỆN TẠI
         from app.models.content import Blog
+        from app.models.media import Media
 
+        # 1. Chuyển blogs
         blog_count = user.blogs.count()
-
         if blog_count > 0:
-            # Chuyển tất cả blogs cho current_user
             Blog.query.filter_by(author_id=user.id).update({'author_id': current_user.id})
-            db.session.flush()  # Flush để update ngay
+            flash(f'ℹ️ Đã chuyển {blog_count} bài viết cho bạn.', 'info')
 
-            flash(f'ℹ️ Đã chuyển {blog_count} bài viết của "{username}" cho bạn.', 'info')
+        # 2. Chuyển media files
+        media_count = Media.query.filter_by(uploaded_by=user.id).count()
+        if media_count > 0:
+            Media.query.filter_by(uploaded_by=user.id).update({'uploaded_by': current_user.id})
+            flash(f'ℹ️ Đã chuyển {media_count} file media cho bạn.', 'info')
 
-        # Xóa user
+        db.session.flush()  # Flush tất cả updates
+
+        # 3. Xóa user
         db.session.delete(user)
         db.session.commit()
 
