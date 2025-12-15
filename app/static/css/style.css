@@ -1937,7 +1937,7 @@ section h2 {
 /* Bottom bar (đen-vàng đúng BRICON) */
 .footer-bottom{
   margin-top: 26px;
-  background: linear-gradient(180deg, #0b0f1a, #000);
+  background: #000000bf;
   border: 1px solid rgba(255,255,255,.10);
   color: rgba(255,255,255,.86);
   border-radius: 999px;

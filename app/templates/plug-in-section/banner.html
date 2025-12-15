@@ -27,10 +27,10 @@
         {% set media_info = banner.get_media_seo_info() if banner.image else None %}
         {% set mobile_info = banner.get_mobile_media_seo_info() if banner.image_mobile else media_info %}
 
-        <!-- ✅ Thêm hỗ trợ ảnh mobile -->
+        <!-- mobile -->
         <picture>
           {% if banner.image_mobile %}
-          <!-- Ảnh mobile khi màn hình nhỏ hơn 768px -->
+          <!-- Ảnh mobile  768px -->
           <source media="(max-width: 767px)" srcset="{{ banner.image_mobile }}" type="image/webp">
           {% endif %}
           <!-- Ảnh desktop -->

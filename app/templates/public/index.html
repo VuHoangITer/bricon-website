@@ -54,7 +54,7 @@
   }
 </script>
 
-{# ✅ Schema Product - chỉ thêm nếu products feature enabled và có data #}
+
 {% if is_feature_enabled('products') and featured_products %}
 <script type="application/ld+json">
   [
@@ -84,7 +84,7 @@
 </script>
 {% endif %}
 
-{# ✅ Schema Banner - chỉ thêm nếu banners feature enabled và có data #}
+
 {% if is_feature_enabled('banners') and banners %}
 <script type="application/ld+json">
 {
