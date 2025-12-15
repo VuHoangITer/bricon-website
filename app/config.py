@@ -11,6 +11,11 @@ class Config:
     # ===== CƠ BẢN =====
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
 
+    WTF_CSRF_ENABLED = True
+    WTF_CSRF_CHECK_DEFAULT = False
+    WTF_CSRF_TIME_LIMIT = None
+    WTF_CSRF_SSL_STRICT = False
+
     # ===== DATABASE =====
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
                               'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), '../app.db')
