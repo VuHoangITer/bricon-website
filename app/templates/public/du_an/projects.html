@@ -119,7 +119,7 @@
             <h5 class="card-title" itemprop="name">
               <a
                 href="{{ url_for('main.project_detail', slug=project.slug) }}"
-                class="text-decoration-none text-dark"
+                class="text-decoration-none text-dark project-link"
                 itemprop="url"
               >
                 {{ project.title }}
@@ -167,16 +167,6 @@
                 content="{{ get_setting('website_name') }}"
               />
             </div>
-          </div>
-
-          <!-- Footer -->
-          <div class="card-footer bg-white border-0">
-            <a
-              href="{{ url_for('main.project_detail', slug=project.slug) }}"
-              class="btn btn-outline-warning w-100"
-            >
-              Xem chi tiết <i class="bi bi-arrow-right"></i>
-            </a>
           </div>
         </article>
       </div>
@@ -262,6 +252,7 @@ block extra_css %}
 <style>
   .project-card {
     transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
   }
   .project-card:hover {
     transform: translateY(-5px);
@@ -273,6 +264,9 @@ block extra_css %}
   .project-card:hover .card-img-top {
     transform: scale(1.05);
   }
+  .project-card:hover .card-title a {
+    color: #FFC107 !important;
+  }
   .filter-section .btn {
     transition: all 0.3s ease;
   }
@@ -283,6 +277,20 @@ block extra_css %}
 {% endblock %} {# ==================== CUSTOM SCRIPTS ==================== #} {%
 block extra_js %}
 <script>
-  // Thêm bất kỳ JavaScript tùy chỉnh nào nếu cần
+  document.addEventListener('DOMContentLoaded', function() {
+    // Làm toàn bộ card clickable
+    document.querySelectorAll('.project-card').forEach(function(card) {
+      card.addEventListener('click', function(e) {
+        // Tìm link trong card
+        const link = this.querySelector('.project-link');
+
+        // Nếu người dùng không click trực tiếp vào link
+        if (link && e.target !== link) {
+          // Chuyển hướng đến link
+          window.location.href = link.href;
+        }
+      });
+    });
+  });
 </script>
 {% endblock %} {# ==================== END OF FILE ==================== #}
