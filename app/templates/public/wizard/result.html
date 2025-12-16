@@ -44,8 +44,6 @@
                   {% else %}
                     <span></span>
                   {% endif %}
-
-                  <span class="br-score">{{ item.score }}%</span>
                 </div>
 
                 <div class="br-name">{{ item.product.name }}</div>
@@ -224,16 +222,6 @@
   }
   .br-cat i{ color: var(--br-yellow); }
 
-  .br-score{
-    font-size: 12.5px;
-    font-weight: 950;
-    color: var(--br-ink);
-    padding: 5px 8px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,193,7,.30);
-    background: rgba(255,193,7,.12);
-    flex: 0 0 auto;
-  }
 
   /* Clamp tên sản phẩm tránh dài như ảnh bạn gửi */
   .br-name{
