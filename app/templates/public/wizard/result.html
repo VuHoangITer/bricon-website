@@ -47,13 +47,6 @@
                 </div>
 
                 <div class="br-name">{{ item.product.name }}</div>
-
-                {# Lý do: nếu muốn bỏ luôn cho siêu gọn => xóa block này #}
-                {% if item.reasons %}
-                  <div class="br-reason">
-                    {{ item.reasons[0] }}
-                  </div>
-                {% endif %}
               </div>
             </a>
           {% endfor %}
