@@ -13,8 +13,8 @@ import time
 # =====================================================
 # CẤU HÌNH
 # =====================================================
-DRY_RUN = True  # True = xem thử, False = cập nhật thật
-DELAY = 1.5  # Delay giữa mỗi request (Nominatim yêu cầu tối thiểu 1s)
+DRY_RUN = False
+DELAY = 1.5
 
 # =====================================================
 # FUNCTIONS
