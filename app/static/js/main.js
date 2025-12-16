@@ -1962,3 +1962,227 @@ document.addEventListener("DOMContentLoaded", function () {
     lightboxImg.src = "";
   });
 });
+
+// ==================== SEARCH AUTOCOMPLETE ====================
+(function() {
+  'use strict';
+
+  class SearchAutocomplete {
+    constructor(inputSelector, resultsSelector) {
+      this.input = document.querySelector(inputSelector);
+      this.resultsContainer = document.querySelector(resultsSelector);
+      this.debounceTimer = null;
+      this.currentFocus = -1;
+      this.cache = new Map();
+
+      if (this.input && this.resultsContainer) {
+        this.init();
+      }
+    }
+
+    init() {
+      this.input.addEventListener('input', (e) => this.handleInput(e));
+      this.input.addEventListener('keydown', (e) => this.handleKeydown(e));
+      this.input.addEventListener('focus', () => {
+        if (this.input.value.trim().length >= 2) {
+          this.resultsContainer.style.display = 'block';
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!this.input.contains(e.target) && !this.resultsContainer.contains(e.target)) {
+          this.hideResults();
+        }
+      });
+
+      this.input.closest('form')?.addEventListener('submit', (e) => {
+        if (this.currentFocus >= 0) {
+          e.preventDefault();
+          this.selectItem(this.currentFocus);
+        }
+      });
+    }
+
+    handleInput(e) {
+      const keyword = e.target.value.trim();
+      clearTimeout(this.debounceTimer);
+
+      if (keyword.length < 2) {
+        this.hideResults();
+        return;
+      }
+
+      this.debounceTimer = setTimeout(() => {
+        this.fetchSuggestions(keyword);
+      }, 300);
+    }
+
+    async fetchSuggestions(keyword) {
+      if (this.cache.has(keyword)) {
+        this.renderResults(this.cache.get(keyword));
+        return;
+      }
+
+      try {
+        this.showLoading();
+        const response = await fetch(`/api/search-suggestions?q=${encodeURIComponent(keyword)}`);
+        const data = await response.json();
+
+        this.cache.set(keyword, data.suggestions);
+        if (this.cache.size > 20) {
+          const firstKey = this.cache.keys().next().value;
+          this.cache.delete(firstKey);
+        }
+
+        this.renderResults(data.suggestions);
+      } catch (error) {
+        console.error('Search error:', error);
+        this.hideResults();
+      }
+    }
+
+    showLoading() {
+      this.resultsContainer.innerHTML = `
+        <div class="search-autocomplete-loading">
+          <div class="spinner-border spinner-border-sm text-warning" role="status">
+            <span class="visually-hidden">Đang tìm...</span>
+          </div>
+          <span class="ms-2">Đang tìm kiếm...</span>
+        </div>
+      `;
+      this.resultsContainer.style.display = 'block';
+    }
+
+    renderResults(suggestions) {
+      if (!suggestions || suggestions.length === 0) {
+        this.resultsContainer.innerHTML = `
+          <div class="search-autocomplete-empty">
+            <i class="bi bi-search"></i>
+            <span>Không tìm thấy kết quả phù hợp</span>
+          </div>
+        `;
+        this.resultsContainer.style.display = 'block';
+        return;
+      }
+
+      const grouped = { page: [], product: [], blog: [] };
+      suggestions.forEach(item => {
+        if (grouped[item.type]) grouped[item.type].push(item);
+      });
+
+      let html = '';
+
+      if (grouped.page.length > 0) {
+        html += '<div class="search-autocomplete-group">';
+        html += '<div class="search-autocomplete-group-title"><i class="bi bi-file-text"></i> Trang thông tin</div>';
+        grouped.page.forEach((item, index) => {
+          html += this.renderItem(item, index);
+        });
+        html += '</div>';
+      }
+
+      if (grouped.product.length > 0) {
+        html += '<div class="search-autocomplete-group">';
+        html += '<div class="search-autocomplete-group-title"><i class="bi bi-box-seam"></i> Sản phẩm</div>';
+        grouped.product.forEach((item, index) => {
+          html += this.renderItem(item, grouped.page.length + index);
+        });
+        html += '</div>';
+      }
+
+      if (grouped.blog.length > 0) {
+        html += '<div class="search-autocomplete-group">';
+        html += '<div class="search-autocomplete-group-title"><i class="bi bi-journal-text"></i> Bài viết</div>';
+        grouped.blog.forEach((item, index) => {
+          html += this.renderItem(item, grouped.page.length + grouped.product.length + index);
+        });
+        html += '</div>';
+      }
+
+      this.resultsContainer.innerHTML = html;
+      this.resultsContainer.style.display = 'block';
+      this.currentFocus = -1;
+    }
+
+    renderItem(item, index) {
+      const imageHtml = item.image
+        ? `<img src="${item.image}" alt="${item.title}" class="search-autocomplete-image">`
+        : '';
+
+      return `
+        <a href="${item.url}"
+           class="search-autocomplete-item type-${item.type}"
+           data-index="${index}">
+          ${imageHtml}
+          <span class="search-autocomplete-title">${this.highlightKeyword(item.title)}</span>
+        </a>
+      `;
+    }
+
+    highlightKeyword(text) {
+      const keyword = this.input.value.trim();
+      if (!keyword) return text;
+      const regex = new RegExp(`(${keyword})`, 'gi');
+      return text.replace(regex, '<mark>$1</mark>');
+    }
+
+    handleKeydown(e) {
+      const items = this.resultsContainer.querySelectorAll('.search-autocomplete-item');
+      if (items.length === 0) return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        this.currentFocus++;
+        if (this.currentFocus >= items.length) this.currentFocus = 0;
+        this.setActive(items);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        this.currentFocus--;
+        if (this.currentFocus < 0) this.currentFocus = items.length - 1;
+        this.setActive(items);
+      } else if (e.key === 'Enter') {
+        if (this.currentFocus >= 0) {
+          e.preventDefault();
+          items[this.currentFocus].click();
+        }
+      } else if (e.key === 'Escape') {
+        this.hideResults();
+        this.input.blur();
+      }
+    }
+
+    setActive(items) {
+      items.forEach((item, index) => {
+        if (index === this.currentFocus) {
+          item.classList.add('active');
+          item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        } else {
+          item.classList.remove('active');
+        }
+      });
+    }
+
+    selectItem(index) {
+      const items = this.resultsContainer.querySelectorAll('.search-autocomplete-item');
+      if (items[index]) items[index].click();
+    }
+
+    hideResults() {
+      this.resultsContainer.style.display = 'none';
+      this.currentFocus = -1;
+    }
+  }
+
+  // Initialize
+  function initSearchAutocomplete() {
+    new SearchAutocomplete('.header-search-input', '#search-autocomplete-results');
+    new SearchAutocomplete('#searchModal input[name="q"]', '#search-autocomplete-results-mobile');
+    console.log('✅ Search Autocomplete: Initialized');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSearchAutocomplete);
+  } else {
+    initSearchAutocomplete();
+  }
+})();

@@ -24,7 +24,7 @@
 <!-- Search Results Section -->
 <section class="py-5">
   <div class="container">
-    {% if not products and not blogs %}
+    {% if not products and not blogs and not static_pages %}
     <!-- No Results -->
     <div class="no-results-container">
       <h3 class="no-results-title">Không tìm thấy kết quả</h3>
@@ -40,6 +40,41 @@
           <li><i class="bi bi-check-circle"></i> Sử dụng từ khóa phổ biến hơn</li>
           <li><i class="bi bi-check-circle"></i> Liên hệ với chúng tôi để được tư vấn</li>
         </ul>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if static_pages %}
+    <!-- Static Pages Section -->
+    <div class="search-section mb-5">
+      <div class="section-header mb-4">
+        <div class="d-flex align-items-center gap-2">
+          <h2 class="section-title mb-0">Trang thông tin</h2>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        {% for page in static_pages %}
+        <div class="col-md-6 col-lg-4">
+          <a href="{{ url_for(page.url, **page.params) }}" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm hover-lift">
+              <div class="card-body">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="flex-shrink-0">
+                    <div class="icon-box bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                      <i class="bi {{ page.icon }} fs-4"></i>
+                    </div>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h5 class="card-title fw-bold mb-2">{{ page.title }}</h5>
+                    <p class="card-text text-muted small mb-0">{{ page.description }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+        {% endfor %}
       </div>
     </div>
     {% endif %}
@@ -85,4 +120,105 @@
     {% endif %}
   </div>
 </section>
+
+<style>
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.icon-box {
+  transition: transform 0.3s ease;
+}
+
+.card:hover .icon-box {
+  transform: scale(1.1);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #f8f9fa;
+  padding-bottom: 1rem;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+.view-all-link {
+  color: #ffc107;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.view-all-link:hover {
+  color: #ffb300;
+  text-decoration: underline;
+}
+
+.no-results-container {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.no-results-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #6c757d;
+  margin-bottom: 1rem;
+}
+
+.no-results-text {
+  font-size: 1.1rem;
+  color: #6c757d;
+  margin-bottom: 2rem;
+}
+
+.no-results-suggestions {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 2rem;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.no-results-suggestions h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.no-results-suggestions ul {
+  list-style: none;
+  padding: 0;
+  text-align: left;
+}
+
+.no-results-suggestions li {
+  padding: 0.5rem 0;
+  color: #495057;
+}
+
+.no-results-suggestions li i {
+  color: #ffc107;
+  margin-right: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+</style>
 {% endblock %}
