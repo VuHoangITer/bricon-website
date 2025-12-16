@@ -1,11 +1,11 @@
 {% extends 'layouts/base.html' %}
 
 {% block title %}
-{{ get_setting('meta_title', 'Giới thiệu - BRICON Việt Nam') }}
+{{ get_setting('meta_title', 'Giới thiệu - Bricon Việt Nam') }}
 {% endblock %}
 
 {% block meta_description %}
-{{ get_setting('about_meta_description', 'Về chúng tôi - BRICON Việt Nam, thương hiệu keo dán gạch, keo chà ron và giải pháp chống thấm dành cho công trình Việt.') }}
+{{ get_setting('about_meta_description', 'Về chúng tôi - Bricon Việt Nam, thương hiệu keo dán gạch, keo chà ron và giải pháp chống thấm dành cho công trình Việt.') }}
 {% endblock %}
 
 {% block extra_css %}
@@ -31,14 +31,14 @@
 {
   "@context": "https://schema.org",
   "@type": "AboutPage",
-  "name": "Giới thiệu {{ get_setting('website_name', 'BRICON Việt Nam')|e }}",
+  "name": "Giới thiệu {{ get_setting('website_name', 'Bricon Việt Nam')|e }}",
   "url": "{{ url_for('main.about', _external=True) }}",
   "mainEntity": {
     "@type": "Organization",
-    "name": "{{ get_setting('website_name', 'BRICON Việt Nam')|e }}",
+    "name": "{{ get_setting('website_name', 'Bricon Việt Nam')|e }}",
     "url": "{{ get_setting('main_url', request.url_root)|e }}",
     "logo": "{{ get_setting('logo_url', url_for('static', filename='img/logo.png', _external=True))|e }}",
-    "description": "{{ get_setting('company_info', 'BRICON Việt Nam – Keo của người Việt')|e }}",
+    "description": "{{ get_setting('company_info', 'Bricon Việt Nam – Keo của người Việt')|e }}",
     "address": {
       "@type": "PostalAddress",
       "streetAddress": "171, Đường An Phú Đông 03, Phường An Phú Đông, Quận 12",
@@ -93,7 +93,7 @@
           Về Chúng Tôi
         </h1>
         <p class="mb-3">
-          BRICON Việt Nam là thương hiệu vật liệu xây dựng chuyên về
+          Bricon Việt Nam là thương hiệu vật liệu xây dựng chuyên về
           <strong>keo dán gạch</strong>, <strong>keo chà ron</strong> và
           <strong>giải pháp chống thấm</strong> cho nhà ở dân dụng, công trình thương mại
           và dự án xây dựng trên khắp Việt Nam.
@@ -105,7 +105,7 @@
         </p>
         <p class="mb-0">
           Với nền tảng sản xuất trong nước và đội ngũ gắn bó nhiều năm với ngành keo dán gạch,
-          BRICON không chỉ bán sản phẩm, mà còn mang đến trọn bộ giải pháp:
+          Bricon không chỉ bán sản phẩm, mà còn mang đến trọn bộ giải pháp:
           từ tư vấn chọn keo, hướng dẫn thi công thực tế, đến chính sách bán hàng
           dành riêng cho cửa hàng VLXD và đối tác phân phối.
         </p>
@@ -114,7 +114,7 @@
       <!-- Cột phải: thông tin nhanh -->
       <div class="col-lg-5">
         <div class="border rounded-3 p-3 p-md-4 bg-light">
-          <h3 class="h6 text-uppercase text-muted mb-3">BRICON trong 3 điểm</h3>
+          <h3 class="h6 text-uppercase text-muted mb-3">Bricon trong 3 điểm</h3>
           <ul class="list-unstyled mb-3">
             <li class="d-flex mb-2">
               <span class="me-2">▪</span>
@@ -177,14 +177,14 @@
   </div>
 </section>
 
-<!-- ==================== TẠI SAO CHỌN BRICON ==================== -->
+<!-- ==================== TẠI SAO CHỌN Bricon ==================== -->
 <section class="py-5 bg-white">
   <div class="container">
     <div class="row mb-4">
       <div class="col-lg-8">
-        <h2 class="h4 fw-bold mb-2">Tại sao nhiều đối tác chọn BRICON?</h2>
+        <h2 class="h4 fw-bold mb-2">Bricon luôn là thương hiệu mà mọi đối tác tin tưởng!</h2>
         <p class="mb-0 text-muted">
-          Không chỉ vì giá hay chương trình khuyến mãi, mà vì BRICON hướng đến việc
+          Vì không chỉ giá hay chương trình khuyến mãi, mà vì Bricon hướng đến việc
           làm cho công việc của thợ, của cửa hàng và nhà thầu <strong>nhẹ hơn và rõ ràng hơn</strong>.
         </p>
       </div>
@@ -228,10 +228,10 @@
 <section class="py-5 bg-light">
   <div class="container">
     <div class="row g-4 align-items-center">
-      <div class="col-lg-7">
-        <h2 class="h4 fw-bold mb-3">Lời cam kết từ BRICON</h2>
+      <div class="col-lg-10 mx-auto">
+        <h2 class="h4 fw-bold mb-3">Lời cam kết từ Bricon</h2>
         <p class="mb-3">
-          Mỗi bao keo dán gạch, mỗi gói keo chà ron hay mỗi thùng chống thấm mang thương hiệu BRICON
+          Mỗi bao keo dán gạch, mỗi gói keo chà ron hay mỗi thùng chống thấm mang thương hiệu Bricon
           khi xuất xưởng đều phải đáp ứng đồng thời hai yêu cầu:
           <strong>dễ dùng với thợ</strong> và <strong>giữ được chất lượng công trình trong thời gian dài</strong>.
         </p>
@@ -241,7 +241,7 @@
           chứ không chỉ trên lý thuyết.
         </p>
         <p class="mb-0">
-          BRICON mong muốn trở thành <strong>một phần nhỏ nhưng quan trọng</strong>
+          Bricon mong muốn trở thành <strong>một phần nhỏ nhưng quan trọng</strong>
           trong những công trình bền vững và đẹp mắt trên khắp Việt Nam.
         </p>
       </div>
