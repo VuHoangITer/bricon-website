@@ -1,0 +1,159 @@
+{% extends 'layouts/admin.html' %}
+
+{% block page_title %}Quản lý Options - Bước {{ step.step_number }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">
+            <i class="bi bi-list-check text-warning me-2"></i>
+            Options - Bước {{ step.step_number }}
+        </h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.wizards') }}">Wizards</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.wizard_steps', wizard_id=wizard.id) }}">{{ wizard.name }}</a></li>
+                <li class="breadcrumb-item active">Options</li>
+            </ol>
+        </nav>
+    </div>
+    <div>
+        <a href="{{ url_for('admin.add_option', step_id=step.id) }}" class="btn btn-warning">
+            <i class="bi bi-plus-circle me-1"></i> Thêm Option
+        </a>
+        <a href="{{ url_for('admin.wizard_steps', wizard_id=wizard.id) }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại
+        </a>
+    </div>
+</div>
+
+<!-- Step Info -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-start">
+                    <span class="badge bg-primary fs-5 me-3">{{ step.step_number }}</span>
+                    <div>
+                        <h5 class="mb-1">{{ step.question_text }}</h5>
+                        {% if step.description %}
+                        <p class="text-muted mb-0">{{ step.description }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                {% if step.step_type == 'single_choice' %}
+                <span class="badge bg-info">Chọn 1 đáp án</span>
+                {% else %}
+                <span class="badge bg-success">Chọn nhiều đáp án</span>
+                {% endif %}
+                {% if step.is_required %}
+                <span class="badge bg-danger">Bắt buộc</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if options %}
+<div class="row">
+    {% for option in options %}
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm h-100 option-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="option-display">
+                        {% if option.emoji %}
+                        <div class="option-emoji mb-2">{{ option.emoji }}</div>
+                        {% elif option.icon_class %}
+                        <div class="option-icon mb-2">
+                            <i class="{{ option.icon_class }} text-warning"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <span class="badge bg-secondary">#{{ option.order }}</span>
+                </div>
+
+                <h6 class="fw-bold mb-2">{{ option.option_text }}</h6>
+
+                {% if option.description %}
+                <p class="text-muted small mb-3">{{ option.description }}</p>
+                {% endif %}
+
+                {% if option.tags %}
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1">Tags:</small>
+                    <div class="d-flex flex-wrap gap-1">
+                        {% for tag in option.tags %}
+                        <span class="badge bg-light text-dark border">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="btn-group btn-group-sm w-100">
+                    <a href="{{ url_for('admin.edit_option', id=option.id) }}"
+                       class="btn btn-outline-warning">
+                        <i class="bi bi-pencil me-1"></i> Sửa
+                    </a>
+                    <a href="{{ url_for('admin.delete_option', id=option.id) }}"
+                       class="btn btn-outline-danger"
+                       onclick="return confirm('Xóa option này?')">
+                        <i class="bi bi-trash me-1"></i> Xóa
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card shadow-sm">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-list-check fs-1 text-muted mb-3 d-block"></i>
+        <h5>Chưa có option nào</h5>
+        <p class="text-muted mb-4">Thêm options để user có thể trả lời câu hỏi này</p>
+        <a href="{{ url_for('admin.add_option', step_id=step.id) }}" class="btn btn-warning">
+            <i class="bi bi-plus-circle me-1"></i> Thêm Option đầu tiên
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Tips -->
+<div class="alert alert-info mt-4">
+    <i class="bi bi-info-circle me-2"></i>
+    <strong>Tips:</strong>
+    <ul class="mb-0 mt-2">
+        <li>Mỗi option cần có tags để match với sản phẩm</li>
+        <li>Tags nên khớp với tags trong technical_info của sản phẩm</li>
+        <li>Dùng emoji hoặc icon để UI đẹp hơn</li>
+        <li>Order càng nhỏ càng hiển thị trước</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.option-card {
+    border-left: 4px solid #ffc107;
+    transition: all 0.3s ease;
+}
+
+.option-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+}
+
+.option-emoji {
+    font-size: 3rem;
+    line-height: 1;
+}
+
+.option-icon {
+    font-size: 3rem;
+}
+</style>
+{% endblock %}

@@ -324,6 +324,16 @@
             </li>
             {% endif %}
 
+            {% if current_user.has_permission('manage_products') and is_feature_enabled('products') %}
+                <li class="nav-item">
+                  <a class="nav-link {% if request.endpoint and 'wizard' in request.endpoint %}active{% endif %}"
+                     href="{{ url_for('admin.wizards') }}">
+                    <i class="bi bi-magic me-2"></i>
+                    HDSP
+                  </a>
+                </li>
+            {% endif %}
+
             {% if current_user.has_any_permission('view_blogs', 'create_blog', 'edit_all_blogs') and is_feature_enabled('blogs') %}
             <li class="nav-item">
                 <a class="nav-link {% if 'blogs' in request.endpoint %}active{% endif %}"

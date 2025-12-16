@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_compress import Compress
-from flask_wtf.csrf import CSRFProtect  # THÊM DÒNG NÀY
+from flask_wtf.csrf import CSRFProtect
 from app.config import Config
 import cloudinary
 import os
@@ -16,7 +16,7 @@ db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
 compress = Compress()
-csrf = CSRFProtect()  # THÊM DÒNG NÀY
+csrf = CSRFProtect()
 
 # Timezone Việt Nam
 VN_TZ = pytz.timezone('Asia/Ho_Chi_Minh')
@@ -124,7 +124,7 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     login_manager.init_app(app)
     compress.init_app(app)
-    csrf.init_app(app)  # THÊM DÒNG NÀY
+    csrf.init_app(app)
 
     # ==================== CLOUDINARY ====================
     cloudinary.config(
@@ -162,6 +162,7 @@ def create_app(config_class=Config):
         from app.models.settings import get_setting
         from app.models.product import Category
         from app.models.features import get_feature_context
+        from app.models.wizard import get_default_wizard  # ⭐ THÊM IMPORT WIZARD
         from datetime import datetime
 
         cached_categories = cache_manager.get('categories_active')
@@ -181,6 +182,7 @@ def create_app(config_class=Config):
             'logo_url': get_setting('logo_url', '/static/img/logo.png'),
             'hotline': get_setting('hotline', '0901.180.094'),
             'contact_email': get_setting('contact_email', 'info@bricon.vn'),
+            'get_default_wizard': get_default_wizard,
             **feature_context
         }
 

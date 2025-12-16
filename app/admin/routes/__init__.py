@@ -34,6 +34,9 @@ from . import roles
 from . import features
 from . import settings
 
+# ==================== 7. WIZARDS ====================
+from . import wizards
+
 
 #  Export để dễ debug và kiểm tra
 __all__ = [
@@ -56,4 +59,5 @@ __all__ = [
     'roles',
     'features',
     'settings',
+    'wizards',
 ]

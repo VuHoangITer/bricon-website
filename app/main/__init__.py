@@ -12,6 +12,7 @@ from app.main.routes import (
     projects,
     careers,
     quiz,
-    distributors,  # ✅ THÊM DÒNG NÀY
-    misc
+    distributors,
+    misc,
+    wizard
 )

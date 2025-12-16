@@ -1,0 +1,345 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Bước {{ step_num }}/{{ total_steps }} - {{ wizard.name }}{% endblock %}
+
+{% block content %}
+<section class="br-wstep py-5">
+  <div class="container">
+    <div class="br-wstep-wrap mx-auto">
+
+      <!-- Progress -->
+      <div class="br-progress mb-4">
+        <div class="br-progress-top">
+          <span class="br-muted">Bước {{ step_num }} / {{ total_steps }}</span>
+          <span class="br-strong">{{ progress }}%</span>
+        </div>
+        <div class="br-progress-track" aria-label="Tiến độ">
+          <div class="br-progress-bar" style="width: {{ progress }}%"></div>
+        </div>
+      </div>
+
+      <!-- Card -->
+      <div class="br-card">
+        <div class="br-card-body">
+
+          <div class="br-qhead">
+            <h1 class="br-qtitle mb-2">{{ current_step.question_text }}</h1>
+            {% if current_step.description %}
+              <p class="br-qdesc mb-0">{{ current_step.description }}</p>
+            {% endif %}
+          </div>
+
+          <form method="POST" action="{{ url_for('main.wizard_step', wizard_id=wizard.id, step_num=step_num) }}" class="mt-4">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+            {% if current_step.step_type == 'single_choice' %}
+              <!-- Single Choice -->
+              <div class="row g-3">
+                {% for option in options %}
+                  <div class="col-md-6">
+                    <input
+                      type="radio"
+                      class="btn-check"
+                      name="option"
+                      id="option_{{ option.id }}"
+                      value="{{ option.id }}"
+                      {% if saved_answer and saved_answer.option_id == option.id %}checked{% endif %}
+                      required
+                    >
+                    <label class="br-option w-100" for="option_{{ option.id }}">
+                      <div class="br-option-inner">
+                        {% if option.emoji %}
+                          <div class="br-option-icon" aria-hidden="true">{{ option.emoji }}</div>
+                        {% elif option.icon_class %}
+                          <div class="br-option-icon" aria-hidden="true"><i class="{{ option.icon_class }}"></i></div>
+                        {% endif %}
+
+                        <div class="br-option-text">{{ option.option_text }}</div>
+
+                        {% if option.description %}
+                          <div class="br-option-desc">{{ option.description }}</div>
+                        {% endif %}
+                      </div>
+                    </label>
+                  </div>
+                {% endfor %}
+              </div>
+
+            {% else %}
+              <!-- Multiple Choice -->
+              <div class="row g-3">
+                {% for option in options %}
+                  <div class="col-md-6">
+                    <input
+                      type="checkbox"
+                      class="btn-check"
+                      name="options[]"
+                      id="option_{{ option.id }}"
+                      value="{{ option.id }}"
+                    >
+                    <label class="br-option w-100" for="option_{{ option.id }}">
+                      <div class="br-option-inner">
+                        {% if option.emoji %}
+                          <div class="br-option-icon" aria-hidden="true">{{ option.emoji }}</div>
+                        {% elif option.icon_class %}
+                          <div class="br-option-icon" aria-hidden="true"><i class="{{ option.icon_class }}"></i></div>
+                        {% endif %}
+
+                        <div class="br-option-text">{{ option.option_text }}</div>
+
+                        {% if option.description %}
+                          <div class="br-option-desc">{{ option.description }}</div>
+                        {% endif %}
+                      </div>
+                    </label>
+                  </div>
+                {% endfor %}
+              </div>
+
+              <div class="br-hint mt-3">
+                <i class="bi bi-info-circle"></i>
+                <span>Bạn có thể chọn nhiều lựa chọn</span>
+              </div>
+            {% endif %}
+
+            <!-- Nav -->
+            <div class="br-nav mt-4">
+              {% if has_previous %}
+                <a href="{{ url_for('main.wizard_step', wizard_id=wizard.id, step_num=step_num-1) }}" class="br-btn br-btn-ghost">
+                  <i class="bi bi-arrow-left"></i>
+                  Quay lại
+                </a>
+              {% else %}
+                <a href="{{ url_for('main.wizard_start', wizard_id=wizard.id) }}" class="br-btn br-btn-ghost">
+                  <i class="bi bi-arrow-left"></i>
+                  Về đầu
+                </a>
+              {% endif %}
+
+              <button type="submit" class="br-btn br-btn-primary">
+                {% if step_num < total_steps %}
+                  Tiếp theo <i class="bi bi-arrow-right"></i>
+                {% else %}
+                  Xem kết quả <i class="bi bi-check-circle"></i>
+                {% endif %}
+              </button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+  :root{
+    --br-yellow:#FFC107;
+    --br-ink:#0b0f1a;
+    --br-text:#111827;
+    --br-muted:#6b7280;
+    --br-border:rgba(17,24,39,.10);
+    --br-bg:#f7f8fb;
+    --br-card:#ffffff;
+    --br-shadow: 0 10px 28px rgba(11,15,26,.08);
+    --br-radius: 18px;
+  }
+
+  .br-wstep{
+    background:
+      radial-gradient(900px 300px at 20% 0%, rgba(255,193,7,.10), transparent 60%),
+      linear-gradient(180deg, #ffffff, var(--br-bg));
+    min-height: 75vh;
+  }
+  .br-wstep-wrap{
+    max-width: 980px;
+  }
+
+  /* Progress */
+  .br-progress{
+    background: rgba(255,255,255,.7);
+    border: 1px solid var(--br-border);
+    border-radius: 16px;
+    padding: 14px 16px;
+    box-shadow: 0 6px 18px rgba(11,15,26,.05);
+  }
+  .br-progress-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+  .br-muted{ color: var(--br-muted); }
+  .br-strong{ color: var(--br-text); font-weight: 800; }
+
+  .br-progress-track{
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(255,193,7,.14);
+    overflow: hidden;
+  }
+  .br-progress-bar{
+    height: 100%;
+    border-radius: 999px;
+    background: var(--br-yellow);
+    box-shadow: 0 8px 18px rgba(255,193,7,.25);
+    transition: width .25s ease;
+  }
+
+  /* Card */
+  .br-card{
+    background: var(--br-card);
+    border: 1px solid var(--br-border);
+    border-radius: var(--br-radius);
+    box-shadow: var(--br-shadow);
+    overflow: hidden;
+  }
+  .br-card-body{
+    padding: 22px;
+  }
+
+  .br-qhead{
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(17,24,39,.08);
+  }
+  .br-qtitle{
+    font-size: clamp(18px, 2vw, 24px);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: var(--br-text);
+    margin: 0;
+  }
+  .br-qdesc{
+    font-size: 14.5px;
+    color: var(--br-muted);
+    margin-top: 6px;
+  }
+
+  /* Options */
+  .br-option{
+    display:block;
+    border: 1px solid rgba(17,24,39,.10);
+    background: #fff;
+    border-radius: 16px;
+    padding: 14px 14px;
+    min-height: 124px; /* gọn hơn */
+    cursor: pointer;
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  }
+  .br-option:hover{
+    border-color: rgba(255,193,7,.55);
+    box-shadow: 0 10px 22px rgba(11,15,26,.06);
+    transform: translateY(-1px);
+  }
+
+  .br-option-inner{
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    gap: 6px;
+    align-items:flex-start;
+    justify-content:center;
+  }
+
+  .br-option-icon{
+    font-size: 22px; /* icon vừa */
+    line-height: 1;
+    color: var(--br-yellow);
+  }
+  .br-option-icon i{
+    font-size: 22px;
+    color: var(--br-yellow);
+  }
+
+  .br-option-text{
+    font-size: 15px;
+    font-weight: 850;
+    color: var(--br-text);
+  }
+  .br-option-desc{
+    font-size: 13.5px;
+    color: var(--br-muted);
+  }
+
+  /* Checked state */
+  .btn-check:checked + .br-option{
+    border-color: rgba(255,193,7,.85);
+    box-shadow: 0 14px 28px rgba(255,193,7,.16);
+    background: linear-gradient(180deg, rgba(255,193,7,.10), rgba(255,255,255,1));
+  }
+  .btn-check:focus + .br-option{
+    outline: 0;
+    box-shadow: 0 0 0 4px rgba(255,193,7,.20);
+  }
+
+  /* Hint */
+  .br-hint{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(17,24,39,.08);
+    background: rgba(17,24,39,.02);
+    color: var(--br-muted);
+    font-size: 14px;
+  }
+  .br-hint i{ color: var(--br-yellow); font-size: 16px; }
+
+  /* Nav buttons */
+  .br-nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 12px;
+  }
+  .br-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding: 11px 14px;
+    border-radius: 14px;
+    font-weight: 850;
+    text-decoration:none;
+    border: 1px solid rgba(17,24,39,.12);
+    transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+    white-space: nowrap;
+  }
+  .br-btn i{ font-size: 18px; line-height: 1; }
+
+  .br-btn-ghost{
+    background: #fff;
+    color: var(--br-text);
+  }
+  .br-btn-ghost:hover{
+    box-shadow: 0 10px 22px rgba(11,15,26,.06);
+    transform: translateY(-1px);
+  }
+
+  .br-btn-primary{
+    background: var(--br-yellow);
+    color: var(--br-ink);
+    border-color: rgba(11,15,26,.10);
+    box-shadow: 0 10px 18px rgba(255,193,7,.22);
+    min-width: 170px;
+  }
+  .br-btn-primary:hover{
+    transform: translateY(-1px);
+    filter: brightness(.985);
+  }
+
+  /* Responsive */
+  @media (max-width: 992px){
+    .br-wstep-wrap{ max-width: 860px; }
+  }
+  @media (max-width: 768px){
+    .br-card-body{ padding: 18px 16px; }
+    .br-option{ min-height: 112px; }
+    .br-nav{ flex-direction: column; align-items: stretch; }
+    .br-btn{ width: 100%; }
+  }
+</style>
+{% endblock %}

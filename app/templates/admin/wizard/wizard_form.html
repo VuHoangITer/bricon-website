@@ -1,0 +1,176 @@
+{% extends 'layouts/admin.html' %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">{{ title }}</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.wizards') }}">Wizards</a></li>
+                <li class="breadcrumb-item active">{{ title }}</li>
+            </ol>
+        </nav>
+    </div>
+    <a href="{{ url_for('admin.wizards') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Quay lại
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+
+                    <!-- Name -->
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label fw-bold") }}
+                        {{ form.name(class="form-control" ~ (" is-invalid" if form.name.errors else "")) }}
+                        {% if form.name.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.name.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <small class="form-text text-muted">Tên wizard hiển thị cho user</small>
+                    </div>
+
+                    <!-- Slug -->
+                    <div class="mb-3">
+                        {{ form.slug.label(class="form-label fw-bold") }}
+                        <div class="input-group">
+                            <span class="input-group-text">/product-wizard/</span>
+                            {{ form.slug(class="form-control" ~ (" is-invalid" if form.slug.errors else "")) }}
+                        </div>
+                        {% if form.slug.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.slug.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <small class="form-text text-muted">URL thân thiện (không dấu, không khoảng trắng)</small>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label fw-bold") }}
+                        {{ form.description(class="form-control") }}
+                        <small class="form-text text-muted">Mô tả ngắn về wizard này</small>
+                    </div>
+
+                    <!-- Icon -->
+                    <div class="mb-3">
+                        {{ form.icon.label(class="form-label fw-bold") }}
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="{{ form.icon.data or 'bi-magic' }}"></i>
+                            </span>
+                            {{ form.icon(class="form-control") }}
+                        </div>
+                        <small class="form-text text-muted">
+                            Bootstrap Icon class, ví dụ: bi-magic, bi-stars, bi-lightbulb-fill
+                            <a href="https://icons.getbootstrap.com/" target="_blank" class="ms-2">
+                                Xem icons <i class="bi bi-box-arrow-up-right"></i>
+                            </a>
+                        </small>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            {{ form.is_active(class="form-check-input") }}
+                            {{ form.is_active.label(class="form-check-label fw-bold") }}
+                        </div>
+                        <small class="form-text text-muted">Wizard có hiển thị cho user không</small>
+                    </div>
+
+                    <!-- Default -->
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            {{ form.is_default(class="form-check-input") }}
+                            {{ form.is_default.label(class="form-check-label fw-bold") }}
+                        </div>
+                        <small class="form-text text-muted">
+                            Wizard mặc định sẽ hiển thị trên homepage. Chỉ nên có 1 wizard mặc định.
+                        </small>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('admin.wizards') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle me-1"></i> Hủy
+                        </a>
+                        {{ form.submit(class="btn btn-warning") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm bg-light">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">
+                    <i class="bi bi-info-circle text-primary me-2"></i>
+                    Hướng dẫn
+                </h6>
+                <ul class="small mb-0 ps-3">
+                    <li class="mb-2">Tạo wizard với tên dễ hiểu</li>
+                    <li class="mb-2">Sau khi tạo, thêm các bước (steps)</li>
+                    <li class="mb-2">Mỗi bước có nhiều lựa chọn (options)</li>
+                    <li class="mb-2">Options có tags để match với sản phẩm</li>
+                    <li>Wizard mặc định sẽ hiện ở homepage</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if wizard %}
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-warning text-dark fw-bold">
+        <i class="bi bi-list-ol me-2"></i>
+        Các bước hiện tại
+    </div>
+    <div class="card-body">
+        {% if wizard.total_steps > 0 %}
+        <p class="mb-2">Wizard này có <strong>{{ wizard.total_steps }} bước</strong></p>
+        <a href="{{ url_for('admin.wizard_steps', wizard_id=wizard.id) }}" class="btn btn-outline-primary">
+            <i class="bi bi-gear me-1"></i> Quản lý Steps
+        </a>
+        {% else %}
+        <p class="text-muted mb-2">Chưa có bước nào. Thêm steps để wizard hoạt động.</p>
+        <a href="{{ url_for('admin.add_step', wizard_id=wizard.id) }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Thêm Step đầu tiên
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-generate slug from name
+document.addEventListener('DOMContentLoaded', function() {
+    const nameInput = document.getElementById('name');
+    const slugInput = document.getElementById('slug');
+
+    if (nameInput && slugInput && !slugInput.value) {
+        nameInput.addEventListener('input', function() {
+            const slug = this.value
+                .toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove accents
+                .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+                .replace(/[^a-z0-9\s-]/g, '')
+                .trim()
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-');
+            slugInput.value = slug;
+        });
+    }
+});
+</script>
+{% endblock %}

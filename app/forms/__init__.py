@@ -9,6 +9,7 @@ from app.forms.settings import SettingsForm
 from app.forms.quiz import QuizForm, QuestionForm, QuizStartForm
 from app.forms.distributor import DistributorForm
 from app.forms.popup import PopupForm
+from app.forms.wizard import WizardForm, WizardStepForm, WizardOptionForm
 
 __all__ = [
     'LoginForm',
@@ -21,5 +22,6 @@ __all__ = [
     'SettingsForm',
     'QuizForm', 'QuestionForm', 'QuizStartForm',
     'DistributorForm',
-    'PopupForm'
+    'PopupForm',
+    'WizardForm', 'WizardStepForm', 'WizardOptionForm'
 ]

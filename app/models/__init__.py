@@ -12,6 +12,15 @@ from app.models.contact import Contact
 from app.models.settings import Settings, get_setting, set_setting
 from app.models.distributor import Distributor
 from app.models.popup import Popup
+from app.models.wizard import (
+    Wizard,
+    WizardStep,
+    WizardOption,
+    WizardResult,
+    get_active_wizards,
+    get_default_wizard,
+    get_wizard_with_steps
+)
 
 # Import Feature Flags
 from app.models.features import (
@@ -46,6 +55,9 @@ __all__ = [
     'Distributor',
     # Popup
     'Popup',
+    #  Wizard
+    'Wizard', 'WizardStep', 'WizardOption', 'WizardResult',
+    'get_active_wizards', 'get_default_wizard', 'get_wizard_with_steps',
     # Feature Flags
     'AVAILABLE_FEATURES',
     'is_feature_enabled',

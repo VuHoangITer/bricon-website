@@ -47,24 +47,49 @@
         </div>
       </a>
 
-      <!-- 2. Thông tin sản phẩm -->
+      <!-- 2. PRODUCT WIZARD (THAY THẾ "Thông tin sản phẩm") -->
       {% if is_feature_enabled('products') %}
-      <a class="exp-card" href="{{ url_for('main.products') }}">
-        <div class="exp-ico" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M4 7l8-4 8 4v10l-8 4-8-4V7z" />
-            <path d="M12 3v18" />
-            <circle cx="8.5" cy="9" r="1.2" class="fill" />
-          </svg>
-        </div>
-        <div class="exp-text">
-          <div class="exp-name">Thông tin sản phẩm</div>
-          <div class="exp-desc">TDS, tiêu chuẩn, ứng dụng</div>
-        </div>
-        <div class="exp-arrow" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" /></svg>
-        </div>
-      </a>
+        {% set default_wizard = get_default_wizard() %}
+        {% if default_wizard %}
+        <a class="exp-card" href="{{ url_for('main.wizard_start', wizard_id=default_wizard.id) }}">
+          <div class="exp-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <!-- Magic wand icon -->
+              <path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8L19 13M17.8 6.2L19 5M3 21l9-9"/>
+              <circle cx="6" cy="18" r="3"/>
+              <path d="M12.5 12.5L15 15" stroke-linecap="round"/>
+              <circle cx="16" cy="7" r="1.5" class="fill"/>
+              <circle cx="19" cy="10" r="1" class="fill"/>
+              <circle cx="10" cy="5" r="1" class="fill"/>
+            </svg>
+          </div>
+          <div class="exp-text">
+            <div class="exp-name">{{ default_wizard.name }}</div>
+            <div class="exp-desc">{{ default_wizard.description[:50] if default_wizard.description else 'Tìm sản phẩm phù hợp với bạn' }}</div>
+          </div>
+          <div class="exp-arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" /></svg>
+          </div>
+        </a>
+        {% else %}
+        <!-- Fallback: Nếu chưa có wizard, vẫn hiện link sản phẩm -->
+        <a class="exp-card" href="{{ url_for('main.products') }}">
+          <div class="exp-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 7l8-4 8 4v10l-8 4-8-4V7z" />
+              <path d="M12 3v18" />
+              <circle cx="8.5" cy="9" r="1.2" class="fill" />
+            </svg>
+          </div>
+          <div class="exp-text">
+            <div class="exp-name">Thông tin sản phẩm</div>
+            <div class="exp-desc">TDS, tiêu chuẩn, ứng dụng</div>
+          </div>
+          <div class="exp-arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" /></svg>
+          </div>
+        </a>
+        {% endif %}
       {% endif %}
 
       <!-- 3. Bảng màu -->
@@ -87,7 +112,6 @@
         <div class="exp-arrow" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" /></svg>
         </div>
-      </a>
       </a>
 
       <!-- 4. FAQ -->
@@ -127,7 +151,6 @@
         <div class="exp-arrow" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" /></svg>
         </div>
-      </a>
       </a>
 
       <!-- 6. Điều lệ dịch vụ -->

@@ -1,0 +1,227 @@
+{% extends 'layouts/admin.html' %}
+
+{% block page_title %}Kết quả Wizard - {{ wizard.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">
+            <i class="bi bi-bar-chart text-warning me-2"></i>
+            Analytics - {{ wizard.name }}
+        </h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.wizards') }}">Wizards</a></li>
+                <li class="breadcrumb-item active">Results</li>
+            </ol>
+        </nav>
+    </div>
+    <a href="{{ url_for('admin.wizards') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Quay lại
+    </a>
+</div>
+
+<!-- Stats -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-start border-warning border-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1">Tổng lượt sử dụng</p>
+                        <h3 class="mb-0 fw-bold">{{ total_uses }}</h3>
+                    </div>
+                    <i class="bi bi-people fs-1 text-warning"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-start border-info border-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1">Hôm nay</p>
+                        <h3 class="mb-0 fw-bold">{{ results.items|selectattr('created_at')|list|length }}</h3>
+                    </div>
+                    <i class="bi bi-calendar-check fs-1 text-info"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-start border-success border-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1">Số bước</p>
+                        <h3 class="mb-0 fw-bold">{{ wizard.total_steps }}</h3>
+                    </div>
+                    <i class="bi bi-list-ol fs-1 text-success"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Results Table -->
+<div class="card shadow-sm">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <span class="fw-bold">
+            <i class="bi bi-table me-2"></i>
+            Lịch sử sử dụng
+        </span>
+    </div>
+    <div class="card-body p-0">
+        {% if results.items %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">#ID</th>
+                        <th>Session</th>
+                        <th>Email</th>
+                        <th>Số sản phẩm gợi ý</th>
+                        <th>IP Address</th>
+                        <th>Thời gian</th>
+                        <th class="text-center">Chi tiết</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results.items %}
+                    <tr>
+                        <td class="ps-4">{{ result.id }}</td>
+                        <td>
+                            <code class="small">{{ result.session_id[:12] }}...</code>
+                        </td>
+                        <td>
+                            {% if result.user_email %}
+                            <i class="bi bi-envelope me-1"></i>{{ result.user_email }}
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if result.recommended_products %}
+                            <span class="badge bg-success">{{ result.recommended_products|length }} sản phẩm</span>
+                            {% else %}
+                            <span class="badge bg-secondary">0</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ result.ip_address or 'N/A' }}</small>
+                        </td>
+                        <td>
+                            <small>{{ result.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-primary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#resultModal{{ result.id }}">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Modal for each result -->
+                    <div class="modal fade" id="resultModal{{ result.id }}" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Chi tiết kết quả #{{ result.id }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <h6 class="fw-bold mb-3">Câu trả lời:</h6>
+                                    <div class="mb-4">
+                                        {% for key, answer in result.answers.items() %}
+                                        <div class="mb-2">
+                                            <strong>{{ key.replace('step_', 'Bước ') }}:</strong>
+                                            {% if answer.option_text %}
+                                            {{ answer.option_text }}
+                                            {% elif answer.options %}
+                                            <ul class="mb-0">
+                                                {% for opt in answer.options %}
+                                                <li>{{ opt.option_text }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                            {% endif %}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+
+                                    {% if result.recommended_products %}
+                                    <h6 class="fw-bold mb-3">Sản phẩm gợi ý:</h6>
+                                    <ul>
+                                        {% for rec in result.recommended_products %}
+                                        <li>
+                                            Product ID: {{ rec.product_id }}
+                                            - Match: {{ rec.match_score }}%
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if results.pages > 1 %}
+        <div class="card-footer">
+            <nav>
+                <ul class="pagination pagination-sm justify-content-center mb-0">
+                    {% if results.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.wizard_results', wizard_id=wizard.id, page=results.prev_num) }}">
+                            Trước
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for page_num in results.iter_pages() %}
+                        {% if page_num %}
+                        <li class="page-item {% if page_num == results.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('admin.wizard_results', wizard_id=wizard.id, page=page_num) }}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if results.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.wizard_results', wizard_id=wizard.id, page=results.next_num) }}">
+                            Sau
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>
+            <h5>Chưa có ai sử dụng wizard này</h5>
+            <p class="text-muted">Kết quả sẽ hiển thị khi có user hoàn thành wizard</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="alert alert-info mt-4">
+    <i class="bi bi-info-circle me-2"></i>
+    <strong>Lưu ý:</strong> Dữ liệu này giúp bạn hiểu user đang tìm kiếm gì và cải thiện wizard.
+</div>
+{% endblock %}

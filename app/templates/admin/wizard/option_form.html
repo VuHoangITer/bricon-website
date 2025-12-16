@@ -1,0 +1,240 @@
+{% extends 'layouts/admin.html' %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">{{ title }}</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.wizards') }}">Wizards</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.wizard_steps', wizard_id=wizard.id) }}">{{ wizard.name }}</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.step_options', step_id=step.id) }}">Bước {{ step.step_number }}</a></li>
+                <li class="breadcrumb-item active">{{ title }}</li>
+            </ol>
+        </nav>
+    </div>
+    <a href="{{ url_for('admin.step_options', step_id=step.id) }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Quay lại
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light fw-bold">
+                <i class="bi bi-list-check me-2"></i>
+                Bước {{ step.step_number }}: {{ step.question_text }}
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+
+                    <!-- Option Text -->
+                    <div class="mb-3">
+                        {{ form.option_text.label(class="form-label fw-bold") }}
+                        {{ form.option_text(class="form-control" ~ (" is-invalid" if form.option_text.errors else "")) }}
+                        {% if form.option_text.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.option_text.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <small class="form-text text-muted">Nội dung lựa chọn hiển thị cho user</small>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label fw-bold") }}
+                        {{ form.description(class="form-control") }}
+                        <small class="form-text text-muted">Mô tả ngắn (optional)</small>
+                    </div>
+
+                    <div class="row">
+                        <!-- Emoji -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.emoji.label(class="form-label fw-bold") }}
+                                {{ form.emoji(class="form-control") }}
+                                <small class="form-text text-muted">
+                                    Ví dụ: 🏠 🌳 💧 🔥 ♻️
+                                    <a href="https://emojipedia.org/" target="_blank" class="ms-2">
+                                        Tìm emoji <i class="bi bi-box-arrow-up-right"></i>
+                                    </a>
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Icon Class -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.icon_class.label(class="form-label fw-bold") }}
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="{{ form.icon_class.data or 'bi-star' }}"></i>
+                                    </span>
+                                    {{ form.icon_class(class="form-control") }}
+                                </div>
+                                <small class="form-text text-muted">
+                                    Bootstrap icon (nếu không dùng emoji)
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tags (JSON) -->
+                    <div class="mb-3">
+                        {{ form.tags.label(class="form-label fw-bold") }}
+                        {{ form.tags(class="form-control font-monospace") }}
+                        <small class="form-text text-muted">
+                            <strong>QUAN TRỌNG:</strong> Tags để match với sản phẩm. Định dạng JSON array.<br>
+                            Ví dụ: <code>["interior", "residential", "waterproof"]</code>
+                        </small>
+                    </div>
+
+                    <!-- Order -->
+                    <div class="mb-4">
+                        {{ form.order.label(class="form-label fw-bold") }}
+                        {{ form.order(class="form-control", type="number", min="0") }}
+                        <small class="form-text text-muted">Thứ tự hiển thị (số nhỏ hiện trước)</small>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('admin.step_options', step_id=step.id) }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle me-1"></i> Hủy
+                        </a>
+                        {{ form.submit(class="btn btn-warning") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Preview -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-warning text-dark fw-bold">
+                <i class="bi bi-eye me-2"></i>
+                Preview
+            </div>
+            <div class="card-body text-center">
+                <div id="preview-option" class="option-preview">
+                    <div class="preview-icon mb-3" id="preview-icon">
+                        <i class="bi bi-star text-warning" style="font-size: 3rem;"></i>
+                    </div>
+                    <div class="preview-text fw-bold mb-2" id="preview-text">Nội dung lựa chọn</div>
+                    <small class="text-muted" id="preview-desc">Mô tả ngắn</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tags Help -->
+        <div class="card shadow-sm bg-light">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">
+                    <i class="bi bi-tags text-primary me-2"></i>
+                    Tags phổ biến
+                </h6>
+                <div class="d-flex flex-wrap gap-1 mb-3">
+                    <span class="badge bg-primary tag-suggest" data-tag="interior">interior</span>
+                    <span class="badge bg-primary tag-suggest" data-tag="exterior">exterior</span>
+                    <span class="badge bg-success tag-suggest" data-tag="waterproof">waterproof</span>
+                    <span class="badge bg-info tag-suggest" data-tag="residential">residential</span>
+                    <span class="badge bg-warning tag-suggest" data-tag="commercial">commercial</span>
+                    <span class="badge bg-danger tag-suggest" data-tag="industrial">industrial</span>
+                    <span class="badge bg-secondary tag-suggest" data-tag="eco-friendly">eco-friendly</span>
+                    <span class="badge bg-dark tag-suggest" data-tag="fast-drying">fast-drying</span>
+                </div>
+                <small class="text-muted">Click để thêm tag vào field</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.option-preview {
+    padding: 2rem;
+    border: 2px dashed #dee2e6;
+    border-radius: 15px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.tag-suggest {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tag-suggest:hover {
+    transform: scale(1.1);
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Live preview
+document.addEventListener('DOMContentLoaded', function() {
+    const optionText = document.getElementById('option_text');
+    const description = document.getElementById('description');
+    const emoji = document.getElementById('emoji');
+    const iconClass = document.getElementById('icon_class');
+
+    const previewText = document.getElementById('preview-text');
+    const previewDesc = document.getElementById('preview-desc');
+    const previewIcon = document.getElementById('preview-icon');
+
+    function updatePreview() {
+        previewText.textContent = optionText.value || 'Nội dung lựa chọn';
+        previewDesc.textContent = description.value || 'Mô tả ngắn';
+
+        if (emoji.value) {
+            previewIcon.innerHTML = `<div style="font-size: 3rem;">${emoji.value}</div>`;
+        } else if (iconClass.value) {
+            previewIcon.innerHTML = `<i class="${iconClass.value} text-warning" style="font-size: 3rem;"></i>`;
+        } else {
+            previewIcon.innerHTML = '<i class="bi bi-star text-warning" style="font-size: 3rem;"></i>';
+        }
+    }
+
+    optionText.addEventListener('input', updatePreview);
+    description.addEventListener('input', updatePreview);
+    emoji.addEventListener('input', updatePreview);
+    iconClass.addEventListener('input', updatePreview);
+
+    // Tag suggestions
+    const tagsField = document.getElementById('tags');
+    const tagSuggestions = document.querySelectorAll('.tag-suggest');
+
+    tagSuggestions.forEach(badge => {
+        badge.addEventListener('click', function() {
+            const tag = this.dataset.tag;
+            let currentTags = [];
+
+            try {
+                if (tagsField.value.trim()) {
+                    currentTags = JSON.parse(tagsField.value);
+                }
+            } catch(e) {
+                currentTags = [];
+            }
+
+            if (!currentTags.includes(tag)) {
+                currentTags.push(tag);
+                tagsField.value = JSON.stringify(currentTags, null, 2);
+            }
+        });
+    });
+
+    // Initial preview
+    updatePreview();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,210 @@
+{% extends 'layouts/admin.html' %}
+
+{% block page_title %}Quản lý Steps - {{ wizard.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">
+            <i class="bi bi-list-ol text-warning me-2"></i>
+            Steps: {{ wizard.name }}
+        </h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.wizards') }}">Wizards</a></li>
+                <li class="breadcrumb-item active">Steps</li>
+            </ol>
+        </nav>
+    </div>
+    <div>
+        <a href="{{ url_for('admin.add_step', wizard_id=wizard.id) }}" class="btn btn-warning">
+            <i class="bi bi-plus-circle me-1"></i> Thêm Step
+        </a>
+        <a href="{{ url_for('admin.wizards') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại
+        </a>
+    </div>
+</div>
+
+<!-- Wizard Info -->
+<div class="alert alert-info d-flex align-items-center mb-4">
+    <i class="bi bi-info-circle fs-4 me-3"></i>
+    <div>
+        <strong>{{ wizard.description or wizard.name }}</strong><br>
+        <small>
+            Tổng: <strong>{{ steps|length }} bước</strong> |
+            Status: {% if wizard.is_active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-secondary">Inactive</span>{% endif %}
+        </small>
+    </div>
+</div>
+
+{% if steps %}
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4" style="width: 80px">Bước</th>
+                        <th>Câu hỏi</th>
+                        <th class="text-center">Loại</th>
+                        <th class="text-center">Options</th>
+                        <th class="text-center" style="width: 200px">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for step in steps %}
+                    <tr>
+                        <td class="ps-4">
+                            <span class="badge bg-primary fs-6">{{ step.step_number }}</span>
+                        </td>
+                        <td>
+                            <div class="fw-bold">{{ step.question_text }}</div>
+                            {% if step.description %}
+                            <small class="text-muted">{{ step.description[:100] }}</small>
+                            {% endif %}
+                            {% if step.is_required %}
+                            <span class="badge bg-danger ms-2">Bắt buộc</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if step.step_type == 'single_choice' %}
+                            <span class="badge bg-info">Chọn 1</span>
+                            {% else %}
+                            <span class="badge bg-success">Chọn nhiều</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <a href="{{ url_for('admin.step_options', step_id=step.id) }}"
+                               class="text-decoration-none">
+                                <i class="bi bi-list-check me-1"></i>
+                                <strong>{{ step.total_options }}</strong> options
+                            </a>
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('admin.step_options', step_id=step.id) }}"
+                                   class="btn btn-outline-primary"
+                                   title="Quản lý Options">
+                                    <i class="bi bi-list-check"></i>
+                                </a>
+                                <a href="{{ url_for('admin.edit_step', id=step.id) }}"
+                                   class="btn btn-outline-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{{ url_for('admin.delete_step', id=step.id) }}"
+                                   class="btn btn-outline-danger"
+                                   onclick="return confirm('Xóa step này và tất cả options?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="card shadow-sm">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-list-ol fs-1 text-muted mb-3 d-block"></i>
+        <h5>Chưa có step nào</h5>
+        <p class="text-muted mb-4">Thêm steps để wizard có thể hoạt động</p>
+        <a href="{{ url_for('admin.add_step', wizard_id=wizard.id) }}" class="btn btn-warning">
+            <i class="bi bi-plus-circle me-1"></i> Thêm Step đầu tiên
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Flow Preview -->
+{% if steps %}
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-light fw-bold">
+        <i class="bi bi-diagram-3 me-2"></i>
+        Xem trước luồng Wizard
+    </div>
+    <div class="card-body">
+        <div class="wizard-flow">
+            {% for step in steps %}
+            <div class="flow-step">
+                <div class="step-number">{{ step.step_number }}</div>
+                <div class="step-content">
+                    <div class="fw-bold mb-1">{{ step.question_text }}</div>
+                    <small class="text-muted">
+                        {{ step.total_options }} lựa chọn
+                        {% if step.step_type == 'multiple_choice' %}(Chọn nhiều){% endif %}
+                    </small>
+                </div>
+            </div>
+            {% if not loop.last %}
+            <div class="flow-arrow">
+                <i class="bi bi-arrow-down"></i>
+            </div>
+            {% endif %}
+            {% endfor %}
+            <div class="flow-step flow-result">
+                <div class="step-number">✓</div>
+                <div class="step-content">
+                    <div class="fw-bold">Kết quả</div>
+                    <small class="text-muted">Top 5 sản phẩm phù hợp</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.wizard-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.flow-step {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+}
+
+.flow-result {
+    background: linear-gradient(135deg, #fff9e6, #ffffff);
+    border-color: #ffc107;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    background: #ffc107;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.step-content {
+    flex: 1;
+}
+
+.flow-arrow {
+    text-align: center;
+    color: #6c757d;
+    font-size: 1.5rem;
+}
+</style>
+{% endblock %}

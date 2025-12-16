@@ -33,6 +33,7 @@ from app.admin.routes import (
     roles,
     features,
     settings,
+    wizards,
 )
 
 
