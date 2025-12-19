@@ -4926,11 +4926,30 @@ timeline {
     background-color: #fff8e1;
 }
 
+/* ✅ FIX: Dropdown Menu - Đảm bảo hoạt động trên mọi màn hình */
 .trang-san-pham-vn .dropdown-menu {
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    max-height: 400px;
-    overflow-y: auto;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    max-height: 400px !important;
+    overflow-y: auto !important;
+    /* QUAN TRỌNG: Override CSS navbar */
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    z-index: 1000 !important;
+    display: none !important;
+    background: white !important;
+    border: 1px solid #e5e7eb !important;
+    margin-top: 4px !important;
+    padding: 8px 0 !important;
+    /* Đảm bảo không bị static trên mobile */
+    transform: none !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.trang-san-pham-vn .dropdown-menu.show {
+    display: block !important;
 }
 
 .trang-san-pham-vn .dropdown-item {
@@ -5064,6 +5083,12 @@ timeline {
 
     .trang-san-pham-vn .quick-filters {
         flex-wrap: wrap;
+    }
+
+    /* ✅ QUAN TRỌNG: Đảm bảo dropdown vẫn absolute trên mobile */
+    .trang-san-pham-vn .dropdown-menu {
+        position: absolute !important;
+        /* Không cho phép override thành static */
     }
 }
 

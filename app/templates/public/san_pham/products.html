@@ -66,7 +66,7 @@
 
                     <!-- Search -->
                     <div class="col-lg-3 col-md-6">
-                        <form action="{{ url_for('main.products', category_slug=current_category.slug if current_category else None) }}" method="get">
+                        <form action="{% if current_category %}{{ url_for('main.products', category_slug=current_category.slug) }}{% else %}{{ url_for('main.products') }}{% endif %}" method="get">
                             {% if min_price %}
                             <input type="hidden" name="min_price" value="{{ min_price }}">
                             {% endif %}
@@ -88,7 +88,7 @@
 
                     <!-- Price Filter -->
                     <div class="col-lg-4 col-md-6">
-                        <form action="{{ url_for('main.products', category_slug=current_category.slug if current_category else None) }}"
+                        <form action="{% if current_category %}{{ url_for('main.products', category_slug=current_category.slug) }}{% else %}{{ url_for('main.products') }}{% endif %}"
                               method="get" class="d-flex gap-2 align-items-center">
                             {% if current_search %}
                             <input type="hidden" name="search" value="{{ current_search }}">
@@ -110,7 +110,7 @@
                             </button>
 
                             {% if min_price or max_price %}
-                            <a href="{{ url_for('main.products', category_slug=current_category.slug if current_category else None, search=current_search if current_search else None, sort=current_sort if current_sort else None) }}"
+                            <a href="{% if current_category %}{{ url_for('main.products', category_slug=current_category.slug, search=current_search if current_search else None, sort=current_sort if current_sort else None) }}{% else %}{{ url_for('main.products', search=current_search if current_search else None, sort=current_sort if current_sort else None) }}{% endif %}"
                                class="btn btn-outline-secondary btn-sm">
                                 <i class="bi bi-x-lg"></i>
                             </a>
@@ -132,13 +132,13 @@
                 <!-- Quick Price Filters -->
                 <div class="quick-filters mt-2 d-flex gap-2 align-items-center">
                     <small class="text-muted">Lọc Nhanh:</small>
-                    <a href="{{ url_for('main.products', category_slug=current_category.slug if current_category else None, min_price=0, max_price=0, search=current_search if current_search else None, sort=current_sort if current_sort else None) }}"
+                    <a href="{% if current_category %}{{ url_for('main.products', category_slug=current_category.slug, min_price=0, max_price=0, search=current_search if current_search else None, sort=current_sort if current_sort else None) }}{% else %}{{ url_for('main.products', min_price=0, max_price=0, search=current_search if current_search else None, sort=current_sort if current_sort else None) }}{% endif %}"
                        class="badge bg-light text-dark border">Liên hệ</a>
-                    <a href="{{ url_for('main.products', category_slug=current_category.slug if current_category else None, min_price=1, max_price=100000, search=current_search if current_search else None, sort=current_sort if current_sort else None) }}"
+                    <a href="{% if current_category %}{{ url_for('main.products', category_slug=current_category.slug, min_price=1, max_price=100000, search=current_search if current_search else None, sort=current_sort if current_sort else None) }}{% else %}{{ url_for('main.products', min_price=1, max_price=100000, search=current_search if current_search else None, sort=current_sort if current_sort else None) }}{% endif %}"
                        class="badge bg-light text-dark border">Dưới 100.000₫</a>
-                    <a href="{{ url_for('main.products', category_slug=current_category.slug if current_category else None, min_price=100000, max_price=500000, search=current_search if current_search else None, sort=current_sort if current_sort else None) }}"
+                    <a href="{% if current_category %}{{ url_for('main.products', category_slug=current_category.slug, min_price=100000, max_price=500000, search=current_search if current_search else None, sort=current_sort if current_sort else None) }}{% else %}{{ url_for('main.products', min_price=100000, max_price=500000, search=current_search if current_search else None, sort=current_sort if current_sort else None) }}{% endif %}"
                        class="badge bg-light text-dark border">100.000₫ - 500.000₫</a>
-                    <a href="{{ url_for('main.products', category_slug=current_category.slug if current_category else None, min_price=500000, search=current_search if current_search else None, sort=current_sort if current_sort else None) }}"
+                    <a href="{% if current_category %}{{ url_for('main.products', category_slug=current_category.slug, min_price=500000, search=current_search if current_search else None, sort=current_sort if current_sort else None) }}{% else %}{{ url_for('main.products', min_price=500000, search=current_search if current_search else None, sort=current_sort if current_sort else None) }}{% endif %}"
                        class="badge bg-light text-dark border">Trên 500.000₫</a>
 
                     {% if min_price is not none or max_price is not none %}
@@ -188,7 +188,7 @@
                     <i class="bi bi-inbox display-1 text-muted"></i>
                     <p class="text-muted mt-3">Không tìm thấy sản phẩm nào</p>
                     {% if current_search or min_price or max_price %}
-                    <a href="{{ url_for('main.products', category_slug=current_category.slug if current_category else None) }}"
+                    <a href="{% if current_category %}{{ url_for('main.products', category_slug=current_category.slug) }}{% else %}{{ url_for('main.products') }}{% endif %}"
                        class="btn btn-outline-warning">
                         <i class="bi bi-arrow-counterclockwise me-1"></i>
                         Xóa bộ lọc
