@@ -13,12 +13,17 @@
     <div class="card-body">
         <form method="POST" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
+            {{ form.images_json() }}
 
-            <!-- ========== TAB NAVIGATION ========== -->
             <ul class="nav nav-tabs mb-4" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button">
                         <i class="bi bi-info-circle"></i> Thông tin cơ bản
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="images-tab" data-bs-toggle="tab" data-bs-target="#images" type="button">
+                        <i class="bi bi-images"></i> Thư viện ảnh
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -28,10 +33,9 @@
                 </li>
             </ul>
 
-            <!-- ========== TAB CONTENT ========== -->
             <div class="tab-content">
 
-                <!-- ========== TAB 1: THÔNG TIN CƠ BẢN ========== -->
+                <!-- TAB 1: THÔNG TIN CƠ BẢN -->
                 <div class="tab-pane fade show active" id="basic" role="tabpanel">
                     <div class="row g-3">
                         <div class="col-md-8">
@@ -77,7 +81,7 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">Hình ảnh</label>
+                            <label class="form-label">Hình ảnh đại diện</label>
                             <div class="input-group">
                                 {{ form.image(class="form-control", id="image") }}
                                 {% if is_feature_enabled('media') %}
@@ -111,10 +115,28 @@
                     </div>
                 </div>
 
-                <!-- ========== TAB 2: THÔNG TIN KỸ THUẬT (JSON ĐỘNG) ========== -->
+                <!-- TAB 2: THƯ VIỆN ẢNH -->
+                <div class="tab-pane fade" id="images" role="tabpanel">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Thư viện ảnh sản phẩm:</strong> Chọn nhiều ảnh để hiển thị slider trên trang chi tiết sản phẩm.
+                        Click vào từng ảnh để thêm vào gallery.
+                    </div>
+
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-warning" onclick="openGalleryPicker()">
+                            <i class="bi bi-plus-circle"></i> Thêm ảnh từ thư viện
+                        </button>
+                    </div>
+
+                    <div id="galleryContainer" class="row g-3">
+                        <!-- Images will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- TAB 3: THÔNG TIN KỸ THUẬT -->
                 <div class="tab-pane fade" id="technical" role="tabpanel">
 
-                    <!-- Hướng dẫn -->
                     <div class="alert alert-info mb-4">
                         <h6 class="fw-bold mb-3">
                             <i class="bi bi-lightbulb-fill me-2"></i>Hướng dẫn nhập liệu (Linh hoạt cho mọi dự án)
@@ -127,7 +149,6 @@
                         </ul>
                     </div>
 
-                    <!-- Textarea nhập liệu -->
                     <div class="row">
                         <div class="col-12">
                             <label class="form-label fw-bold fs-5">
@@ -137,7 +158,6 @@
                         </div>
                     </div>
 
-                    <!-- Ví dụ mẫu -->
                     <div class="card mt-4 bg-light border-0">
                         <div class="card-body">
                             <h6 class="fw-bold text-primary mb-3">
@@ -156,9 +176,6 @@ pH: 6.5-8.5
 Thời gian đóng rắn: 24-48 giờ
 Nhiệt độ thi công: 5-35°C
 
-# ========== TAGS ==========
-tags: chong-tham | noi-that | ngoai-that | chiu-nhiet | chong-chay | san-nha
-
 # ========== ỨNG DỤNG & ĐÓNG GÓI ==========
 Ứng dụng: Dán gạch ceramic | Dán đá ốp tường | Chà ron gạch | Chống thấm
 Quy cách đóng gói: Bao 25kg | Thùng 20kg | Bao 5kg
@@ -173,7 +190,6 @@ Màu sắc: Trắng | Xám | Vàng chanh | Đen</code></pre>
 
             </div>
 
-            <!-- ========== SUBMIT BUTTONS ========== -->
             <div class="mt-4 pt-3 border-top">
                 {{ form.submit(class="btn btn-warning px-5") }}
                 <a href="{{ url_for('admin.products') }}" class="btn btn-secondary">Hủy</a>
@@ -181,11 +197,106 @@ Màu sắc: Trắng | Xám | Vàng chanh | Đen</code></pre>
         </form>
     </div>
 </div>
+
+<!-- Modal cho Gallery Picker -->
+<div class="modal fade" id="galleryPickerModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">
+                    <i class="bi bi-images"></i> Chọn ảnh cho gallery (Click nhiều ảnh)
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <select class="form-select" id="galleryAlbumFilter">
+                            <option value="">Tất cả albums</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" id="gallerySearchMedia" placeholder="Tìm kiếm...">
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-outline-secondary" onclick="loadGalleryMedia()">
+                            <i class="bi bi-arrow-clockwise"></i> Làm mới
+                        </button>
+                    </div>
+                </div>
+
+                <div id="galleryMediaGrid" class="row g-3" style="max-height: 500px; overflow-y: auto;">
+                    <div class="col-12 text-center py-5">
+                        <div class="spinner-border text-warning" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-warning" onclick="addSelectedImagesToGallery()">
+                    <i class="bi bi-check-circle"></i> Thêm các ảnh đã chọn (<span id="selectedCount">0</span>)
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.gallery-media-item {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 3px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    background: #fff;
+}
+
+.gallery-media-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+}
+
+.gallery-media-item.selected {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 4px rgba(255,193,7,0.3);
+}
+
+.gallery-media-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.gallery-media-item .check-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #ffc107;
+    color: #000;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.gallery-media-item.selected .check-badge {
+    display: flex;
+}
+</style>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Auto generate slug from name
+// Auto generate slug
 document.querySelector('input[name="name"]').addEventListener('input', function(e) {
     const slug = e.target.value
         .toLowerCase()
@@ -195,10 +306,176 @@ document.querySelector('input[name="name"]').addEventListener('input', function(
         .replace(/[^a-z0-9\s-]/g, '')
         .replace(/\s+/g, '-')
         .replace(/-+/g, '-');
-
     document.querySelector('input[name="slug"]').value = slug;
 });
+
+// ========== GALLERY MANAGEMENT ==========
+let galleryImages = [];
+let selectedGalleryImages = [];
+let galleryModal = null;
+
+// Load existing images when editing
+document.addEventListener('DOMContentLoaded', function() {
+    const imagesJson = document.getElementById('images_json').value;
+    if (imagesJson) {
+        try {
+            galleryImages = JSON.parse(imagesJson);
+            renderGallery();
+        } catch (e) {
+            galleryImages = [];
+        }
+    }
+});
+
+function openGalleryPicker() {
+    selectedGalleryImages = [];
+    galleryModal = new bootstrap.Modal(document.getElementById('galleryPickerModal'));
+    galleryModal.show();
+    loadGalleryMedia();
+}
+
+function loadGalleryMedia() {
+    const album = document.getElementById('galleryAlbumFilter').value;
+    const search = document.getElementById('gallerySearchMedia').value;
+
+    let url = '{{ url_for("admin.api_media") }}?';
+    if (album) url += `album=${encodeURIComponent(album)}&`;
+    if (search) url += `search=${encodeURIComponent(search)}`;
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            renderGalleryMediaGrid(data.media);
+            updateSelectedCount();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+function renderGalleryMediaGrid(mediaList) {
+    const grid = document.getElementById('galleryMediaGrid');
+
+    if (!mediaList || mediaList.length === 0) {
+        grid.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-image fs-1 text-muted"></i>
+                <p class="text-muted mt-3">Chưa có ảnh nào</p>
+            </div>
+        `;
+        return;
+    }
+
+    grid.innerHTML = mediaList.map(media => `
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+            <div class="gallery-media-item ${selectedGalleryImages.includes(media.filepath) ? 'selected' : ''}"
+                 data-path="${media.filepath}"
+                 onclick="toggleGalleryImage('${media.filepath}')">
+                <span class="check-badge">✓</span>
+                <img src="${media.filepath}" alt="${media.original_filename}">
+            </div>
+        </div>
+    `).join('');
+}
+
+function toggleGalleryImage(path) {
+    const index = selectedGalleryImages.indexOf(path);
+    if (index > -1) {
+        selectedGalleryImages.splice(index, 1);
+    } else {
+        selectedGalleryImages.push(path);
+    }
+
+    // Update UI
+    document.querySelectorAll('.gallery-media-item').forEach(item => {
+        if (item.dataset.path === path) {
+            item.classList.toggle('selected');
+        }
+    });
+
+    updateSelectedCount();
+}
+
+function updateSelectedCount() {
+    document.getElementById('selectedCount').textContent = selectedGalleryImages.length;
+}
+
+function addSelectedImagesToGallery() {
+    selectedGalleryImages.forEach(img => {
+        if (!galleryImages.includes(img)) {
+            galleryImages.push(img);
+        }
+    });
+
+    updateGalleryInput();
+    renderGallery();
+
+    if (galleryModal) {
+        galleryModal.hide();
+    }
+}
+
+function removeGalleryImage(index) {
+    if (confirm('Xóa ảnh này khỏi thư viện?')) {
+        galleryImages.splice(index, 1);
+        updateGalleryInput();
+        renderGallery();
+    }
+}
+
+function moveImage(index, direction) {
+    if (direction === 'up' && index > 0) {
+        [galleryImages[index], galleryImages[index - 1]] = [galleryImages[index - 1], galleryImages[index]];
+    } else if (direction === 'down' && index < galleryImages.length - 1) {
+        [galleryImages[index], galleryImages[index + 1]] = [galleryImages[index + 1], galleryImages[index]];
+    }
+    updateGalleryInput();
+    renderGallery();
+}
+
+function updateGalleryInput() {
+    document.getElementById('images_json').value = JSON.stringify(galleryImages);
+}
+
+function renderGallery() {
+    const container = document.getElementById('galleryContainer');
+
+    if (galleryImages.length === 0) {
+        container.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-images text-muted" style="font-size: 4rem;"></i>
+                <p class="text-muted mt-3">Chưa có ảnh nào trong thư viện</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = galleryImages.map((img, index) => `
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+            <div class="card shadow-sm">
+                <img src="${img}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                <div class="card-body p-2">
+                    <div class="btn-group btn-group-sm w-100 mb-1">
+                        <button type="button" class="btn btn-outline-primary" onclick="moveImage(${index}, 'up')"
+                                ${index === 0 ? 'disabled' : ''}>
+                            <i class="bi bi-arrow-up"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" onclick="moveImage(${index}, 'down')"
+                                ${index === galleryImages.length - 1 ? 'disabled' : ''}>
+                            <i class="bi bi-arrow-down"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-danger" onclick="removeGalleryImage(${index})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                    <small class="text-muted d-block text-center">Ảnh ${index + 1}</small>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
 </script>
+
 {% if is_feature_enabled('media') %}
 {% include 'components/media_picker.html' %}
 {% endif %}

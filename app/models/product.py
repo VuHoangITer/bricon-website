@@ -86,6 +86,16 @@ class Product(db.Model):
             'caption': self.image_caption
         }
 
+    def get_images_list(self):
+        """Lấy danh sách ảnh từ JSON"""
+        if not self.images:
+            return []
+        try:
+            import json
+            return json.loads(self.images)
+        except:
+            return []
+
 
 # ==================== AUTO CLEAR CACHE EVENTS ====================
 

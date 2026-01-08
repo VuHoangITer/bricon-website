@@ -1,4 +1,3 @@
-# File: app/admin/routes/products.py
 """
 🛍️ Products Management Routes (Admin) - JSON Dynamic Version
 """
@@ -11,8 +10,8 @@ from app.decorators import permission_required
 from app.admin import admin_bp
 from app.admin.utils.helpers import get_image_from_form
 from app.models.features import feature_required
+import json
 
-# ⭐ IMPORT HELPER
 from app.admin.utils.technical_parser import (
     parse_technical_info,
     technical_info_to_text,
@@ -20,7 +19,6 @@ from app.admin.utils.technical_parser import (
 )
 
 
-# ==================== DANH SÁCH SẢN PHẨM ====================
 @admin_bp.route('/products')
 @permission_required('view_products')
 @feature_required('products')
@@ -35,7 +33,6 @@ def products():
         products_list = Product.query.order_by(Product.created_at.desc()).all()
         cache_manager.set(cache_key, products_list)
 
-    # Phân trang
     per_page = 20
     total = len(products_list)
     start = (page - 1) * per_page
@@ -70,8 +67,8 @@ def products():
             last = 0
             for num in range(1, self.pages + 1):
                 if (num <= left_edge or
-                    (self.page - left_current <= num <= self.page + right_current) or
-                    num > self.pages - right_edge):
+                        (self.page - left_current <= num <= self.page + right_current) or
+                        num > self.pages - right_edge):
                     if last + 1 != num:
                         yield None
                     yield num
@@ -81,7 +78,6 @@ def products():
     return render_template('admin/san_pham/products.html', products=pagination)
 
 
-# ==================== THÊM SẢN PHẨM ====================
 @admin_bp.route('/products/add', methods=['GET', 'POST'])
 @permission_required('manage_products')
 @feature_required('products')
@@ -90,18 +86,15 @@ def add_product():
     form = ProductForm()
 
     if form.validate_on_submit():
-        # Validate technical info
         if form.technical_info_raw.data:
             is_valid, message = validate_technical_info(form.technical_info_raw.data)
             if not is_valid:
                 flash(f'❌ Lỗi định dạng:\n{message}', 'danger')
                 return render_template('admin/san_pham/product_form.html',
-                                     form=form, title='Thêm sản phẩm')
+                                       form=form, title='Thêm sản phẩm')
 
-        # Xử lý hình ảnh
         image_path = get_image_from_form(form.image, 'image', folder='products')
 
-        # Tạo sản phẩm
         product = Product(
             name=form.name.data,
             slug=form.slug.data,
@@ -114,11 +107,17 @@ def add_product():
             is_active=form.is_active.data
         )
 
-        # ⭐ XỬ LÝ THÔNG TIN KỸ THUẬT
+        # ⭐ XỬ LÝ NHIỀU ẢNH
+        if form.images_json.data:
+            try:
+                images_list = json.loads(form.images_json.data)
+                product.images = json.dumps(images_list)
+            except:
+                product.images = None
+
         if form.technical_info_raw.data:
             product.technical_info = parse_technical_info(form.technical_info_raw.data)
 
-        # Lưu
         try:
             db.session.add(product)
             db.session.commit()
@@ -129,10 +128,9 @@ def add_product():
             flash(f'❌ Lỗi: {str(e)}', 'danger')
 
     return render_template('admin/san_pham/product_form.html',
-                          form=form, title='Thêm sản phẩm')
+                           form=form, title='Thêm sản phẩm')
 
 
-# ==================== SỬA SẢN PHẨM ====================
 @admin_bp.route('/products/edit/<int:id>', methods=['GET', 'POST'])
 @permission_required('manage_products')
 @feature_required('products')
@@ -142,22 +140,19 @@ def edit_product(id):
     form = ProductForm(obj=product)
 
     if form.validate_on_submit():
-        # Validate
         if form.technical_info_raw.data:
             is_valid, message = validate_technical_info(form.technical_info_raw.data)
             if not is_valid:
                 flash(f'❌ Lỗi định dạng:\n{message}', 'danger')
                 return render_template('admin/san_pham/product_form.html',
-                                     form=form,
-                                     title=f'Sửa: {product.name}',
-                                     product=product)
+                                       form=form,
+                                       title=f'Sửa: {product.name}',
+                                       product=product)
 
-        # Xử lý hình ảnh
         new_image = get_image_from_form(form.image, 'image', folder='products')
         if new_image:
             product.image = new_image
 
-        # Cập nhật thông tin
         product.name = form.name.data
         product.slug = form.slug.data
         product.description = form.description.data
@@ -167,13 +162,19 @@ def edit_product(id):
         product.is_featured = form.is_featured.data
         product.is_active = form.is_active.data
 
-        # ⭐ CẬP NHẬT THÔNG TIN KỸ THUẬT
+        # ⭐ XỬ LÝ NHIỀU ẢNH
+        if form.images_json.data:
+            try:
+                images_list = json.loads(form.images_json.data)
+                product.images = json.dumps(images_list)
+            except:
+                pass
+
         if form.technical_info_raw.data:
             product.technical_info = parse_technical_info(form.technical_info_raw.data)
         else:
             product.technical_info = None
 
-        # Lưu
         try:
             db.session.commit()
             flash(f'✅ Đã cập nhật "{product.name}"!', 'success')
@@ -182,18 +183,23 @@ def edit_product(id):
             db.session.rollback()
             flash(f'❌ Lỗi: {str(e)}', 'danger')
 
-    # ⭐ LOAD DỮ LIỆU KHI EDIT
     if request.method == 'GET':
         if product.technical_info:
             form.technical_info_raw.data = technical_info_to_text(product.technical_info)
 
+        # ⭐ LOAD IMAGES
+        if product.images:
+            try:
+                form.images_json.data = product.images
+            except:
+                form.images_json.data = '[]'
+
     return render_template('admin/san_pham/product_form.html',
-                          form=form,
-                          title=f'Sửa: {product.name}',
-                          product=product)
+                           form=form,
+                           title=f'Sửa: {product.name}',
+                           product=product)
 
 
-# ==================== XÓA SẢN PHẨM ====================
 @admin_bp.route('/products/delete/<int:id>')
 @permission_required('manage_products')
 @feature_required('products')

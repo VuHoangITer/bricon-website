@@ -8,38 +8,95 @@
     {{ rendered_meta_description }}
 {% endblock %}
 
-<!-- ==================== CUSTOM OG TAGS FOR PRODUCT ==================== -->
 {% block extra_css %}
-<meta
-  property="og:title"
-  content="{{ product.name }} - {{ get_setting('website_name', '') }}"
-/>
-<meta
-  property="og:description"
-  content="{{ product.description[:200] if product.description else 'Keo dán gạch, keo chà ron, chống thấm BRICON - Keo của người Việt' }}"
-/>
-<meta
-  property="og:image"
-  content="{{ product.image if product.image else get_setting('default_share_image', '/static/img/default-share.jpg') }}"
-/>
+<meta property="og:title" content="{{ product.name }} - {{ get_setting('website_name', '') }}" />
+<meta property="og:description" content="{{ product.description[:200] if product.description else 'Keo dán gạch, keo chà ron, chống thấm BRICON - Keo của người Việt' }}" />
+<meta property="og:image" content="{{ product.image if product.image else get_setting('default_share_image', '/static/img/default-share.jpg') }}" />
 <meta property="og:url" content="{{ request.url }}" />
 <meta property="og:type" content="product" />
 <meta property="product:price:amount" content="{{ product.price }}" />
 <meta property="product:price:currency" content="VND" />
+
+<style>
+.product-image-slider {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.product-image-main {
+    width: 100%;
+    height: 500px;
+    object-fit: contain;
+    background: #f8f9fa;
+}
+
+.product-thumbnails {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.product-thumbnail {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.3s;
+}
+
+.product-thumbnail:hover {
+    border-color: #ffc107;
+    transform: scale(1.05);
+}
+
+.product-thumbnail.active {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.3);
+}
+
+.slider-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 193, 7, 0.9);
+    border: none;
+    color: #000;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s;
+}
+
+.slider-nav-btn:hover {
+    background: #ffc107;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.slider-nav-btn.prev { left: 15px; }
+.slider-nav-btn.next { right: 15px; }
+
+@media (max-width: 768px) {
+    .product-image-main { height: 300px; }
+    .product-thumbnail { width: 60px; height: 60px; }
+    .slider-nav-btn { width: 40px; height: 40px; }
+}
+</style>
 {% endblock %}
 
 {% block content %}
-<!-- ==================== BREADCRUMB & PAGE HEADER ==================== -->
 <div class="page-header bg-light py-4">
   <div class="container">
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb mb-0">
-        <li class="breadcrumb-item">
-          <a href="{{ url_for('main.index') }}">Trang chủ</a>
-        </li>
-        <li class="breadcrumb-item">
-          <a href="{{ url_for('main.products') }}">Sản phẩm</a>
-        </li>
+        <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('main.products') }}">Sản phẩm</a></li>
         <li class="breadcrumb-item">
           <a href="{{ url_for('main.products', category_slug=product.category.slug) }}">
             {{ product.category.name }}
@@ -52,46 +109,63 @@
     </nav>
   </div>
 </div>
+
 <div class="trang-san-pham-chi-tiet-vn">
-<!-- ==================== PRODUCT DETAIL ==================== -->
 <section class="py-5">
   <div class="container">
     <div class="row">
-      <!-- Product Image -->
+
+      <!-- Product Images -->
       <div class="col-lg-6 mb-4">
-        <div class="product-detail-image position-relative">
-          {% set media_info = product.get_media_seo_info() if product.image else None %}
+        {% set images_list = product.get_images_list() %}
+        {% set all_images = [product.image] + images_list if product.image else images_list %}
 
-          <img
-            src="{{ product.image if product.image else 'https://via.placeholder.com/600x600/FFC107/FFFFFF?text=Product' }}"
-            class="img-fluid rounded shadow-lg w-100"
-            alt="{{ media_info.alt_text if media_info and media_info.alt_text else product.name }}"
-            title="{{ media_info.title if media_info and media_info.title else product.name }}"
-            itemprop="image"
-            loading="eager"
-          />
+        {% if all_images|length > 0 %}
+        <div class="product-image-slider">
+          <img id="mainImage"
+               src="{{ all_images[0] }}"
+               class="product-image-main"
+               alt="{{ product.name }}"
+               loading="eager">
 
-          <!-- Badge giảm giá -->
+          {% if all_images|length > 1 %}
+          <button class="slider-nav-btn prev" onclick="changeImage(-1)">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          <button class="slider-nav-btn next" onclick="changeImage(1)">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+          {% endif %}
+
           {% if product.old_price and product.price > 0 %}
           <span class="badge bg-danger position-absolute top-0 start-0 m-3 fs-5">
             {{ ((product.old_price - product.price) / product.old_price * 100)|int }}%
           </span>
           {% endif %}
-
-          {# Hiển thị Caption cho SEO nhưng ẩn đi #}
-          {% if media_info and media_info.caption %}
-          <div class="visually-hidden" itemprop="description">
-            {{ media_info.caption }}
-          </div>
-          {% endif %}
         </div>
+
+        {% if all_images|length > 1 %}
+        <div class="product-thumbnails">
+          {% for img in all_images %}
+          <img src="{{ img }}"
+               class="product-thumbnail {% if loop.first %}active{% endif %}"
+               onclick="setImage({{ loop.index0 }})"
+               alt="{{ product.name }}">
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <img src="https://via.placeholder.com/600x600/FFC107/FFFFFF?text=Product"
+             class="img-fluid rounded shadow-lg"
+             alt="{{ product.name }}">
+        {% endif %}
       </div>
 
       <!-- Product Info -->
       <div class="col-lg-6">
         <h2 class="h3 mb-3" itemprop="name">{{ product.name }}</h2>
 
-        <!-- Badges -->
         <div class="mb-3">
           <span class="badge bg-info me-2">
             <i class="bi bi-tag-fill me-1"></i>{{ product.category.name }}
@@ -103,7 +177,6 @@
           {% endif %}
         </div>
 
-        <!-- Price -->
         <div class="product-price-detail bg-light p-3 rounded mb-4">
           {% if product.price == 0 %}
           <h2 class="text-danger fw-bold mb-0 text-center" itemprop="price">Liên hệ</h2>
@@ -125,62 +198,40 @@
           {% endif %}
         </div>
 
-        <!-- CTA Buttons -->
         <div class="d-grid gap-2 mb-4">
-          <a
-            href="tel:{{ get_setting('hotline', '0901180094')|replace('.', '')|replace(' ', '') }}"
-            class="btn btn-warning btn-lg"
-          >
+          <a href="tel:{{ get_setting('hotline', '0901180094')|replace('.', '')|replace(' ', '') }}"
+             class="btn btn-warning btn-lg">
             <i class="bi bi-telephone-fill me-2"></i>
             Gọi ngay: {{ get_setting('hotline', '0901.180.094') }}
           </a>
           <div class="row g-2">
             <div class="col-6">
-              <a
-                href="{{ get_setting('zalo_url', 'https://zalo.me/2548623772320781405') }}"
-                target="_blank"
-                class="btn btn-outline-primary btn-lg w-100"
-              >
+              <a href="{{ get_setting('zalo_url', 'https://zalo.me/2548623772320781405') }}"
+                 target="_blank" class="btn btn-outline-primary btn-lg w-100">
                 <i class="bi bi-chat-dots-fill me-1"></i>Chat Zalo
               </a>
             </div>
             <div class="col-6">
-              <a
-                href="{{ get_setting('facebook_messenger_url', '#') }}"
-                target="_blank"
-                class="btn btn-outline-primary btn-lg w-100"
-              >
+              <a href="{{ get_setting('facebook_messenger_url', '#') }}"
+                 target="_blank" class="btn btn-outline-primary btn-lg w-100">
                 <i class="bi bi-messenger me-1"></i>Messenger
               </a>
             </div>
           </div>
         </div>
 
-        <!-- Social Share -->
         <div class="border-top pt-3">
           <h6 class="fw-semibold mb-2">Chia sẻ sản phẩm:</h6>
           <div class="d-flex gap-2">
-            <a
-              href="https://www.facebook.com/sharer/sharer.php?u={{ request.url }}"
-              target="_blank"
-              class="btn btn-outline-primary btn-sm"
-              title="Chia sẻ lên Facebook"
-            >
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url }}"
+               target="_blank" class="btn btn-outline-primary btn-sm" title="Chia sẻ lên Facebook">
               <i class="bi bi-facebook"></i> Facebook
             </a>
-            <a
-              href="https://zalo.me/share?url={{ request.url }}"
-              target="_blank"
-              class="btn btn-outline-info btn-sm"
-              title="Chia sẻ qua Zalo"
-            >
+            <a href="https://zalo.me/share?url={{ request.url }}"
+               target="_blank" class="btn btn-outline-info btn-sm" title="Chia sẻ qua Zalo">
               <i class="bi bi-chat-dots-fill"></i> Zalo
             </a>
-            <button
-              onclick="copyLink()"
-              class="btn btn-outline-secondary btn-sm"
-              title="Sao chép link"
-            >
+            <button onclick="copyLink()" class="btn btn-outline-secondary btn-sm" title="Sao chép link">
               <i class="bi bi-link-45deg"></i> Copy Link
             </button>
           </div>
@@ -188,7 +239,7 @@
       </div>
     </div>
 
-    <!-- ==================== PRODUCT TABS ==================== -->
+    <!-- Product Tabs -->
     <div class="row mt-5">
       <div class="col-12">
         <ul class="nav nav-tabs mb-4" role="tablist">
@@ -205,129 +256,113 @@
         </ul>
 
         <div class="tab-content">
-          <!-- Chi tiết sản phẩm -->
           <div class="tab-pane fade show active" id="details">
             <div class="bg-light p-4 rounded">
               {{ product.description | nl2br | safe if product.description else 'Thông tin chi tiết đang được cập nhật...' }}
             </div>
           </div>
 
-          <!-- Thông số kỹ thuật -->
-            <div class="tab-pane fade" id="specs">
-                <div class="bg-white p-4">
+          <div class="tab-pane fade" id="specs">
+            <div class="bg-white p-4">
+              {% if product.technical_info %}
+              <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom border-warning">
+                <i class="bi bi-info-circle text-warning me-2"></i>Thông tin cơ bản
+              </h5>
+              <table class="table table-bordered mb-5">
+                <tbody>
+                  <tr>
+                    <td class="fw-semibold bg-light" style="width: 30%">
+                      <i class="bi bi-tag text-warning me-2"></i>Danh mục
+                    </td>
+                    <td>{{ product.category.name }}</td>
+                  </tr>
+                  <tr>
+                    <td class="fw-semibold bg-light">
+                      <i class="bi bi-check-circle text-success me-2"></i>Tình trạng
+                    </td>
+                    <td><span class="badge bg-success">Còn hàng</span></td>
+                  </tr>
+                  <tr>
+                    <td class="fw-semibold bg-light">
+                      <i class="bi bi-flag text-warning me-2"></i>Xuất xứ
+                    </td>
+                    <td><strong>Việt Nam</strong> - {{ get_setting('website_name', '') }}</td>
+                  </tr>
+                </tbody>
+              </table>
 
-                    {% if product.technical_info %}
-
-                    <!-- Thông tin cơ bản (luôn hiển thị) -->
-                    <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom border-warning">
-                        <i class="bi bi-info-circle text-warning me-2"></i>Thông tin cơ bản
-                    </h5>
-                    <table class="table table-bordered mb-5">
-                        <tbody>
-                            <tr>
-                                <td class="fw-semibold bg-light" style="width: 30%">
-                                    <i class="bi bi-tag text-warning me-2"></i>Danh mục
-                                </td>
-                                <td>{{ product.category.name }}</td>
-                            </tr>
-                            <tr>
-                                <td class="fw-semibold bg-light">
-                                    <i class="bi bi-check-circle text-success me-2"></i>Tình trạng
-                                </td>
-                                <td><span class="badge bg-success">Còn hàng</span></td>
-                            </tr>
-                            <tr>
-                                <td class="fw-semibold bg-light">
-                                    <i class="bi bi-flag text-warning me-2"></i>Xuất xứ
-                                </td>
-                                <td><strong>Việt Nam</strong> - {{ get_setting('website_name', '') }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <!-- Hiển thị tất cả thông tin kỹ thuật từ JSON -->
-                    <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom border-warning">
-                        <i class="bi bi-clipboard-data text-warning me-2"></i>Thông tin kỹ thuật chi tiết
-                    </h5>
-
-                    <div class="table-responsive mb-4">
-                        <table class="table table-bordered table-hover">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th style="width: 35%">Thông số</th>
-                                    <th>Giá trị</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for key, value in product.technical_info.items() %}
-                                <tr>
-                                    <td class="fw-semibold text-dark">
-                                        <i class="bi bi-dot text-warning fs-3"></i>{{ key }}
-                                    </td>
-                                    <td>
-                                        {% if value is string %}
-                                            <!-- Single value -->
-                                            {% if 'ĐẠT' in value or '✓' in value %}
-                                                <span class="text-success fw-bold">
-                                                    <i class="bi bi-check-circle-fill me-1"></i>{{ value }}
-                                                </span>
-                                            {% elif '≥' in value or '≤' in value or 'MPa' in value or 'µm' in value %}
-                                                <span class="badge bg-info text-dark fs-6 px-3 py-2">{{ value }}</span>
-                                            {% else %}
-                                                {{ value }}
-                                            {% endif %}
-                                        {% elif value is sequence and value is not string %}
-                                            <!-- List values -->
-                                            <ul class="list-unstyled mb-0">
-                                                {% for item in value %}
-                                                <li class="mb-2">
-                                                    <i class="bi bi-check2 text-success me-2"></i>{{ item }}
-                                                </li>
-                                                {% endfor %}
-                                            </ul>
-                                        {% else %}
-                                            {{ value }}
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {% else %}
-
-                    <!-- Không có thông tin -->
-                    <div class="card border-warning bg-light">
-                        <div class="card-body text-center py-5">
-                            <i class="bi bi-exclamation-triangle text-warning fs-1 mb-3 d-block"></i>
-                            <p class="text-muted mb-3">Thông tin kỹ thuật đang được cập nhật.</p>
-                            <p class="mb-0">
-                                Liên hệ <strong>{{ get_setting('hotline', '0901.180.094') }}</strong>
-                                để được tư vấn chi tiết.
-                            </p>
-                        </div>
-                    </div>
-
-                    {% endif %}
-
+              <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom border-warning">
+                <i class="bi bi-clipboard-data text-warning me-2"></i>Thông tin kỹ thuật chi tiết
+              </h5>
+              <div class="table-responsive mb-4">
+                <table class="table table-bordered table-hover">
+                  <thead class="bg-light">
+                    <tr>
+                      <th style="width: 35%">Thông số</th>
+                      <th>Giá trị</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for key, value in product.technical_info.items() %}
+                    <tr>
+                      <td class="fw-semibold text-dark">
+                        <i class="bi bi-dot text-warning fs-3"></i>{{ key }}
+                      </td>
+                      <td>
+                        {% if value is string %}
+                          {% if 'ĐẠT' in value or '✓' in value %}
+                            <span class="text-success fw-bold">
+                              <i class="bi bi-check-circle-fill me-1"></i>{{ value }}
+                            </span>
+                          {% elif '≥' in value or '≤' in value or 'MPa' in value or 'µm' in value %}
+                            <span class="badge bg-info text-dark fs-6 px-3 py-2">{{ value }}</span>
+                          {% else %}
+                            {{ value }}
+                          {% endif %}
+                        {% elif value is sequence and value is not string %}
+                          <ul class="list-unstyled mb-0">
+                            {% for item in value %}
+                            <li class="mb-2">
+                              <i class="bi bi-check2 text-success me-2"></i>{{ item }}
+                            </li>
+                            {% endfor %}
+                          </ul>
+                        {% else %}
+                          {{ value }}
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              {% else %}
+              <div class="card border-warning bg-light">
+                <div class="card-body text-center py-5">
+                  <i class="bi bi-exclamation-triangle text-warning fs-1 mb-3 d-block"></i>
+                  <p class="text-muted mb-3">Thông tin kỹ thuật đang được cập nhật.</p>
+                  <p class="mb-0">
+                    Liên hệ <strong>{{ get_setting('hotline', '0901.180.094') }}</strong>
+                    để được tư vấn chi tiết.
+                  </p>
                 </div>
+              </div>
+              {% endif %}
             </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- ==================== RELATED PRODUCTS ==================== -->
+    <!-- Related Products -->
     {% if related_products %}
     <div class="mt-5">
-      <h3 class="fw-bold mb-4">
-        Sản phẩm liên quan
-      </h3>
+      <h3 class="fw-bold mb-4">Sản phẩm liên quan</h3>
       <div class="row g-4">
         {% for rp in related_products %}
           {% set product = rp %}
-            {% include 'components/card_product.html' with context %}
-          {% endfor %}
+          {% include 'components/card_product.html' with context %}
+        {% endfor %}
       </div>
     </div>
     {% endif %}
@@ -335,7 +370,6 @@
 </section>
 </div>
 
-<!-- ==================== SCHEMA.ORG - PRODUCT ==================== -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -364,7 +398,6 @@
 }
 </script>
 
-<!-- ==================== SCHEMA.ORG - BREADCRUMB ==================== -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -399,10 +432,38 @@
 </script>
 {% endblock %}
 
-<!-- ==================== CUSTOM JS ==================== -->
 {% block extra_js %}
 <script>
-// Copy link function
+// Image slider functionality
+{% set images_list = product.get_images_list() %}
+{% set all_images = [product.image] + images_list if product.image else images_list %}
+
+const images = {{ all_images|tojson }};
+let currentIndex = 0;
+
+function setImage(index) {
+  currentIndex = index;
+  document.getElementById('mainImage').src = images[index];
+
+  document.querySelectorAll('.product-thumbnail').forEach((thumb, i) => {
+    thumb.classList.toggle('active', i === index);
+  });
+}
+
+function changeImage(direction) {
+  currentIndex += direction;
+  if (currentIndex < 0) currentIndex = images.length - 1;
+  if (currentIndex >= images.length) currentIndex = 0;
+  setImage(currentIndex);
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowLeft') changeImage(-1);
+  if (e.key === 'ArrowRight') changeImage(1);
+});
+
+// Copy link
 function copyLink() {
   navigator.clipboard.writeText(window.location.href).then(() => {
     const notification = document.createElement('div');
@@ -428,7 +489,6 @@ function copyLink() {
   });
 }
 
-// CSS animations
 const style = document.createElement('style');
 style.textContent = `
   @keyframes slideIn {
