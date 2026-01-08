@@ -145,7 +145,7 @@
         "Xi măng trắng cao cấp",
         "Phụ gia"
       ],
-      "packaging": "1kg/túi, 1 thùng 24 túi",
+      "packaging": "1kg/túi, 1 thùng 20 túi (thay đổi từ 24 túi/thùng kể từ tháng 01/2026)",
       "technical_specs": {
         "Định mức sử dụng": "≈ 1kg/5m²",
         "Khối lượng riêng": "≈ 0.9–1.1g/cm³",
@@ -160,7 +160,12 @@
         "Độ hút nước sau 30 phút": "2.87 g – ĐẠT",
         "Độ hút nước sau 240 phút": "8.22 g – ĐẠT"
       },
-      "standards": "TCVN 7899-3:2008"
+      "standards": "TCVN 7899-3:2008",
+      "notes": [
+        "⚠️ Quy cách đóng gói đã thay đổi từ 24kg/thùng sang 20kg/thùng kể từ tháng 01/2026",
+        "Trong giai đoạn chuyển đổi, trên thị trường có thể lưu hành song song hai quy cách đóng gói (cũ và mới)",
+        "Công ty cam kết chất lượng sản phẩm và tiêu chuẩn kỹ thuật không thay đổi"
+      ]
     },
     {
       "name": "Keo Chà Ron BRICON Ngoại Thất (Extra)",
@@ -190,7 +195,70 @@
       "standards": "TCVN 7899-3:2008"
     },
     {
-      "name": "Keo Chà Ron BRICON Ngoại Thất (Dạng Hộp)",
+      "name": "Keo Chà Ron Epoxy BRICON 2 Thành Phần (VOC Free)",
+      "category": "Keo Chà Ron",
+      "brand": "BRICON",
+      "description": "Keo chà ron Epoxy hai thành phần (A+B) tỉ lệ 1:1, VOC Free. Tạo hỗn hợp bền chắc, chống thấm vượt trội, kháng hóa chất, chống ố vàng và chống mốc. Giữ màu sắc bền đẹp lâu dài. Phù hợp cho gạch men, đá tự nhiên, mosaic và nhiều loại vật liệu ốp lát khác.",
+      "composition": [
+        "Nhựa Epoxy (Phần A)",
+        "Chất đóng rắn (Phần B)",
+        "Bột màu & phụ gia"
+      ],
+      "application": [
+        "Chà ron cho tường và sàn ở khu vực nội thất và ngoại thất",
+        "Phù hợp cho nhà tắm, bếp, ban công, hồ bơi, khu thương mại",
+        "Dùng được cho gạch men, đá tự nhiên, mosaic",
+        "Chống thấm vượt trội cho tường/sàn",
+        "Kháng hóa chất (chất tẩy rửa, dầu mỡ, nước hồ bơi)",
+        "Chống rêu mốc và chống ố vàng",
+        "Màu sắc bền lâu, khó bám bẩn",
+        "Độ bền cơ học cao, chịu mài mòn tốt"
+      ],
+      "expiry": "Trong vòng 24 tháng kể từ ngày sản xuất",
+      "packaging": "Ống đôi 380ml (A+B), 1 thùng 12 ống",
+      "colors": [
+        "Trắng Sứ",
+        "Kem Sữa",
+        "Xám Xi",
+        "Đen",
+        "Vàng Bricon"
+      ],
+      "technical_specs": {
+        "Loại sản phẩm": "Keo chà ron Epoxy hai thành phần (A+B), VOC Free",
+        "Tỷ lệ pha trộn": "A:B = 1:1 (theo thể tích)",
+        "Dung tích": "380ml (2 thành phần)",
+        "Độ rộng khe ron": "1-10mm",
+        "Định mức sử dụng": "≈ 1 ống/2-4 m² (phụ thuộc kích thước ron và gạch)",
+        "Thời gian thi công (pot life)": "30-45 phút (25°C)",
+        "Khô bề mặt": "4-6 giờ",
+        "Cho phép lưu thông nhẹ": "24 giờ",
+        "Cường độ tối đa": "24 giờ",
+        "Nhiệt độ thi công": "10-35°C",
+        "Kháng hóa chất": "Tốt (chất tẩy rửa, dầu mỡ, nước hồ bơi)"
+      },
+      "standards": "ANSI A118.3 (tham chiếu)",
+      "construction_method": [
+        "Bước 1: Làm sạch khe ron, đảm bảo khô ráo",
+        "Bước 2: Cắt đầu vòi, lắp vòi trộn, đặt vào súng bơm",
+        "Bước 3: Thải bỏ khoảng 10g keo đầu để đảm bảo trộn đều",
+        "Bước 4: Bơm keo đều tay vào khe ron, tránh tạo bọt khí",
+        "Bước 5: Miết tạo hình ron; sau 4-5 giờ tháo băng và vệ sinh",
+        "Bước 6: Sau 24 giờ đạt cường độ tối đa"
+      ],
+      "notes": [
+        "Ngừng thi công trên 20 phút: keo trong vòi có thể đông, cần thay vòi mới",
+        "Không pha dung môi. Luôn đeo găng tay và đồ bảo hộ",
+        "Gỡ bỏ keo khi còn ướt: lau ngay bằng khăn sạch",
+        "Gỡ bỏ keo khi đã khô: dùng dụng cụ cơ học, máy mài, không làm hỏng bề mặt gạch"
+      ],
+      "warnings": [
+        "Tránh tiếp xúc mắt/da",
+        "Không nuốt hoặc hít hơi/bụi",
+        "Để xa tầm tay trẻ em"
+      ]
+    },
+    {
+      "name": "Keo Chà Ron BRICON Nội & Ngoại Thất (Dạng Hộp)",
       "category": "Keo Chà Ron",
       "brand": "BRICON",
       "description": "Keo chà ron cao cấp dạng hộp – dòng sản phẩm đặc trưng của BRICON, dùng cho khu vực nội và ngoại thất. Có khả năng chịu thời tiết, bám dính tốt, phù hợp cho hồ bơi, WC, sân thượng, kho lạnh và khu vực ẩm ướt.",
@@ -306,6 +374,10 @@
     {
       "question": "Sản phẩm chống thấm BRICON có dùng được cho hồ bơi không?",
       "answer": "Dạ có ạ. BRICON 106 và BRICON 108 đều phù hợp cho hồ bơi, sân thượng và khu vực thường xuyên tiếp xúc với nước."
+    },
+    {
+      "question": "Tại sao Keo Chà Ron BRICON Nội Thất đổi từ 24 túi/thùng xuống 20 túi/thùng?",
+      "answer": "Dạ, từ tháng 01/2026, BRICON điều chỉnh quy cách đóng gói Keo Chà Ron Nội Thất từ 24kg/thùng xuống 20kg/thùng để tối ưu logistics và đảm bảo chất lượng sản phẩm tốt nhất. Trong giai đoạn chuyển đổi, thị trường có thể lưu hành song song cả hai quy cách (cũ 24kg và mới 20kg). Chất lượng sản phẩm và tiêu chuẩn kỹ thuật vẫn giữ nguyên ạ."
     }
   ],
   "process": [

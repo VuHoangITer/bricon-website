@@ -10,14 +10,7 @@ from groq import Groq
 groq_client = None
 _COMPANY_INFO_CACHE = None
 _COMPANY_INFO_MTIME = None
-_DEFAULT_MODEL_NAME = 'llama-3.3-70b-versatile'  # Hoặc 'mixtral-8x7b-32768'
-
-# Từ khoá kích hoạt chế độ "full" (kỹ thuật/CSKH chi tiết)
-TECH_KEYWORDS = [
-    "thông số", "kỹ thuật", "tds", "định mức", "độ bám", "bám dính",
-    "hạn dùng", "hạn sử dụng", "date", "hsd", "đổi trả", "quy cách",
-    "màu ron", "màu chà ron", "packaging", "bao bì", "ứng dụng", "hướng dẫn thi công"
-]
+_DEFAULT_MODEL_NAME = 'llama-3.3-70b-versatile'
 
 
 # ==================== INIT GROQ ====================
@@ -70,34 +63,17 @@ def load_company_info():
         return _COMPANY_INFO_CACHE or {}
 
 
-# ==================== PROMPT MODES ====================
-def pick_mode(user_message: str) -> str:
-    """Chọn 'full' nếu có từ khoá kỹ thuật/CSKH sâu; ngược lại 'lite'."""
-    low = (user_message or "").lower()
-    if any(k in low for k in TECH_KEYWORDS):
-        return "full"
-    return current_app.config.get("CHATBOT_PROMPT_MODE_DEFAULT", "lite")
-
-
-def _summarize_products(products, limit=10):
-    lines = []
-    for p in (products or [])[:limit]:
-        name = p.get('name', 'N/A')
-        desc = (p.get('description') or '')[:120]
-        lines.append(f"• {name}: {desc}")
-    return "\n".join(lines)
-
-
-def _summarize_faq(faq, limit=5, answer_len=150):
-    lines = []
-    for q in (faq or [])[:limit]:
-        lines.append(f"Q: {q.get('question', '')}\nA: {(q.get('answer') or '')[:answer_len]}")
-    return "\n".join(lines)
-
-
-def create_prompt(company_info: dict, mode="lite") -> str:
+# ==================== FULL PROMPT (LUÔN DÙNG) ====================
+def create_full_prompt(company_info: dict) -> str:
+    """
+    Tạo prompt FULL với toàn bộ thông tin từ JSON
+    Không cắt giảm, không summarize
+    """
     # Thông tin cơ bản
     company_name = company_info.get('company_name', 'CÔNG TY TNHH BRICON VIỆT NAM')
+    slogan = company_info.get('slogan', 'Kết dính bền lâu – Xây dựng niềm tin')
+    company_intro = company_info.get('company_intro', '')
+
     contact = company_info.get('contact', {}) or {}
     phone = contact.get('phone', '0901.180.094')
     hotline = contact.get('hotline', '0901180094')
@@ -107,62 +83,62 @@ def create_prompt(company_info: dict, mode="lite") -> str:
     website = contact.get('website', 'https://www.bricon.vn')
     working_hours = contact.get('working_hours', '8:00 - 17:30 (Thứ 2 - Thứ 7)')
 
-    products = company_info.get('products', []) or []
-    faq = company_info.get('faq', []) or []
-
-    if mode == "lite":
-        # Gọn nhẹ: tiết kiệm token & cost
-        products_summary = _summarize_products(products, limit=10)
-        faq_summary = _summarize_faq(faq, limit=5, answer_len=150)
-
-        return f"""BẠN LÀ TRỢ LÝ ẢO {company_name}
-
-📞 LIÊN HỆ: Hotline: {hotline} | Zalo: {zalo} | Email: {email}
-📍 Địa chỉ: {address} | 🌐 {website}
-
-📦 SẢN PHẨM CHÍNH:
-{products_summary}
-
-❓ FAQ:
-{faq_summary}
-
-🎯 NGUYÊN TẮC:
-1) Trả lời NGẮN (2–4 câu), đi thẳng trọng tâm
-2) KHÔNG đưa giá cụ thể → hướng dẫn liên hệ hotline/Zalo
-3) Thân thiện, chuyên nghiệp
-4) Không biết thì nói thật và cho thông tin liên hệ
-
-HÃY TRẢ LỜI NGẮN GỌN:"""
-
-    # FULL MODE (giàu thông tin)
-    slogan = company_info.get('slogan', 'Kết dính bền lâu – Xây dựng niềm tin')
+    # Chi nhánh
     branches = contact.get('branches', []) or []
-    branches_text = "\n".join([f"• {b.get('name', 'N/A')}: {b.get('address', 'N/A')}" for b in branches]) or "—"
+    branches_text = "\n".join([
+        f"• {b.get('name', 'N/A')}: {b.get('address', 'N/A')}"
+        for b in branches
+    ]) or "—"
 
-    # Sản phẩm chi tiết
+    # TOÀN BỘ SẢN PHẨM - KHÔNG CẮT GIẢM
+    products = company_info.get('products', []) or []
     products_list = []
     for p in products:
         info = []
         info.append(f"━━━ {p.get('name', 'N/A')} ━━━")
-        if p.get('category'): info.append(f"• Loại: {p['category']}")
-        if p.get('description'): info.append(f"• Mô tả: {p['description']}")
+        if p.get('category'):
+            info.append(f"• Loại: {p['category']}")
+        if p.get('brand'):
+            info.append(f"• Thương hiệu: {p['brand']}")
+        if p.get('description'):
+            info.append(f"• Mô tả: {p['description']}")
+
+        # Composition
+        if p.get('composition'):
+            info.append("• Thành phần:")
+            for comp in p['composition']:
+                info.append(f"  - {comp}")
+
+        # Application
         if p.get('application'):
             info.append("• Ứng dụng:")
             for app in p['application']:
                 info.append(f"  - {app}")
+
+        # Technical specs (FULL - không cắt)
         if p.get('technical_specs'):
             info.append("• Thông số kỹ thuật:")
             for k, v in p['technical_specs'].items():
                 info.append(f"  - {k}: {v}")
-        if p.get('packaging'): info.append(f"• Đóng gói: {p['packaging']}")
-        if p.get('colors'): info.append(f"• Màu sắc: {', '.join(p['colors'])}")
-        if p.get('expiry'): info.append(f"• Hạn sử dụng: {p['expiry']}")
-        products_list.append("\n".join(info))
-    products_text = "\n".join(products_list) or "—"
 
+        if p.get('packaging'):
+            info.append(f"• Đóng gói: {p['packaging']}")
+        if p.get('colors'):
+            info.append(f"• Màu sắc: {', '.join(p['colors'])}")
+        if p.get('expiry'):
+            info.append(f"• Hạn sử dụng: {p['expiry']}")
+        if p.get('standards'):
+            info.append(f"• Tiêu chuẩn: {p['standards']}")
+
+        products_list.append("\n".join(info))
+
+    products_text = "\n\n".join(products_list) or "—"
+
+    # Ưu điểm
     strengths = company_info.get('strengths', []) or []
     strengths_text = "\n".join([f"✓ {s}" for s in strengths]) or "—"
 
+    # Chính sách đổi trả
     rp = company_info.get('return_policy', {}) or {}
     return_summary = rp.get('policy_summary', 'Công ty có chính sách đổi trả linh hoạt')
     conditions = rp.get('conditions', {}) or {}
@@ -174,17 +150,24 @@ HÃY TRẢ LỜI NGẮN GỌN:"""
         else:
             conditions_parts.append(f"\n{key}: {value}")
     conditions_text = "".join(conditions_parts)
+
     notes = rp.get('note', []) or []
     notes_text = "\n".join([f"⚠️ {n}" for n in notes]) if notes else ""
 
+    # Quy trình đặt hàng
     process = company_info.get('process', []) or []
     process_text = "\n".join([f"{i + 1}. {s}" for i, s in enumerate(process)]) or "—"
 
+    # Dự án (TOÀN BỘ - không giới hạn 15)
     projects = company_info.get('projects', []) or []
-    projects_text = "\n".join([f"• {proj}" for proj in projects[:15]]) or "—"
+    projects_text = "\n".join([f"• {proj}" for proj in projects]) or "—"
 
-    company_intro = company_info.get('company_intro', '')
-    faq_text = "\n".join([f"❓ {q.get('question', '')}\n💡 {q.get('answer', '')}\n" for q in faq]) or "—"
+    # FAQ (TOÀN BỘ - không cắt)
+    faq = company_info.get('faq', []) or []
+    faq_text = "\n".join([
+        f"❓ {q.get('question', '')}\n💡 {q.get('answer', '')}\n"
+        for q in faq
+    ]) or "—"
 
     return f"""BẠN LÀ TRỢ LÝ ẢO BRICON - CHUYÊN GIA VẬT LIỆU XÂY DỰNG
 
@@ -192,36 +175,59 @@ HÃY TRẢ LỜI NGẮN GỌN:"""
 📞 {hotline} | 💬 Zalo: {zalo} | 📧 {email} | 🌐 {website}
 📍 {address} | ⏰ {working_hours}
 
-📖 GIỚI THIỆU:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📖 GIỚI THIỆU CÔNG TY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {company_intro}
 
-— HỆ THỐNG CHI NHÁNH —
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏪 HỆ THỐNG CHI NHÁNH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {branches_text}
 
-— DANH MỤC SẢN PHẨM CHI TIẾT —
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📦 DANH MỤC SẢN PHẨM CHI TIẾT (TOÀN BỘ)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {products_text}
 
-— ƯU ĐIỂM NỔI BẬT —
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⭐ ƯU ĐIỂM NỔI BẬT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {strengths_text}
 
-— CHÍNH SÁCH ĐỔI TRẢ —
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔄 CHÍNH SÁCH ĐỔI TRẢ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📌 {return_summary}
 ✅ Điều kiện:{conditions_text}
 {notes_text}
 
-— QUY TRÌNH ĐẶT HÀNG —
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 QUY TRÌNH ĐẶT HÀNG
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {process_text}
 
-— DỰ ÁN TIÊU BIỂU —
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏗️ DỰ ÁN TIÊU BIỂU
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {projects_text}
 
-— CÂU HỎI THƯỜNG GẶP —
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+❓ CÂU HỎI THƯỜNG GẶP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {faq_text}
 
-🎯 NGUYÊN TẮC TRẢ LỜI:
-1) Trả lời TRỰC TIẾP, đúng trọng tâm
-2) Không nêu giá; hướng dẫn liên hệ {hotline}/Zalo {zalo}
-3) Thân thiện, chuyên nghiệp; chỉ hỏi thêm khi thật sự cần
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 NGUYÊN TẮC TRẢ LỜI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Trả lời CHÍNH XÁC dựa trên thông tin đã cung cấp ở trên
+2. Trích dẫn cụ thể từ phần sản phẩm/FAQ khi được hỏi về thông số kỹ thuật
+3. KHÔNG đưa giá cụ thể → hướng dẫn liên hệ {hotline} hoặc Zalo {zalo}
+4. Thân thiện, chuyên nghiệp, ngắn gọn (2-5 câu)
+5. Nếu không chắc chắn → nói thẳng và cho thông tin liên hệ
+6. Ưu tiên câu trả lời ngắn gọn, tránh dài dòng trừ khi khách yêu cầu chi tiết
+7. Luôn trả lời bằng tiếng Việt có dấu
+8. Khi khách hỏi về sản phẩm → giới thiệu sản phẩm phù hợp nhất từ danh mục
 """
 
 
@@ -256,10 +262,7 @@ def build_messages(system_prompt: str, history_context: str, user_message: str) 
 @feature_required('chatbot')
 def send_message():
     """
-    Xử lý tin nhắn với Groq:
-    - Tuân thủ giới hạn trong app/config.py (15 req/giờ mặc định)
-    - Tự động chọn 'lite'/'full' theo intent
-    - Groq có timeout mặc định 30s
+    Xử lý tin nhắn với Groq - LUÔN DÙNG FULL MODE
     """
     global groq_client
 
@@ -307,8 +310,8 @@ def send_message():
 
         session['chatbot_request_count'] += 1
 
-        # Lịch sử hội thoại (giới hạn ngắn để tiết kiệm token)
-        history_turns = int(current_app.config.get('CHATBOT_HISTORY_TURNS', 5))
+        # Lịch sử hội thoại (tăng lên 10 turns để nhớ lâu hơn)
+        history_turns = int(current_app.config.get('CHATBOT_HISTORY_TURNS', 10))
         if 'chatbot_history' not in session:
             session['chatbot_history'] = []
         history_context = "\n".join([
@@ -316,10 +319,9 @@ def send_message():
             for msg in session['chatbot_history'][-history_turns:]
         ])
 
-        # Chọn prompt mode & build messages
+        # Tạo FULL PROMPT (luôn luôn)
         company_info = load_company_info()
-        mode = pick_mode(user_message)  # 'lite' / 'full'
-        system_prompt = create_prompt(company_info, mode=mode)
+        system_prompt = create_full_prompt(company_info)
         messages = build_messages(system_prompt, history_context, user_message)
 
         # Gọi Groq API
@@ -327,8 +329,8 @@ def send_message():
             chat_completion = groq_client.chat.completions.create(
                 messages=messages,
                 model=current_app.config.get('GROQ_MODEL', _DEFAULT_MODEL_NAME),
-                temperature=float(current_app.config.get('CHATBOT_TEMPERATURE', 0.6)),
-                max_tokens=int(current_app.config.get('CHATBOT_MAX_OUTPUT_TOKENS', 800 if mode == "full" else 400)),
+                temperature=0.4,  # Giảm xuống 0.4 để ổn định hơn
+                max_tokens=1000,  # Tăng lên 1000 vì full mode
                 top_p=0.9,
                 stream=False
             )
@@ -347,17 +349,17 @@ def send_message():
                 'response': '⚠️ Hệ thống đang quá tải, anh/chị vui lòng thử lại sau vài giây hoặc gọi 📞 0901180094.'
             }), 500
 
-        # Lưu lịch sử (giới hạn 20 message gần nhất)
+        # Lưu lịch sử (tăng lên 30 message)
         session['chatbot_history'].append({'role': 'user', 'content': user_message})
         session['chatbot_history'].append({'role': 'assistant', 'content': bot_reply})
-        session['chatbot_history'] = session['chatbot_history'][-20:]
+        session['chatbot_history'] = session['chatbot_history'][-30:]
         session.modified = True
 
         remaining = request_limit - session['chatbot_request_count']
 
         return jsonify({
             'response': bot_reply,
-            'mode': mode,
+            'mode': 'full',  # Luôn là full
             'remaining_requests': remaining,
             'timestamp': datetime.now().isoformat()
         })
@@ -378,9 +380,9 @@ def reset_chat():
         session.pop('chatbot_request_count', None)
         session.pop('chatbot_request_start_time', None)
         session.modified = True
-        current_app.logger.info(" Chat history reset successfully")
+        current_app.logger.info("✅ Chat history reset successfully")
         return jsonify(
-            {'status': 'success', 'message': ' Đã làm mới hội thoại', 'timestamp': datetime.now().isoformat()})
+            {'status': 'success', 'message': '✅ Đã làm mới hội thoại', 'timestamp': datetime.now().isoformat()})
     except Exception as e:
         current_app.logger.error(f"❌ Reset chat error: {str(e)}")
         return jsonify({'status': 'error', 'message': '⚠️ Không thể làm mới hội thoại'}), 500
@@ -398,6 +400,7 @@ def chatbot_status():
             'enabled': current_app.config.get('CHATBOT_ENABLED', True),
             'model_initialized': groq_client is not None,
             'model': current_app.config.get('GROQ_MODEL', _DEFAULT_MODEL_NAME),
+            'mode': 'full',  # Luôn là full
             'request_limit': limit,
             'remaining_requests': max(0, limit - used),
             'history_length': len(session.get('chatbot_history', [])),
@@ -413,9 +416,9 @@ def init_chatbot(app):
     """Gọi ở __init__.py khi khởi động app"""
     with app.app_context():
         init_groq()
-        # Preload company info để cache sẵn (không block request đầu)
+        # Preload company info để cache sẵn
         try:
             load_company_info()
+            current_app.logger.info("🤖 BRICON Chatbot initialized with Groq (FULL MODE ONLY)")
         except Exception:
             pass
-        current_app.logger.info("🤖 BRICON Chatbot initialized with Groq (hybrid mode)")
