@@ -62,8 +62,8 @@
       <li class="nav-item" role="presentation">
         <button class="nav-link fw-bold" id="tab-khac" data-bs-toggle="pill"
                 data-bs-target="#content-khac" type="button" role="tab">
-          <i class="bi bi-box-seam me-2"></i>
-          Sản Phẩm Khác
+          <i class="bi bi-download me-2"></i>
+          Tài Liệu Kỹ Thuật
         </button>
       </li>
     </ul>
@@ -408,7 +408,7 @@
           <div class="col-12">
             <h2 class="fw-bold mb-4">
               <i class="bi bi-play-circle-fill text-warning me-2"></i>
-              Video Hướng Dẫn - Keo Chà Ron Epoxy
+              Video Hướng Dẫn - Keo Chà Ron Epoxy 2 Thành Phần
             </h2>
             <div class="card shadow-sm">
               <div class="card-body p-4">
@@ -420,40 +420,12 @@
           </div>
         </div>
 
-        <!-- Giới thiệu -->
-        <div class="row mb-5">
-          <div class="col-12">
-            <h2 class="fw-bold mb-4">
-              <i class="bi bi-info-circle-fill text-warning me-2"></i>
-              Giới Thiệu Sản Phẩm
-            </h2>
-            <div class="card shadow-sm">
-              <div class="card-body">
-                <p class="card-text mb-3">
-                  Keo chà ron Epoxy hai thành phần, đóng gói theo tỷ lệ 1:1. Khi trộn tạo hỗn hợp bền chắc, chống thấm, kháng hóa chất và giữ màu bền đẹp. Phù hợp cho gạch men, đá tự nhiên, mosaic và nhiều loại vật liệu ốp lát khác.
-                </p>
-                <h6 class="fw-bold">Phạm vi ứng dụng</h6>
-                <p class="card-text mb-3">
-                  Chà ron cho tường và sàn ở khu vực nội thất và ngoại thất: nhà tắm, bếp, ban công, hồ bơi, khu thương mại...
-                </p>
-                <h6 class="fw-bold">Tính năng nổi bật</h6>
-                <ul class="mb-0">
-                  <li>Chống thấm vượt trội cho tường, sàn</li>
-                  <li>Kháng hóa chất, chống rêu mốc</li>
-                  <li>Màu sắc bền lâu, khó bám bẩn</li>
-                  <li>Độ bền cơ học cao, chịu mài mòn tốt</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Quy trình thi công -->
         <div class="row mb-5">
           <div class="col-12">
             <h2 class="fw-bold mb-4">
               <i class="bi bi-list-ol text-warning me-2"></i>
-              Phương Pháp Thi Công
+              Quy Trình Thi Công
             </h2>
 
             <div class="card mb-3 border-start border-warning border-4 shadow-sm">
@@ -546,128 +518,69 @@
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Thông tin sản phẩm -->
+      <!-- ==================== TAB: TÀI LIỆU KỸ THUẬT ==================== -->
+      <div class="tab-pane fade" id="content-khac" role="tabpanel">
         <div class="row mb-5">
           <div class="col-12">
             <h2 class="fw-bold mb-4">
-              <i class="bi bi-box-seam text-warning me-2"></i>
-              Thông Tin Sản Phẩm
+              <i class="bi bi-download text-warning me-2"></i>
+              Tài Liệu Kỹ Thuật
             </h2>
-            <div class="card shadow-sm">
-              <div class="card-body">
-                <table class="table table-borderless mb-0">
-                  <tbody>
-                    <tr>
-                      <th style="width: 200px;">Tên sản phẩm</th>
-                      <td>BRICON Epoxy Grout - VOC Free</td>
-                    </tr>
-                    <tr>
-                      <th>Dung tích</th>
-                      <td>380ml (2 thành phần)</td>
-                    </tr>
-                    <tr>
-                      <th>Tỷ lệ trộn</th>
-                      <td>1:1</td>
-                    </tr>
-                    <tr>
-                      <th>Hạn sử dụng</th>
-                      <td>24 tháng kể từ ngày sản xuất</td>
-                    </tr>
-                    <tr>
-                      <th>Ngày sản xuất</th>
-                      <td>In trên bao bì</td>
-                    </tr>
-                  </tbody>
-                </table>
+            <div class="row g-3">
+              <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+                  <div class="card-body text-center">
+                    <i class="bi bi-file-pdf-fill text-danger mb-3" style="font-size: 3rem;"></i>
+                    <h5 class="card-title">Catalogue</h5>
+                    <p class="card-text text-muted small">Thông tin sản phẩm</p>
+                    <a href="{{ url_for('static', filename='downloads/catalogue.pdf') }}"
+                       class="btn btn-outline-warning btn-sm"
+                       download="BRICON-Catalogue.pdf"
+                       target="_blank">
+                      <i class="bi bi-download me-1"></i>Tải xuống
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+                  <div class="card-body text-center">
+                    <i class="bi bi-file-pdf-fill text-danger mb-3" style="font-size: 3rem;"></i>
+                    <h5 class="card-title">TDS</h5>
+                    <p class="card-text text-muted small">Thông số kỹ thuật</p>
+                    <a href="{{ url_for('static', filename='downloads/tds.pdf') }}"
+                       class="btn btn-outline-warning btn-sm"
+                       download="BRICON-TDS.pdf"
+                       target="_blank">
+                      <i class="bi bi-download me-1"></i>Tải xuống
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+                  <div class="card-body text-center">
+                    <i class="bi bi-file-pdf-fill text-danger mb-3" style="font-size: 3rem;"></i>
+                    <h5 class="card-title">TCVN</h5>
+                    <p class="card-text text-muted small">Chứng Nhận Chất Lượng</p>
+                    <a href="{{ url_for('static', filename='downloads/tcvn.pdf') }}"
+                       class="btn btn-outline-warning btn-sm"
+                       download="BRICON-MSDS.pdf"
+                       target="_blank">
+                      <i class="bi bi-download me-1"></i>Tải xuống
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- ==================== TAB 4: SẢN PHẨM KHÁC ==================== -->
-      <div class="tab-pane fade" id="content-khac" role="tabpanel">
-        <div class="alert alert-info">
-          <i class="bi bi-info-circle-fill me-2"></i>
-          Nội dung hướng dẫn cho các sản phẩm khác sẽ được cập nhật sớm...
         </div>
       </div>
 
     </div>
     <!-- End Tab Content -->
-
-    <!-- Download Section (chung cho tất cả tabs) -->
-    <div class="row mb-5 mt-5">
-      <div class="col-12">
-        <h2 class="fw-bold mb-4">
-          <i class="bi bi-download text-warning me-2"></i>
-          Tài Liệu Kỹ Thuật
-        </h2>
-        <div class="row g-3">
-          <div class="col-md-6 col-lg-3">
-            <div class="card h-100 shadow-sm">
-              <div class="card-body text-center">
-                <i class="bi bi-file-pdf-fill text-danger mb-3" style="font-size: 3rem;"></i>
-                <h5 class="card-title">Catalogue</h5>
-                <p class="card-text text-muted small">Thông tin sản phẩm</p>
-                <a href="{{ url_for('static', filename='downloads/catalogue.pdf') }}"
-                   class="btn btn-outline-warning btn-sm"
-                   download="BRICON-Catalogue.pdf"
-                   target="_blank">
-                  <i class="bi bi-download me-1"></i>Tải xuống
-                </a>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6 col-lg-3">
-            <div class="card h-100 shadow-sm">
-              <div class="card-body text-center">
-                <i class="bi bi-file-pdf-fill text-danger mb-3" style="font-size: 3rem;"></i>
-                <h5 class="card-title">TDS</h5>
-                <p class="card-text text-muted small">Thông số kỹ thuật</p>
-                <a href="{{ url_for('static', filename='downloads/tds.pdf') }}"
-                   class="btn btn-outline-warning btn-sm"
-                   download="BRICON-TDS.pdf"
-                   target="_blank">
-                  <i class="bi bi-download me-1"></i>Tải xuống
-                </a>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6 col-lg-3">
-            <div class="card h-100 shadow-sm">
-              <div class="card-body text-center">
-                <i class="bi bi-file-pdf-fill text-danger mb-3" style="font-size: 3rem;"></i>
-                <h5 class="card-title">MSDS</h5>
-                <p class="card-text text-muted small">An toàn hóa chất</p>
-                <a href="{{ url_for('static', filename='downloads/msds.pdf') }}"
-                   class="btn btn-outline-warning btn-sm"
-                   download="BRICON-MSDS.pdf"
-                   target="_blank">
-                  <i class="bi bi-download me-1"></i>Tải xuống
-                </a>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6 col-lg-3">
-            <div class="card h-100 shadow-sm">
-              <div class="card-body text-center">
-                <i class="bi bi-file-pdf-fill text-danger mb-3" style="font-size: 3rem;"></i>
-                <h5 class="card-title">Quy trình</h5>
-                <p class="card-text text-muted small">Hướng dẫn chi tiết</p>
-                <a href="{{ url_for('static', filename='downloads/quy-trinh.pdf') }}"
-                   class="btn btn-outline-warning btn-sm"
-                   download="BRICON-Quy-Trinh.pdf"
-                   target="_blank">
-                  <i class="bi bi-download me-1"></i>Tải xuống
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </section>
 
