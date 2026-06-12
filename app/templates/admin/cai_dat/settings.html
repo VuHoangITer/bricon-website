@@ -523,6 +523,14 @@
 
                                 <div class="settings-form-group">
                                     <label class="settings-form-label">
+                                        <i class="bi bi-bag"></i>
+                                        {{ form.shopee_url.label.text }}
+                                    </label>
+                                    {{ form.shopee_url(class="settings-form-control", placeholder="https://shopee.vn/yourshop") }}
+                                </div>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
                                         <i class="bi bi-tiktok"></i>
                                         {{ form.tiktok_url.label.text }}
                                     </label>

@@ -47,6 +47,7 @@ class SettingsForm(FlaskForm):
     contact_email = StringField('Email liên hệ', validators=[Email()])
     facebook_url = StringField('Facebook', validators=[Optional()])
     zalo_url = StringField('Zalo', validators=[Optional()])
+    shopee_url = StringField('Shopee', validators=[Optional()])
     tiktok_url = StringField('TikTok', validators=[Optional()])
     youtube_url = StringField('YouTube', validators=[Optional()])
     google_maps = TextAreaField('Bản đồ Google Maps (embed code)', validators=[Optional()])
