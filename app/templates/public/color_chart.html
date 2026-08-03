@@ -4,10 +4,45 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bảng màu keo chà ron BRICON</title>
-<link rel="icon" type="image/x-icon" sizes="any" href="https://bricon.vn/static/img/favicon.ico">
-<link rel="icon" type="image/svg+xml" href="https://bricon.vn/static/img/favicon.svg">
-<link rel="icon" type="image/png" sizes="96x96" href="https://bricon.vn/static/img/favicon-96x96.png">
-<link rel="apple-touch-icon" sizes="180x180" href="https://bricon.vn/static/img/apple-touch-icon.png">
+<!-- ==================== FAVICON - MULTIPLE FORMATS ==================== -->
+<link
+  rel="icon"
+  type="image/x-icon"
+  sizes="any"
+  href="{{ get_setting('favicon_ico_url', get_setting('favicon_url', url_for('static', filename='img/favicon.ico'))) }}"
+/>
+<link
+  rel="icon"
+  type="image/svg+xml"
+  href="{{ get_setting('favicon_svg_url', url_for('static', filename='img/favicon.svg')) }}"
+/>
+<link
+  rel="icon"
+  type="image/png"
+  sizes="96x96"
+  href="{{ get_setting('favicon_png_url', url_for('static', filename='img/favicon-96x96.png')) }}"
+/>
+<link
+  rel="apple-touch-icon"
+  sizes="180x180"
+  href="{{ get_setting('apple_touch_icon_url', url_for('static', filename='img/apple-touch-icon.png')) }}"
+/>
+<link
+  rel="manifest"
+  href="{{ url_for('static', filename='site.webmanifest') }}"
+/>
+<link
+  rel="icon"
+  type="image/png"
+  sizes="192x192"
+  href="{{ url_for('static', filename='web-app-manifest-192x192.png') }}"
+/>
+<link
+  rel="icon"
+  type="image/png"
+  sizes="512x512"
+  href="{{ url_for('static', filename='web-app-manifest-512x512.png') }}"
+/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
