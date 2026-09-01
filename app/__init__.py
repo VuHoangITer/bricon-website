@@ -105,7 +105,7 @@ def create_app(config_class=Config):
 
     # ==================== CONFIG ====================
     app.config.from_object(config_class)
-    app.config['GROQ_API_KEY'] = os.getenv('GROQ_API_KEY')
+    app.config['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
     app.config['CHATBOT_ENABLED'] = True
 
     # ===== SESSION SECURITY - Từ config class, KHÔNG override =====
@@ -148,10 +148,10 @@ def create_app(config_class=Config):
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(chatbot_bp)
 
-    # ==================== GROQ INIT ====================
+    # ==================== OPENAI INIT ====================
     with app.app_context():
-        from app.chatbot.routes import init_groq
-        init_groq()
+        from app.chatbot.routes import init_openai
+        init_openai()
 
     config_class.init_app(app)
 

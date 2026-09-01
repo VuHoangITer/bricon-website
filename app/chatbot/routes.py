@@ -4,31 +4,31 @@ from datetime import datetime
 import json
 import os
 from app.models.features import feature_required
-from groq import Groq
+from openai import OpenAI
 
 # ==================== GLOBALS ====================
-groq_client = None
+openai_client = None
 _COMPANY_INFO_CACHE = None
 _COMPANY_INFO_MTIME = None
-_DEFAULT_MODEL_NAME = 'llama-3.3-70b-versatile'
+_DEFAULT_MODEL_NAME = 'gpt-5.6-terra'
 
 
-# ==================== INIT GROQ ====================
-def init_groq():
-    """Khởi tạo Groq API (được gọi khi app boot và khi lần đầu /send)."""
-    global groq_client
-    api_key = current_app.config.get('GROQ_API_KEY')
+# ==================== INIT OPENAI ====================
+def init_openai():
+    """Khởi tạo OpenAI API (được gọi khi app boot và khi lần đầu /send)."""
+    global openai_client
+    api_key = current_app.config.get('OPENAI_API_KEY')
     if not api_key:
-        current_app.logger.warning("⚠️ GROQ_API_KEY not found in config")
-        groq_client = None
+        current_app.logger.warning("⚠️ OPENAI_API_KEY not found in config")
+        openai_client = None
         return
 
     try:
-        groq_client = Groq(api_key=api_key)
-        current_app.logger.info("✅ Groq API initialized successfully")
+        openai_client = OpenAI(api_key=api_key)
+        current_app.logger.info("✅ OpenAI API initialized successfully")
     except Exception as e:
-        current_app.logger.error(f"❌ Failed to initialize Groq API: {str(e)}")
-        groq_client = None
+        current_app.logger.error(f"❌ Failed to initialize OpenAI API: {str(e)}")
+        openai_client = None
 
 
 # ==================== COMPANY INFO (CACHE + INVALIDATION) ====================
@@ -233,7 +233,7 @@ def create_full_prompt(company_info: dict) -> str:
 
 # ==================== PROMPT BUILDER ====================
 def build_messages(system_prompt: str, history_context: str, user_message: str) -> list:
-    """Tạo messages array cho Groq API"""
+    """Tạo messages array cho OpenAI API"""
     messages = [
         {
             "role": "system",
@@ -262,18 +262,18 @@ def build_messages(system_prompt: str, history_context: str, user_message: str) 
 @feature_required('chatbot')
 def send_message():
     """
-    Xử lý tin nhắn với Groq - LUÔN DÙNG FULL MODE
+    Xử lý tin nhắn với OpenAI - LUÔN DÙNG FULL MODE
     """
-    global groq_client
+    global openai_client
 
     # Bật/tắt chatbot
     if not current_app.config.get('CHATBOT_ENABLED', True):
         return jsonify({'response': '⚠️ Chatbot đang bảo trì. Vui lòng liên hệ: 📞 0901 180 094'}), 503
 
     # Init client nếu chưa có
-    if groq_client is None:
-        init_groq()
-    if groq_client is None:
+    if openai_client is None:
+        init_openai()
+    if openai_client is None:
         return jsonify({'response': '😔 Chatbot tạm thời không khả dụng.\nLiên hệ: 📞 0901180094'}), 500
 
     try:
@@ -324,15 +324,14 @@ def send_message():
         system_prompt = create_full_prompt(company_info)
         messages = build_messages(system_prompt, history_context, user_message)
 
-        # Gọi Groq API
+        # Gọi OpenAI API
+        # Lưu ý: dòng model gpt-5.x chỉ chấp nhận temperature mặc định (1) và dùng
+        # max_completion_tokens thay vì max_tokens — nên bỏ temperature/top_p ở đây.
         try:
-            chat_completion = groq_client.chat.completions.create(
+            chat_completion = openai_client.chat.completions.create(
                 messages=messages,
-                model=current_app.config.get('GROQ_MODEL', _DEFAULT_MODEL_NAME),
-                temperature=0.4,  # Giảm xuống 0.4 để ổn định hơn
-                max_tokens=1000,  # Tăng lên 1000 vì full mode
-                top_p=0.9,
-                stream=False
+                model=current_app.config.get('OPENAI_MODEL', _DEFAULT_MODEL_NAME),
+                max_completion_tokens=1000,  # Tăng lên 1000 vì full mode
             )
 
             bot_reply = chat_completion.choices[0].message.content.strip()
@@ -344,7 +343,7 @@ def send_message():
                 )
 
         except Exception as api_error:
-            current_app.logger.error(f"❌ Groq API error: {str(api_error)}")
+            current_app.logger.error(f"❌ OpenAI API error: {str(api_error)}")
             return jsonify({
                 'response': '⚠️ Hệ thống đang quá tải, anh/chị vui lòng thử lại sau vài giây hoặc gọi 📞 0901180094.'
             }), 500
@@ -393,13 +392,13 @@ def reset_chat():
 def chatbot_status():
     """Kiểm tra trạng thái chatbot"""
     try:
-        global groq_client
+        global openai_client
         limit = int(current_app.config.get('CHATBOT_REQUEST_LIMIT', 15))
         used = int(session.get('chatbot_request_count', 0))
         return jsonify({
             'enabled': current_app.config.get('CHATBOT_ENABLED', True),
-            'model_initialized': groq_client is not None,
-            'model': current_app.config.get('GROQ_MODEL', _DEFAULT_MODEL_NAME),
+            'model_initialized': openai_client is not None,
+            'model': current_app.config.get('OPENAI_MODEL', _DEFAULT_MODEL_NAME),
             'mode': 'full',  # Luôn là full
             'request_limit': limit,
             'remaining_requests': max(0, limit - used),
@@ -415,10 +414,10 @@ def chatbot_status():
 def init_chatbot(app):
     """Gọi ở __init__.py khi khởi động app"""
     with app.app_context():
-        init_groq()
+        init_openai()
         # Preload company info để cache sẵn
         try:
             load_company_info()
-            current_app.logger.info("🤖 BRICON Chatbot initialized with Groq (FULL MODE ONLY)")
+            current_app.logger.info("🤖 BRICON Chatbot initialized with OpenAI (FULL MODE ONLY)")
         except Exception:
             pass

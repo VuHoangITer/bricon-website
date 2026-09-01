@@ -48,13 +48,13 @@ class Config:
     MAX_CONTENT_LENGTH = int(os.environ.get('MAX_CONTENT_LENGTH', 10 * 1024 * 1024))
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'ico', 'svg'}
 
-    # ===== GROQ CHATBOT =====
-    GROQ_API_KEY = os.environ.get('GROQ_API_KEY')
-    GROQ_MODEL = os.environ.get('GROQ_MODEL', 'llama-3.3-70b-versatile')  # hoặc 'mixtral-8x7b-32768'
+    # ===== OPENAI CHATBOT =====
+    OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
+    OPENAI_MODEL = os.environ.get('OPENAI_MODEL', 'gpt-5.6-terra')
     CHATBOT_ENABLED = True
     CHATBOT_REQUEST_LIMIT = int(os.environ.get('CHATBOT_REQUEST_LIMIT', 15))
     CHATBOT_REQUEST_WINDOW = int(os.environ.get('CHATBOT_REQUEST_WINDOW', 3600))
-    GROQ_TIMEOUT = int(os.environ.get('GROQ_TIMEOUT', 30))
+    OPENAI_TIMEOUT = int(os.environ.get('OPENAI_TIMEOUT', 30))
 
     CHATBOT_HISTORY_TURNS = int(os.environ.get('CHATBOT_HISTORY_TURNS', 5))
     CHATBOT_PROMPT_MODE_DEFAULT = os.environ.get('CHATBOT_PROMPT_MODE_DEFAULT', 'lite')
