@@ -36,28 +36,33 @@
     <div class="card mb-4">
         <div class="card-header bg-warning text-dark">Thêm Câu Hỏi Mới</div>
         <div class="card-body">
-            <form method="POST" action="{{ url_for('admin.add_question') }}">
+            <form method="POST" action="{{ url_for('admin.add_question') }}" id="addQuestionForm">
                 <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
                 <div class="mb-3">
                     <label class="form-label">Câu Hỏi</label>
                     <textarea name="question_text" class="form-control" rows="2" required></textarea>
                 </div>
                 <div class="mb-3">
+                    <label class="form-label">Loại Câu Hỏi</label>
+                    <select name="question_type" class="form-select" id="questionTypeSelect" onchange="toggleQuestionType()">
+                        <option value="multiple_choice" selected>Trắc nghiệm</option>
+                        <option value="true_false">Đúng / Sai</option>
+                        <option value="essay">Tự luận (HR tự đánh giá, không chấm điểm)</option>
+                    </select>
+                </div>
+                <div class="mb-3 essay-only d-none">
+                    <label class="form-label">Đáp Án Tham Khảo Cho HR <small class="text-muted">(người làm bài không thấy)</small></label>
+                    <textarea name="model_answer" class="form-control" rows="4" placeholder="Ý chính cần có để HR so sánh"></textarea>
+                </div>
+                <div class="mb-3 choice-only">
                     <label class="form-label">Giải Thích Cho Câu Hỏi (Tùy Chọn)</label>
                     <textarea name="explanation" class="form-control" rows="2"></textarea>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Loại Câu Hỏi</label>
-                    <select name="question_type" class="form-select">
-                        <option value="multiple_choice" selected>Trắc nghiệm</option>
-                        <option value="true_false">Đúng / Sai</option>
-                    </select>
-                </div>
-                <div class="mb-3">
+                <div class="mb-3 choice-only">
                     <label class="form-label">Điểm</label>
                     <input type="number" name="points" class="form-control" value="1" min="1">
                 </div>
-                <div class="mb-3">
+                <div class="mb-3 choice-only">
                     <label class="form-label">Đáp Án (Thêm ít nhất 2, chọn đúng bằng radio)</label>
                     <div id="answers-container">
                         <div class="input-group mb-2">
@@ -89,8 +94,15 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <p><strong>Câu hỏi:</strong> {{ question.question_text }}</p>
+                        <p style="white-space: pre-line;"><strong>Câu hỏi:</strong> {{ question.question_text }}</p>
+                        {% if question.is_essay %}
+                        <p><span class="badge bg-info text-dark">Tự luận – không chấm điểm</span></p>
+                        {% if question.model_answer %}
+                        <p class="small text-muted mb-0" style="white-space: pre-line;"><strong>Đáp án tham khảo:</strong> {{ question.model_answer|truncate(200) }}</p>
+                        {% endif %}
+                        {% else %}
                         <p><strong>Điểm:</strong> {{ question.points }}</p>
+                        {% endif %}
                         <ul>
                             {% for answer in question.answers.all() %}
                             <li {% if answer.is_correct %}class="text-success fw-bold"{% endif %}>
@@ -115,6 +127,14 @@ function addAnswerField() {
         <input type="text" name="answers[]" class="form-control" placeholder="Đáp án ${index + 1}" required>
     `;
     container.appendChild(div);
+}
+
+// Tự luận: ẩn phần đáp án lựa chọn, hiện ô đáp án tham khảo cho HR
+function toggleQuestionType() {
+    const isEssay = document.getElementById('questionTypeSelect').value === 'essay';
+    document.querySelectorAll('#addQuestionForm .essay-only').forEach(el => el.classList.toggle('d-none', !isEssay));
+    document.querySelectorAll('#addQuestionForm .choice-only').forEach(el => el.classList.toggle('d-none', isEssay));
+    document.querySelectorAll('#addQuestionForm input[name="answers[]"]').forEach(el => el.required = !isEssay);
 }
 </script>
 {% endblock %}

@@ -15,6 +15,9 @@ from datetime import datetime
 import random
 from app.models.features import feature_required
 
+# Giới hạn độ dài 1 câu trả lời tự luận (ký tự)
+ESSAY_MAX_LENGTH = 5000
+
 # ==================== TRANG NHẬP THÔNG TIN TRƯỚC KHI LÀM BÀI ====================
 @main_bp.route('/<slug>/start', methods=['GET', 'POST'])
 @feature_required('quiz')
@@ -101,8 +104,11 @@ def quiz_take(slug):
             random.shuffle(answers)
         question.shuffled_answers = answers
 
-    # Lấy các câu đã trả lời (để highlight)
-    answered_questions = {ua.question_id for ua in attempt.user_answers.all()}
+    # Lấy các câu đã trả lời (để highlight + khôi phục khi tải lại trang)
+    saved_answers = attempt.user_answers.all()
+    answered_questions = {ua.question_id for ua in saved_answers}
+    selected_answers = {ua.question_id: ua.answer_id for ua in saved_answers if ua.answer_id}
+    essay_texts = {ua.question_id: ua.text_answer or '' for ua in saved_answers if ua.answer_id is None}
 
     # Tính thời gian còn lại
     start_time = datetime.fromisoformat(session.get('quiz_start_time'))
@@ -114,6 +120,8 @@ def quiz_take(slug):
                            attempt=attempt,
                            questions=questions,
                            answered_questions=answered_questions,
+                           selected_answers=selected_answers,
+                           essay_texts=essay_texts,
                            remaining_seconds=remaining_seconds)
 
 
@@ -138,13 +146,38 @@ def save_answer():
     question_id = data.get('question_id')
     answer_id = data.get('answer_id')
 
-    if not question_id or not answer_id:
+    if not question_id:
         return jsonify({'success': False, 'message': 'Thiếu thông tin'}), 400
 
     # Kiểm tra question thuộc quiz này không
     question = Question.query.get(question_id)
     if not question or question.quiz_id != attempt.quiz_id:
         return jsonify({'success': False, 'message': 'Câu hỏi không hợp lệ'}), 400
+
+    # ===== CÂU TỰ LUẬN: lưu bài làm dạng text, không chấm điểm =====
+    if question.is_essay:
+        text = (data.get('text_answer') or '').strip()[:ESSAY_MAX_LENGTH]
+
+        UserAnswer.query.filter_by(attempt_id=attempt.id, question_id=question.id).delete()
+        if text:
+            db.session.add(UserAnswer(
+                attempt_id=attempt.id,
+                question_id=question.id,
+                answer_id=None,
+                text_answer=text,
+                is_correct=False
+            ))
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'answered': bool(text),
+            'answered_count': attempt.user_answers.count(),
+            'total_questions': attempt.quiz.questions.count()
+        })
+
+    if not answer_id:
+        return jsonify({'success': False, 'message': 'Thiếu thông tin'}), 400
 
     # Kiểm tra answer thuộc question này không
     answer = Answer.query.get(answer_id)
@@ -236,10 +269,12 @@ def quiz_result(attempt_id):
 
     quiz = attempt.quiz
 
-    # Lấy chi tiết các câu trả lời
+    # Lấy chi tiết các câu trả lời (chỉ câu trắc nghiệm - câu tự luận do HR đánh giá riêng)
     questions_detail = []
     for user_answer in attempt.user_answers.all():
         question = user_answer.question
+        if question.is_essay:
+            continue
         selected_answer = user_answer.answer
         correct_answer = question.get_correct_answer()
 
@@ -250,7 +285,10 @@ def quiz_result(attempt_id):
             'is_correct': user_answer.is_correct
         })
 
+    essay_count = sum(1 for q in quiz.questions.all() if q.is_essay)
+
     return render_template('public/trac_nghiem/result.html',
                            attempt=attempt,
                            quiz=quiz,
-                           questions_detail=questions_detail)
+                           questions_detail=questions_detail,
+                           essay_count=essay_count)

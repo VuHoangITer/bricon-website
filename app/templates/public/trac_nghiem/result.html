@@ -342,6 +342,14 @@
             </div>
         </div>
 
+        {% if essay_count %}
+        <div class="alert alert-info mx-3 mb-3">
+            <i class="bi bi-pencil-square me-1"></i>
+            Phần tự luận ({{ essay_count }} câu) đã được ghi nhận, không tính vào điểm trắc nghiệm.
+            Bộ phận nhân sự sẽ xem xét bài làm của bạn.
+        </div>
+        {% endif %}
+
         {% if quiz.show_correct_answers %}
         <!-- Review Section -->
         <div class="review-section">

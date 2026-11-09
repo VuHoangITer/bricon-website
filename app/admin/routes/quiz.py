@@ -201,6 +201,7 @@ def add_question():
     question_type = request.form.get('question_type', 'multiple_choice')
     points = int(request.form.get('points', 1))
     explanation = request.form.get('explanation')
+    is_essay = question_type == 'essay'
 
     # Kiểm tra dữ liệu tối thiểu
     if not quiz_id or not question_text or len(question_text.strip()) < 1:
@@ -217,15 +218,16 @@ def add_question():
         quiz_id=quiz.id,
         question_text=question_text.strip(),
         question_type=question_type,
-        points=points,
-        explanation=explanation,
+        points=0 if is_essay else points,  # Tự luận không chấm điểm
+        explanation=None if is_essay else explanation,
+        model_answer=((request.form.get('model_answer') or '').strip() or None) if is_essay else None,
         order=quiz.questions.count() + 1
     )
     db.session.add(question)
     db.session.flush()
 
-    # Lấy danh sách đáp án
-    answers_data = request.form.getlist('answers[]')
+    # Lấy danh sách đáp án (câu tự luận không có đáp án lựa chọn)
+    answers_data = [] if is_essay else request.form.getlist('answers[]')
     correct_index = int(request.form.get('correct_answer', 0))
 
     for idx, text in enumerate(answers_data):
@@ -262,6 +264,15 @@ def edit_question(id):
             if not question.question_text:
                 flash('❌ Nội dung câu hỏi không được để trống!', 'danger')
                 return redirect(url_for('admin.edit_question', id=id))
+
+            # Câu tự luận: chỉ cập nhật nội dung + đáp án tham khảo cho HR
+            if question.is_essay:
+                question.model_answer = (request.form.get('model_answer') or '').strip() or None
+                question.explanation = None
+                question.points = 0
+                db.session.commit()
+                flash('✅ Đã cập nhật câu hỏi thành công!', 'success')
+                return redirect(url_for('admin.edit_questions', quiz_id=question.quiz_id))
 
             correct_index = int(request.form.get('correct_answer', 0))
             answers_data = request.form.getlist('answers[]')
@@ -376,10 +387,14 @@ def view_result(attempt_id):
     """Xem chi tiết kết quả của 1 lượt làm bài"""
     attempt = QuizAttempt.query.get_or_404(attempt_id)
 
-    # Lấy chi tiết từng câu trả lời
+    # Lấy chi tiết từng câu trả lời trắc nghiệm
     questions_detail = []
+    essay_texts = {}
     for user_answer in attempt.user_answers.all():
         question = user_answer.question
+        if question.is_essay:
+            essay_texts[question.id] = user_answer.text_answer
+            continue
         selected_answer = user_answer.answer
         correct_answer = question.get_correct_answer()
 
@@ -390,9 +405,17 @@ def view_result(attempt_id):
             'is_correct': user_answer.is_correct
         })
 
+    # Phần tự luận: hiện TẤT CẢ câu tự luận của đề (kể cả câu bỏ trống) kèm đáp án tham khảo cho HR
+    essay_detail = [
+        {'question': q, 'text_answer': essay_texts.get(q.id)}
+        for q in attempt.quiz.questions.order_by(Question.order).all()
+        if q.is_essay
+    ]
+
     return render_template('admin/trac_nghiem/result_detail.html',
                            attempt=attempt,
-                           questions_detail=questions_detail)
+                           questions_detail=questions_detail,
+                           essay_detail=essay_detail)
 
 # ==================== XOÁ KẾT QUẢ ỨNG VIÊN ====================
 @admin_bp.route('/results/<int:attempt_id>/delete', methods=['POST'])

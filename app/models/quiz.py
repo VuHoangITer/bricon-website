@@ -153,12 +153,14 @@ class Question(db.Model):
     quiz_id = db.Column(db.Integer, db.ForeignKey('quizzes.id'), nullable=False)
 
     question_text = db.Column(db.Text, nullable=False)  # Nội dung câu hỏi
-    question_type = db.Column(db.String(50), default='multiple_choice')  # 'multiple_choice', 'true_false'
+    question_type = db.Column(db.String(50), default='multiple_choice')  # 'multiple_choice', 'true_false', 'essay'
 
     # Metadata
     order = db.Column(db.Integer, default=0)  # Thứ tự hiển thị
     points = db.Column(db.Integer, default=1)  # Điểm của câu hỏi
     explanation = db.Column(db.Text)  # Giải thích đáp án (optional)
+    # Đáp án tham khảo cho câu tự luận - CHỈ HR/admin thấy, không hiển thị cho người làm bài
+    model_answer = db.Column(db.Text)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -169,6 +171,11 @@ class Question(db.Model):
 
     def __repr__(self):
         return f'<Question {self.id}: {self.question_text[:50]}>'
+
+    @property
+    def is_essay(self):
+        """Câu tự luận: không chấm điểm, HR tự đánh giá"""
+        return self.question_type == 'essay'
 
     def get_correct_answer(self):
         """Lấy đáp án đúng"""
@@ -254,7 +261,8 @@ class QuizAttempt(db.Model):
             return
 
         quiz = Quiz.query.get(self.quiz_id)
-        total_points = sum(q.points for q in quiz.questions.all())
+        # Câu tự luận không tính điểm
+        total_points = sum(q.points for q in quiz.questions.all() if not q.is_essay)
 
         if total_points == 0:
             self.score = 0
@@ -265,6 +273,8 @@ class QuizAttempt(db.Model):
         wrong_count = 0
 
         for user_answer in self.user_answers.all():
+            if user_answer.question.is_essay:
+                continue
             if user_answer.is_correct:
                 earned_points += user_answer.question.points
                 correct_count += 1
@@ -301,7 +311,8 @@ class UserAnswer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     attempt_id = db.Column(db.Integer, db.ForeignKey('quiz_attempts.id'), nullable=False)
     question_id = db.Column(db.Integer, db.ForeignKey('questions.id'), nullable=False)
-    answer_id = db.Column(db.Integer, db.ForeignKey('answers.id'), nullable=False)
+    answer_id = db.Column(db.Integer, db.ForeignKey('answers.id'), nullable=True)  # NULL với câu tự luận
+    text_answer = db.Column(db.Text)  # Bài làm của câu tự luận
 
     is_correct = db.Column(db.Boolean, default=False)  # Đúng/Sai
     answered_at = db.Column(db.DateTime, default=datetime.utcnow)

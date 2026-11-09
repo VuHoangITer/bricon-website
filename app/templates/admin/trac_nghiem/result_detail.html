@@ -170,7 +170,7 @@
 
             <!-- Review Section -->
             <div class="review-section">
-                <h4 class="mb-3">Chi tiết đáp án</h4>
+                <h4 class="mb-3">Chi tiết đáp án trắc nghiệm</h4>
                 {% for item in questions_detail %}
                 <div class="question-review {% if not item.is_correct %}wrong{% endif %}">
                     <div class="question-review-header">
@@ -195,6 +195,44 @@
                 </div>
                 {% endfor %}
             </div>
+
+            {% if essay_detail %}
+            <!-- Essay Section: HR tự đánh giá, không chấm điểm -->
+            <div class="review-section">
+                <h4 class="mb-1">Phần tự luận ({{ essay_detail|length }} câu)</h4>
+                <p class="text-muted small mb-3">Không tính vào điểm. So sánh bài làm với đáp án tham khảo để tự đánh giá ứng viên.</p>
+                {% for item in essay_detail %}
+                <div class="question-review">
+                    <div class="question-review-header">
+                        Tự luận {{ loop.index }}{% if not item.text_answer %} – <span class="text-danger">Bỏ trống</span>{% endif %}
+                    </div>
+                    <div class="question-review-text" style="white-space: pre-line;">{{ item.question.question_text }}</div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-lg-6">
+                            <div class="p-3 border rounded h-100">
+                                <div class="fw-bold mb-2">Ứng viên trả lời</div>
+                                {% if item.text_answer %}
+                                <div style="white-space: pre-wrap;">{{ item.text_answer }}</div>
+                                {% else %}
+                                <div class="text-muted fst-italic">Không trả lời</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="p-3 rounded h-100 bg-light border">
+                                <div class="fw-bold mb-2 text-success">Đáp án tham khảo</div>
+                                {% if item.question.model_answer %}
+                                <div style="white-space: pre-line;">{{ item.question.model_answer }}</div>
+                                {% else %}
+                                <div class="text-muted fst-italic">Chưa nhập đáp án tham khảo</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
 
             <!-- Action Buttons -->
             <div class="d-flex justify-content-end p-3">

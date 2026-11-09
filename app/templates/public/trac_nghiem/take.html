@@ -169,6 +169,44 @@ body {
     flex: 1;
 }
 
+/* ==================== ESSAY (TỰ LUẬN) ==================== */
+.dethi-vn__question-text--essay {
+    white-space: pre-line;
+}
+
+.dethi-vn__essay {
+    width: 100%;
+    min-height: 220px;
+    border: 1.5px solid #e5e5e5;
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-size: 15px;
+    line-height: 1.6;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.dethi-vn__essay:focus {
+    outline: none;
+    border-color: #2563eb;
+    background: #f8faff;
+}
+
+.dethi-vn__essay-status {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #888;
+    min-height: 18px;
+}
+
+.dethi-vn__essay-status.saved {
+    color: #10b981;
+}
+
+.dethi-vn__essay-status.error {
+    color: #ef4444;
+}
+
 /* ==================== NAVIGATION ==================== */
 .dethi-vn__nav {
     display: flex;
@@ -513,13 +551,22 @@ body {
 
                     <div class="dethi-vn__question-header">
                         <span class="dethi-vn__question-num">Câu {{ loop.index }}</span>
-                        <span class="dethi-vn__question-info">1 đáp án</span>
+                        <span class="dethi-vn__question-info">{% if question.is_essay %}Tự luận{% else %}1 đáp án{% endif %}</span>
                     </div>
 
-                    <div class="dethi-vn__question-text">
+                    <div class="dethi-vn__question-text {% if question.is_essay %}dethi-vn__question-text--essay{% endif %}">
                         {{ question.question_text }}
                     </div>
 
+                    {% if question.is_essay %}
+                    <div class="essay-wrapper">
+                        <textarea class="dethi-vn__essay essay-input"
+                                  data-question-id="{{ question.id }}"
+                                  maxlength="5000"
+                                  placeholder="Nhập câu trả lời của bạn...">{{ essay_texts.get(question.id, '') }}</textarea>
+                        <div class="dethi-vn__essay-status" id="essay-status-{{ question.id }}"></div>
+                    </div>
+                    {% else %}
                     <div class="dethi-vn__answers answers-wrapper">
                         {% for answer in question.shuffled_answers %}
                         <div class="dethi-vn__answer answer-option"
@@ -530,13 +577,14 @@ body {
                                    name="question_{{ question.id }}"
                                    id="answer_{{ answer.id }}"
                                    value="{{ answer.id }}"
-                                   {% if question.id in answered_questions %}checked{% endif %}>
+                                   {% if selected_answers.get(question.id) == answer.id %}checked{% endif %}>
                             <label class="dethi-vn__answer-label" for="answer_{{ answer.id }}">
                                 {{ 'ABCD'[loop.index0] if loop.index0 < 4 else loop.index0 }}. {{ answer.answer_text }}
                             </label>
                         </div>
                         {% endfor %}
                     </div>
+                    {% endif %}
 
                     <div class="dethi-vn__nav">
                         {% if not loop.first %}
@@ -644,7 +692,7 @@ let answeredQuestions = new Set({{ answered_questions|list|tojson }});
 function updateTimer() {
     if (remainingSeconds <= 0) {
         alert('⏰ Hết thời gian! Bài thi sẽ được nộp tự động.');
-        document.getElementById('submit-form').submit();
+        submitQuizForm();
         return;
     }
 
@@ -714,6 +762,67 @@ function saveAnswer(questionId, answerId) {
     .catch(error => console.error('Error:', error));
 }
 
+// ==================== ESSAY (TỰ LUẬN): TỰ ĐỘNG LƯU ====================
+const essayTimers = {};
+const essayDirty = new Set();
+
+function saveEssay(textarea) {
+    const questionId = parseInt(textarea.dataset.questionId);
+    const status = document.getElementById(`essay-status-${questionId}`);
+    clearTimeout(essayTimers[questionId]);
+    essayDirty.delete(questionId);
+    if (status) { status.textContent = 'Đang lưu...'; status.className = 'dethi-vn__essay-status'; }
+
+    return fetch('{{ url_for("main.save_answer") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question_id: questionId, text_answer: textarea.value })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) throw new Error(data.message || 'save failed');
+        if (data.answered) {
+            answeredQuestions.add(questionId);
+        } else {
+            answeredQuestions.delete(questionId);
+        }
+        updateAnsweredCount();
+        updateQuestionNavigator();
+        if (status) { status.textContent = data.answered ? '✓ Đã lưu' : ''; status.className = 'dethi-vn__essay-status saved'; }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        essayDirty.add(questionId);
+        if (status) { status.textContent = 'Chưa lưu được, đang thử lại...'; status.className = 'dethi-vn__essay-status error'; }
+        essayTimers[questionId] = setTimeout(() => saveEssay(textarea), 3000);
+    });
+}
+
+document.querySelectorAll('.essay-input').forEach(textarea => {
+    textarea.addEventListener('input', function() {
+        const questionId = parseInt(this.dataset.questionId);
+        essayDirty.add(questionId);
+        clearTimeout(essayTimers[questionId]);
+        essayTimers[questionId] = setTimeout(() => saveEssay(this), 1000);
+    });
+    textarea.addEventListener('blur', function() {
+        if (essayDirty.has(parseInt(this.dataset.questionId))) saveEssay(this);
+    });
+});
+
+// Lưu hết các câu tự luận chưa lưu (gọi trước khi nộp bài)
+function flushEssays() {
+    const pending = [];
+    document.querySelectorAll('.essay-input').forEach(textarea => {
+        if (essayDirty.has(parseInt(textarea.dataset.questionId))) pending.push(saveEssay(textarea));
+    });
+    return Promise.all(pending);
+}
+
+function submitQuizForm() {
+    flushEssays().finally(() => document.getElementById('submit-form').submit());
+}
+
 // ==================== UPDATE UI ====================
 function updateAnsweredCount() {
     const count = answeredQuestions.size;
@@ -730,9 +839,7 @@ function updateQuestionNavigator() {
         const questionId = parseInt(block.dataset.questionId);
         const navBtns = document.querySelectorAll(`.dethi-vn__grid-item[data-question-index="${index + 1}"]`);
 
-        if (answeredQuestions.has(questionId)) {
-            navBtns.forEach(btn => btn.classList.add('answered'));
-        }
+        navBtns.forEach(btn => btn.classList.toggle('answered', answeredQuestions.has(questionId)));
     });
 }
 
@@ -799,14 +906,14 @@ function confirmSubmit() {
     }
 
     if (confirm('✅ Bạn có chắc chắn muốn nộp bài?')) {
-        document.getElementById('submit-form').submit();
+        submitQuizForm();
     }
 }
 
 // ==================== AUTO SUBMIT ====================
 setTimeout(() => {
     if (remainingSeconds <= 0) {
-        document.getElementById('submit-form').submit();
+        submitQuizForm();
     }
 }, remainingSeconds * 1000);
 

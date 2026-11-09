@@ -18,6 +18,15 @@
                 <textarea name="question_text" class="form-control" rows="3" required>{{ question.question_text }}</textarea>
             </div>
 
+            {% if question.is_essay %}
+            <div class="mb-3">
+                <span class="badge bg-info text-dark">Tự luận – không chấm điểm</span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Đáp án tham khảo cho HR <small class="text-muted fw-normal">(người làm bài không thấy)</small></label>
+                <textarea name="model_answer" class="form-control" rows="8">{{ question.model_answer or '' }}</textarea>
+            </div>
+            {% else %}
             <div class="mb-3">
                 <label class="form-label fw-bold">Giải thích đáp án</label>
                 <textarea name="explanation" class="form-control" rows="2">{{ question.explanation or '' }}</textarea>
@@ -51,6 +60,7 @@
                     <i class="bi bi-plus-circle"></i> Thêm Đáp Án
                 </button>
             </div>
+            {% endif %}
 
             <div class="d-flex justify-content-between mt-4">
                 <a href="{{ url_for('admin.edit_questions', quiz_id=question.quiz_id) }}"
@@ -99,8 +109,9 @@ function removeAnswer(btn) {
     }
 }
 
-// Validate form trước khi submit
+// Validate form trước khi submit (câu tự luận không có đáp án lựa chọn)
 document.getElementById('questionForm').addEventListener('submit', function(e) {
+    if (!document.getElementById('answers-container')) return;
     const answers = document.querySelectorAll('input[name="answers[]"]');
     const validAnswers = Array.from(answers).filter(a => a.value.trim());
 
