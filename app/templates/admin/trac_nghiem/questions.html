@@ -98,7 +98,7 @@
                         {% if question.is_essay %}
                         <p><span class="badge bg-info text-dark">Tự luận – không chấm điểm</span></p>
                         {% if question.model_answer %}
-                        <p class="small text-muted mb-0" style="white-space: pre-line;"><strong>Đáp án tham khảo:</strong> {{ question.model_answer|truncate(200) }}</p>
+                        <p class="small text-muted mb-0" style="white-space: pre-line;"><strong>Đáp án tham khảo:</strong> {{ question.model_answer }}</p>
                         {% endif %}
                         {% else %}
                         <p><strong>Điểm:</strong> {{ question.points }}</p>

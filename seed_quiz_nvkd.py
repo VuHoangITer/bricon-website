@@ -7,6 +7,7 @@ Nạp đề "Phỏng vấn NVKD – Sản phẩm Bricon" vào module trắc nghi
 
 Chạy:
     python seed_quiz_nvkd.py            # tạo đề (bỏ qua nếu slug đã tồn tại)
+    python seed_quiz_nvkd.py --update   # cập nhật nội dung câu hỏi/đáp án của đề đã có, GIỮ kết quả đã làm
     python seed_quiz_nvkd.py --replace  # xóa đề cũ cùng slug (kể cả kết quả đã làm) rồi tạo lại
 
 Yêu cầu: đã chạy `flask db upgrade` (migration a7c3e91d2b40 - câu tự luận).
@@ -55,30 +56,43 @@ MULTIPLE_CHOICE = [
      ['1,5 m', '3 m', '6 m', 'Không được dùng ốp tường'], 'B',
      'TDS Extra: ốp tường cao lên đến 3 m.'),
     ('Khách muốn lát gạch mới đè lên gạch cũ (gạch chồng gạch). Sản phẩm Bricon nào có ghi trong TDS là thi công được?',
-     ['Keo dán gạch Ngoại thất Extra', 'Keo dán gạch Nội thất', 'Chống thấm Sàn 106', 'Cả hai loại keo dán gạch'], 'A',
+     ['Keo dán gạch Ngoại thất Extra',
+      'Keo dán gạch Nội thất',
+      'Keo chà ron Epoxy hai thành phần',
+      'Cả hai loại keo dán gạch Bricon'], 'A',
      'TDS Extra: sử dụng được phương pháp thi công gạch chồng gạch.'),
     ('Thành phần chính của keo dán gạch Bricon gồm:',
-     ['Xi măng trắng, CaCO₃, phụ gia', 'Nhựa epoxy hai thành phần',
-      'Cát khô siêu mịn (độ ẩm dưới 1%), xi măng chuyên dụng, phụ gia nhập khẩu',
-      'Silica qua lưới 200 mesh, nhựa, chất bảo quản'], 'C',
+     ['Xi măng trắng cao cấp, CaCO₃ và phụ gia đặc biệt',
+      'Nhựa epoxy hai thành phần, chất đóng rắn và bột độn khoáng',
+      'Cát khô siêu mịn, xi măng chuyên dụng, phụ gia nhập khẩu',
+      'Silica siêu mịn qua lưới 200 mesh, nhựa và chất bảo quản'], 'C',
      'TDS: cát khô siêu mịn (<1% độ ẩm), xi măng chuyên dụng, phụ gia nhập khẩu.'),
     ('Quy cách đóng gói của keo dán gạch Bricon là:',
-     ['Cả hai loại đều có bao 25 kg và túi 5 kg', 'Nội thất: túi 1 kg; Extra: bao 20 kg',
-      'Cả hai loại chỉ có bao 40 kg', 'Nội thất: bao 25 kg và túi 5 kg; Extra: bao 25 kg'], 'D',
+     ['Cả hai loại đều có bao 25 kg và túi 5 kg',
+      'Nội thất: túi 1 kg và bao 20 kg; Extra: bao 40 kg',
+      'Cả hai loại chỉ có bao 40 kg, không có túi nhỏ',
+      'Nội thất: bao 25 kg, túi 5 kg; Extra: bao 25 kg'], 'D',
      'TDS: Nội thất 25 kg/bao, 5 kg/túi; Extra 25 kg/bao.'),
     ('Keo dán gạch Bricon đạt tiêu chuẩn nào?',
      ['TCVN 7899-3:2008', 'TCVN 7899-1:2008', 'TCVN 12692:2020', 'Không công bố tiêu chuẩn'], 'B',
      'TDS: đạt TCVN 7899-1:2008.'),
     ('Theo TDS, khu vực nào dưới đây là phạm vi dùng của Keo Ngoại thất Extra?',
-     ['Hồ bơi, sân thượng, WC, kho lạnh, phòng xông hơi, showroom ô tô', 'Chỉ phòng khách, phòng ngủ',
-      'Chỉ tường nội thất khô ráo', 'Chỉ khe ron'], 'A',
+     ['Hồ bơi, sân thượng, WC, kho lạnh, phòng xông hơi',
+      'Chỉ phòng khách, phòng ngủ và các khu nội thất khô',
+      'Chỉ tường nội thất khô ráo, không dùng cho sàn ướt',
+      'Chỉ dùng để chà ron, không dùng để dán gạch'], 'A',
      'TDS Extra: hồ bơi, sân thượng, WC, kho lạnh, phòng xông hơi, showroom ô tô...'),
     ('Điều nào TDS keo dán gạch Bricon cấm làm?',
-     ['Dùng máy trộn tốc độ chậm', 'Dùng bay răng cưa', 'Pha thêm xi măng hoặc phụ gia khác',
-      'Làm sạch bề mặt trước khi thi công'], 'C',
+     ['Dùng máy trộn tốc độ chậm trong 3–4 phút',
+      'Dùng bay răng cưa để trải keo lên nền',
+      'Pha thêm xi măng hoặc phụ gia khác',
+      'Làm sạch bụi bẩn, dầu mỡ trên bề mặt'], 'C',
      'TDS: không pha thêm xi măng hoặc phụ gia khác.'),
     ('Dụng cụ đúng để trải keo dán gạch lên bề mặt là:',
-     ['Bay cao su', 'Chổi quét', 'Con lăn', 'Bay răng cưa'], 'D',
+     ['Bay cao su',
+      'Chổi quét sơn',
+      'Con lăn lông',
+      'Bay răng cưa'], 'D',
      'TDS: dùng bay răng cưa trải keo đều trên bề mặt.'),
     ('Sau khi dán gạch, phải chờ ít nhất bao lâu mới được chà ron?',
      ['2 giờ', '24 giờ', '3 ngày', '7 ngày'], 'B',
@@ -86,8 +100,10 @@ MULTIPLE_CHOICE = [
 
     # ===================== PHẦN A – KEO CHÀ RON GỐC XI MĂNG =====================
     ('Thành phần chính của keo chà ron gốc xi măng Bricon:',
-     ['CaCO₃, xi măng trắng cao cấp, phụ gia đặc biệt', 'Cát vàng, xi măng xám', 'Nhựa epoxy',
-      'Silica, nhựa, chất bảo quản'], 'A',
+     ['CaCO₃, xi măng trắng cao cấp, phụ gia đặc biệt',
+      'Cát vàng sàng mịn, xi măng xám PCB40, vôi bột',
+      'Nhựa epoxy hai thành phần và bột màu chịu UV',
+      'Silica siêu mịn, nhựa acrylic và chất bảo quản'], 'A',
      'TDS: CaCO₃, xi măng trắng cao cấp và phụ gia đặc biệt.'),
     ('Keo chà ron gốc xi măng Bricon đạt tiêu chuẩn:',
      ['TCVN 7899-1:2008', 'TCVN 12692:2020', 'TCVN 7899-3:2008', 'TCVN 2682:2009'], 'C',
@@ -105,40 +121,60 @@ MULTIPLE_CHOICE = [
      ['1 giờ', '6 giờ', '24 giờ', '7 ngày'], 'C',
      'TDS: chờ ít nhất 24 giờ trước khi đưa vào sử dụng hoặc lưu thông.'),
     ('Cách ép keo chà ron vào mạch đúng theo TDS:',
-     ['Dùng bay răng cưa kéo dọc mạch', 'Dùng tay miết từng đoạn', 'Dùng chổi quét',
-      'Dùng bay cao su, kéo theo đường chéo với mạch gạch'], 'D',
+     ['Bay răng cưa, kéo dọc theo chiều mạch gạch',
+      'Dùng tay đeo găng miết từng đoạn mạch',
+      'Chổi quét, quét vuông góc với mạch gạch',
+      'Bay cao su, kéo chéo với mạch gạch'], 'D',
      'TDS: dùng bay cao su ép keo vào mạch ron theo đường chéo với mạch gạch.'),
     ('Keo chà ron thừa trên mặt gạch được loại bỏ bằng:',
-     ['Giấy nhám', 'Miếng xốp hoặc khăn ẩm', 'Axit tẩy rửa', 'Để khô rồi cạo'], 'B',
+     ['Giấy nhám mịn khi keo đã khô',
+      'Miếng xốp hoặc khăn ẩm',
+      'Dung dịch axit tẩy rửa gạch',
+      'Để khô hẳn rồi cạo bằng dao'], 'B',
      'TDS: loại bỏ phần keo thừa bằng miếng xốp hoặc khăn ẩm.'),
     ('Keo chà ron Nội thất (túi 1 kg) KHÔNG nên dùng cho:',
-     ['Khu vực thường xuyên tiếp xúc nước hoặc yêu cầu chống thấm cao', 'Sàn phòng khách',
-      'Tường phòng ngủ', 'Sàn nội thất chịu ẩm'], 'A',
+     ['Khu thường xuyên tiếp xúc nước',
+      'Sàn phòng khách lát gạch men',
+      'Tường phòng ngủ ốp gạch mosaic',
+      'Sàn nội thất chịu ẩm nhẹ, ít nước'], 'A',
      'TDS ron Nội thất: không sử dụng cho khu vực thường xuyên tiếp xúc nước hoặc yêu cầu chống thấm cao.'),
     ('Quy cách đóng gói keo chà ron gốc xi măng Bricon:',
-     ['Túi 5 kg, thùng 4 túi', 'Bao 25 kg', 'Túi 1 kg (thùng 24 túi); hộp 1 kg (thùng 30 hộp)', 'Tuýp 380 ml'], 'C',
+     ['Túi 5 kg (4 túi/thùng); hộp 2 kg (12 hộp/thùng)',
+      'Bao 20 kg và bao 25 kg, không có túi nhỏ',
+      'Túi 1 kg (24 túi/thùng); hộp 1 kg (30 hộp/thùng)',
+      'Tuýp 380 ml (20 tuýp/thùng); lon 1 kg (18 lon/thùng)'], 'C',
      'TDS: túi 1 kg – thùng 24 túi; hộp 1 kg – thùng 30 hộp.'),
     ('Khách cần chà ron hồ bơi, phòng xông hơi, kho lạnh. Loại ron gốc xi măng nào phù hợp?',
-     ['Chỉ ron Nội thất (túi)', 'Không loại nào phù hợp', 'Pha thêm chống thấm vào ron Nội thất',
-      'Ron Ngoại thất Extra hoặc ron Hộp Nội & Ngoại thất'], 'D',
+     ['Ron Nội thất (túi), vì cùng gốc xi măng',
+      'Không ron gốc xi măng nào dùng được',
+      'Ron Nội thất pha thêm chống thấm 102',
+      'Ron Ngoại thất Extra hoặc ron Hộp N&N'], 'D',
      'TDS ron Ngoại thất Extra và ron Hộp N&N: thích hợp hồ bơi, phòng xông hơi, WC, kho lạnh, sân thượng.'),
     ('Lưu ý nào đúng khi pha keo chà ron?',
-     ['Pha càng loãng càng dễ vào mạch và càng bền', 'Không pha quá loãng vì sẽ làm giảm chất lượng',
-      'Pha với dầu để ron bóng', 'Pha sẵn từ hôm trước cho ngấm'], 'B',
+     ['Pha thật loãng để keo dễ chảy vào mạch',
+      'Không pha quá loãng vì sẽ giảm chất lượng',
+      'Pha thêm xi măng trắng để ron cứng hơn',
+      'Pha sẵn từ hôm trước cho keo ngấm đều'], 'B',
      'TDS: không pha quá loãng sẽ làm giảm chất lượng sản phẩm.'),
     ('Tính năng của keo chà ron gốc xi măng Bricon theo TDS:',
-     ['Kháng axit mạnh, chịu hóa chất công nghiệp', 'Dùng được cho mạch ron 20 mm',
-      'Độ mịn cao, bề mặt ron bóng đẹp, chống nấm mốc, chống bám bẩn', 'Không cần vệ sinh keo thừa'], 'C',
+     ['Kháng axit mạnh, chịu được hóa chất công nghiệp',
+      'Dùng được cho mạch ron rộng từ 10 đến 20 mm',
+      'Độ mịn cao, ron bóng đẹp, chống nấm mốc, bám bẩn',
+      'Tự làm sạch, không cần lau keo thừa trên gạch'], 'C',
      'TDS: độ mịn cao, bề mặt ron bóng đẹp, chống nấm mốc, bám bẩn.'),
 
     # ===================== PHẦN A – KEO CHÀ RON EPOXY =====================
     ('Keo chà ron Epoxy Bricon có quy cách và tỉ lệ trộn:',
-     ['Túi 1 kg, trộn với nước', 'Tuýp 380 ml hai thành phần, tỉ lệ 1:1 (trộn qua vòi)',
-      'Hộp 1 kg, trộn 3:1', 'Lon 5 kg, pha dung môi'], 'B',
+     ['Túi 1 kg dạng bột, trộn với nước theo tỉ lệ 3:1',
+      'Tuýp 380 ml, 2 thành phần, trộn 1:1 qua vòi',
+      'Hộp 1 kg hai thành phần, trộn tay tỉ lệ 3:1',
+      'Lon 5 kg, pha thêm dung môi khi thi công'], 'B',
      'TDS Epoxy: 380 ml, 2 thành phần, tỉ lệ 1:1.'),
     ('Khi bắt đầu bơm Epoxy, vì sao phải bỏ khoảng 10 g keo đầu tiên?',
-     ['Để tiết kiệm keo', 'Vì keo đầu bị đông', 'Để làm sạch khe ron',
-      'Để đảm bảo hai thành phần đã trộn đều'], 'D',
+     ['Để tiết kiệm keo cho khe ron hẹp',
+      'Vì keo ở đầu vòi đã bị đông cứng',
+      'Để làm ướt và làm sạch khe ron trước',
+      'Để hai thành phần được trộn đều'], 'D',
      'TDS Epoxy: thải bỏ khoảng 10 g keo đầu để đảm bảo trộn đều.'),
     ('Ngừng bơm Epoxy quá bao lâu thì phải thay vòi trộn mới?',
      ['20 phút', '5 phút', '2 giờ', 'Không cần thay'], 'A',
@@ -147,32 +183,42 @@ MULTIPLE_CHOICE = [
      ['Ngay lập tức; sau 1 giờ', 'Sau 24 giờ; sau 7 ngày', 'Sau 4–5 giờ; sau 24 giờ', 'Sau 30 phút; sau 3 ngày'], 'C',
      'TDS Epoxy: sau 4–5 giờ tháo băng và vệ sinh; sau 24 giờ đạt cứng tối đa.'),
     ('Điều nào đúng khi thi công Epoxy?',
-     ['Pha thêm dung môi nếu keo đặc', 'Không pha dung môi, luôn đeo găng tay và đồ bảo hộ',
-      'Trộn thêm nước cho dễ bơm', 'Bơm keo lên khe ron còn ướt'], 'B',
+     ['Pha thêm dung môi khi keo đặc cho dễ bơm',
+      'Không pha dung môi, đeo găng tay bảo hộ',
+      'Trộn thêm nước sạch để keo dễ miết',
+      'Bơm keo khi khe ron còn ướt để bám tốt'], 'B',
      'TDS Epoxy: không pha dung môi, luôn đeo găng tay và đồ bảo hộ.'),
     ('Keo Epoxy dính lên mặt gạch, xử lý đúng là:',
-     ['Luôn dùng axit tẩy', 'Để khô rồi lau bằng xăng', 'Để nguyên, tự bong',
-      'Còn ướt: lau ngay bằng khăn sạch; đã khô: dùng dụng cụ cơ học, máy mài, không làm hỏng mặt gạch'], 'D',
+     ['Ướt: để khô rồi xử lý; khô: tẩy bằng axit pha loãng',
+      'Ướt: lau bằng xăng thơm; khô: dùng dung môi tẩy sơn',
+      'Ướt hay khô đều để nguyên, keo sẽ tự bong theo thời gian',
+      'Ướt: lau ngay bằng khăn sạch; khô: dùng dụng cụ cơ học'], 'D',
      'TDS Epoxy: khi còn ướt lau ngay bằng khăn sạch; khi đã khô dùng dụng cụ cơ học, máy mài.'),
     ('Tính năng của keo chà ron Epoxy Bricon:',
-     ['Chống thấm vượt trội, kháng hóa chất, chống rêu mốc, màu bền, khó bám bẩn, VOC Free',
-      'Chỉ dùng cho nội thất khô ráo', 'Pha với nước như ron xi măng',
+     ['Chống thấm, kháng hóa chất, chống rêu mốc, VOC Free',
+      'Chỉ dùng cho khu nội thất khô ráo, không dùng ngoài trời',
+      'Pha với nước như ron xi măng, thi công bằng bay cao su',
       'Chỉ dùng cho gạch men, không dùng cho đá tự nhiên, mosaic'], 'A',
      'TDS Epoxy: chống thấm vượt trội, không hóa chất, chống rêu mốc, màu bền, khó bám bẩn, VOC Free.'),
 
     # ===================== PHẦN A – CHỐNG THẤM 102 / 106 =====================
     ('Thành phần chính của Chống thấm Tường 102 / Sàn 106:',
-     ['Bitum, xăng thơm', 'Xi măng trắng, CaCO₃',
-      'Silica siêu mịn qua lưới 200 mesh, nhựa, phụ gia, chất bảo quản', 'Nhựa epoxy hai thành phần'], 'C',
+     ['Bitum nhũ tương, xăng thơm và sợi gia cường polyester',
+      'Xi măng trắng, CaCO₃, phụ gia chống nấm mốc đặc biệt',
+      'Silica siêu mịn 200 mesh, nhựa, phụ gia, chất bảo quản',
+      'Nhựa epoxy hai thành phần và chất đóng rắn gốc amin'], 'C',
      'TDS chống thấm: silica siêu mịn qua lưới 200 mesh, nhựa, phụ gia và chất bảo quản.'),
     ('Cách trộn đúng của Chống thấm 102 / 106:',
-     ['1 chống thấm : 1 nước, dùng ngay',
-      '1 chống thấm : 0,5 nước : 1 keo dán gạch Bricon, trộn chống thấm với nước trước',
-      '1 chống thấm : 1 xi măng : 0,5 nước', 'Dùng nguyên chất, không pha'], 'B',
+     ['1 CT : 1 nước, khuấy đều rồi dùng ngay, không thêm gì khác',
+      '1 CT : 0,5 nước : 1 keo dán gạch, trộn CT với nước trước',
+      '1 CT : 1 xi măng PCB40 : 0,5 nước, trộn khô trước rồi thêm nước',
+      'Dùng nguyên chất, không pha nước hay phụ gia nào khác'], 'B',
      'TDS: 1 chống thấm : 0,5 nước sạch : 1 keo dán gạch Bricon, trộn chống thấm với nước trước.'),
     ('Số lớp thi công chống thấm theo TDS:',
-     ['1 lớp là đủ', 'Luôn 4 lớp', '2 lớp, thi công liên tục không chờ khô',
-      '2 lớp, chờ khô giữa các lớp; khu vực thấm nhanh nên thi công 3 lớp'], 'D',
+     ['1 lớp thật dày là đủ, quét lớp hai chỉ tốn vật tư',
+      'Luôn quét 4 lớp liên tục cho mọi khu vực',
+      '2 lớp liên tục, quét lớp 2 khi lớp 1 còn ướt',
+      '2 lớp, chờ khô giữa lớp; chỗ thấm nhanh làm 3 lớp'], 'D',
      'TDS: thi công 2 lớp, đảm bảo thời gian khô giữa các lớp; khu vực thấm nhanh nên thi công 3 lớp.'),
     ('Định mức chống thấm là 2,0–2,5 m²/kg cho 2 lớp. Sàn 50 m² thi công 2 lớp cần khoảng bao nhiêu kg chống thấm?',
      ['20–25 kg', '5–10 kg', '50 kg', '100–125 kg'], 'A',
@@ -184,8 +230,10 @@ MULTIPLE_CHOICE = [
       'Chịu mài mòn, chịu nước mặn, kháng kiềm cao'], 'C',
      'TDS: tránh thi công dưới trời nắng gắt và gió mạnh.'),
     ('Quy cách đóng gói Chống thấm 102 / 106:',
-     ['Chỉ có thùng 20 kg', 'Bao 25 kg và túi 5 kg', 'Tuýp 380 ml',
-      'Lon 1 kg (thùng 18 lon), lon 5 kg (thùng 4 lon), thùng 18 kg'], 'D',
+     ['Chỉ có thùng 20 kg cho công trình',
+      'Bao 25 kg và túi 5 kg như keo dán',
+      'Tuýp 380 ml và hộp 1 kg hai thành phần',
+      'Lon 1 kg, lon 5 kg và thùng 18 kg'], 'D',
      'TDS: lon 1 kg – thùng 18 lon; lon 5 kg – thùng 4 lon; thùng 18 kg.'),
 
     # ===================== PHẦN A – CHUNG =====================
@@ -195,71 +243,97 @@ MULTIPLE_CHOICE = [
 
     # ===================== PHẦN B – KỸ THUẬT THI CÔNG THỰC TẾ =====================
     ('Thợ quen ngâm gạch vào nước trước khi dán, kể cả khi dùng keo. Bạn khuyên thế nào?',
-     ['Ngâm càng lâu càng bám chắc',
-      'Không cần ngâm; gạch chỉ cần sạch, không bụi – gạch ướt sũng nước làm giảm bám dính của keo',
-      'Ngâm nước pha xi măng', 'Chỉ ngâm gạch granite'], 'B',
+     ['Nên ngâm thật lâu để gạch no nước, keo bám chắc hơn',
+      'Không cần ngâm; gạch ướt sũng làm giảm bám dính của keo',
+      'Ngâm vào nước pha xi măng để tăng độ bám cho keo',
+      'Chỉ cần ngâm gạch granite, gạch men thì không cần'], 'B',
      'Dán bằng keo không cần ngâm gạch; gạch ướt sũng làm giảm bám dính.'),
     ('Vì sao gạch granite, porcelain khổ lớn dán bằng hồ xi măng cát hay bị bộp, bong?',
-     ['Gạch gần như không hút nước nên hồ xi măng bám kém, lớp hồ dày dễ rỗng và co ngót',
-      'Do gạch quá nhẹ', 'Do xi măng quá tốt', 'Do ron quá rộng'], 'A',
+     ['Gạch gần như không hút nước, hồ bám kém, lớp dày dễ rỗng',
+      'Gạch khổ lớn quá nhẹ nên không ép chặt được lớp hồ',
+      'Xi măng mác cao co ngót mạnh làm gạch bị đẩy bung lên',
+      'Ron để quá rộng nên nước thấm xuống làm mục lớp hồ'], 'A',
      'Gạch hút nước thấp, hồ xi măng bám cơ học kém, lớp dày dễ rỗng.'),
     ('Cách kiểm tra nhanh keo đã trải trên nền còn dán được gạch hay không:',
-     ['Nhìn màu keo', 'Ngửi mùi keo',
-      'Chạm ngón tay: keo còn dính tay là còn dán được; nếu đã tạo màng không dính thì cạo bỏ, trải lớp mới',
-      'Tưới nước lên keo rồi dán tiếp'], 'C',
+     ['Nhìn màu: keo chuyển sang trắng là còn dán được',
+      'Tưới thêm nước lên lớp keo rồi dán tiếp bình thường',
+      'Chạm ngón tay: còn dính tay thì còn dán được',
+      'Keo trải trong vòng 2 giờ thì vẫn dán được'], 'C',
      'Keo tạo màng là đã quá thời gian mở, phải cạo bỏ.'),
     ('Gạch khổ lớn (từ 60×60 trở lên), ốp tường ngoài trời nên thi công thế nào để keo phủ kín?',
-     ['Chấm keo 4 góc và giữa viên', 'Chỉ trải keo lên mặt sau gạch', 'Trải keo thật dày bằng bay phẳng',
-      'Trải keo cả trên nền và mặt sau gạch (phết hai mặt)'], 'D',
+     ['Chấm keo ở 4 góc và giữa viên gạch',
+      'Chỉ trải keo lên mặt sau gạch cho đỡ tốn',
+      'Trải keo thật dày bằng bay phẳng cho chắc',
+      'Trải keo cả trên nền và mặt sau gạch'], 'D',
      'Phết hai mặt để keo phủ kín, không bộp.'),
     ('Sau khi đặt gạch lên lớp keo, thao tác đúng là:',
-     ['Ấn và gõ nhẹ bằng búa cao su cho keo dàn đều; thỉnh thoảng nhấc thử một viên kiểm tra độ phủ keo',
-      'Đặt nhẹ, không ấn để khỏi lệch', 'Đứng lên gạch ngay để ép chặt', 'Tưới nước lên mặt gạch'], 'A',
+     ['Ấn, gõ búa cao su, nhấc thử một viên xem độ phủ',
+      'Đặt nhẹ tay, không ấn để gạch khỏi lệch khỏi dây',
+      'Đứng lên gạch ngay để ép keo chặt xuống mặt nền',
+      'Tưới nước lên mặt gạch để keo đông kết nhanh hơn'], 'A',
      'Ấn, gõ búa cao su, nhấc thử kiểm tra độ phủ.'),
     ('Chọn cỡ răng bay răng cưa theo nguyên tắc nào?',
-     ['Loại gạch nào cũng dùng một cỡ', 'Gạch càng lớn, nền càng kém phẳng thì dùng răng bay càng lớn',
-      'Gạch càng lớn dùng răng càng nhỏ để tiết kiệm keo', 'Chỉ dùng bay phẳng'], 'B',
+     ['Mọi loại gạch đều dùng chung một cỡ răng bay tiêu chuẩn',
+      'Gạch càng lớn, nền càng kém phẳng thì răng bay càng lớn',
+      'Gạch càng lớn dùng răng càng nhỏ để tiết kiệm keo hơn',
+      'Chỉ dùng bay phẳng, bay răng cưa chỉ dành cho gạch nhỏ'], 'B',
      'Gạch lớn, nền kém phẳng → răng bay lớn.'),
     ('Yêu cầu về nền trước khi dán gạch bằng keo:',
-     ['Nền càng nhẵn càng tốt', 'Nền còn đọng nước vẫn dán được',
-      'Nền chắc, phẳng, sạch bụi, dầu mỡ; lớp tô trát mới phải đủ thời gian khô cứng',
-      'Keo tự bù được nền lồi lõm vài cm'], 'C',
+     ['Nền càng nhẵn bóng càng tốt, keo sẽ bám chắc hơn',
+      'Nền còn đọng nước vẫn dán được vì keo là gốc xi măng, cần nước',
+      'Nền chắc, phẳng, sạch bụi dầu; tô trát mới phải khô cứng',
+      'Nền lồi lõm vài cm không sao, keo tự bù phẳng được'], 'C',
      'Nền chắc, phẳng, sạch; keo dán lớp mỏng, không dùng để bù nền.'),
     ('Thứ tự thi công đúng cho sàn nhà vệ sinh:',
-     ['Lát gạch → chà ron → quét chống thấm lên mặt gạch', 'Chống thấm → chà ron → lát gạch',
-      'Lát gạch → chống thấm → ngâm nước',
-      'Xử lý bề mặt, cổ ống, góc tường → chống thấm → bảo dưỡng, ngâm thử nước → dán gạch bằng keo → chà ron'], 'D',
+     ['Lát gạch → chà ron → quét chống thấm phủ lên mặt gạch và ron',
+      'Chống thấm → chà ron trước → lát gạch → ngâm thử nước 24 giờ',
+      'Cán nền → lát gạch → chống thấm chân tường → ngâm thử nước',
+      'Xử lý cổ ống, góc → chống thấm → ngâm thử → dán gạch → chà ron'], 'D',
      'Chống thấm, ngâm thử trước rồi mới ốp lát và chà ron.'),
     ('Vì sao nên ngâm thử nước sau khi chống thấm sàn, trước khi lát gạch?',
-     ['Để phát hiện điểm rò rỉ và xử lý ngay, tránh phải đập gạch về sau', 'Để chống thấm khô nhanh hơn',
-      'Để làm sạch bề mặt', 'Không cần thiết'], 'A',
+     ['Phát hiện rò rỉ để sửa ngay, tránh đập gạch về sau',
+      'Giúp lớp chống thấm hút nước, đông cứng nhanh hơn',
+      'Làm sạch bụi trên bề mặt trước khi lát gạch',
+      'Không cần thiết nếu đã dùng sản phẩm chống thấm tốt'], 'A',
      'Phát hiện rò rỉ khi còn sửa được.'),
     ('Khi chống thấm nhà vệ sinh, vị trí nào dễ thấm nhất và cần xử lý kỹ hơn?',
-     ['Giữa sàn', 'Cổ ống xuyên sàn, ga thoát sàn, góc tường và chân tường', 'Trần nhà vệ sinh', 'Khung cửa'], 'B',
+     ['Giữa sàn, nơi đọng nước nhiều nhất',
+      'Cổ ống, ga thoát sàn, góc và chân tường',
+      'Trần nhà vệ sinh do hơi nước bốc lên',
+      'Khung cửa ra vào và bậc cửa nhà vệ sinh'], 'B',
      'Cổ ống, ga thoát sàn, góc và chân tường là điểm yếu.'),
     ('Khi quét lớp chống thấm thứ hai, nên quét thế nào?',
-     ['Quét ngay khi lớp 1 còn ướt', 'Cùng chiều với lớp 1',
-      'Chờ lớp 1 khô, quét vuông góc với chiều lớp 1 để phủ kín lỗ kim', 'Chỉ quét chỗ nào thấy mỏng'], 'C',
+     ['Quét ngay khi lớp 1 còn ướt để hai lớp liền nhau',
+      'Quét cùng chiều với lớp 1 cho bề mặt đều màu',
+      'Chờ lớp 1 khô, quét vuông góc với lớp 1',
+      'Chỉ quét lại những chỗ nhìn thấy còn mỏng'], 'C',
      'Chờ khô, quét vuông góc để không sót lỗ kim.'),
     ('Sân thượng, sân ngoài trời diện tích lớn khi lát gạch cần lưu ý gì để tránh gạch phồng, đội?',
-     ['Lát khít ron 0 mm', 'Dùng keo nội thất cho rẻ', 'Lát vào buổi trưa nắng cho keo khô nhanh',
-      'Chừa khe co giãn theo mảng và ở chân tường, dùng keo và ron ngoại thất'], 'D',
+     ['Lát khít ron 0 mm để nước không lọt xuống',
+      'Dùng keo nội thất cho rẻ, ngoài trời vẫn chịu được',
+      'Lát vào buổi trưa nắng để keo khô và bám nhanh',
+      'Chừa khe co giãn, dùng keo và ron ngoại thất'], 'D',
      'Khe co giãn + keo, ron ngoại thất.'),
     ('Bếp nhà hàng, khu nhiều dầu mỡ và chất tẩy rửa nên tư vấn loại ron nào?',
      ['Keo chà ron Epoxy', 'Ron Nội thất (túi)', 'Xi măng trắng pha nước', 'Không cần chà ron'], 'A',
      'Epoxy kháng hóa chất, khó bám bẩn.'),
     ('Khách hỏi cách vệ sinh ron xi măng mới chà. Lời khuyên đúng:',
-     ['Dùng axit mạnh tẩy ngay cho sạch',
-      'Lau keo thừa bằng xốp/khăn ẩm khi thi công; không dùng axit mạnh vì làm ron mục, bạc màu',
-      'Xịt nước áp lực cao ngay hôm sau', 'Chà bàn chải sắt'], 'B',
+     ['Dùng axit mạnh tẩy ngay hôm sau cho ron trắng sạch',
+      'Lau keo thừa bằng xốp ẩm; không dùng axit mạnh',
+      'Xịt nước áp lực cao ngay hôm sau để làm sạch ron',
+      'Chà bằng bàn chải sắt để ron phẳng và sáng màu hơn'], 'B',
      'Axit mạnh làm ron mục, bạc màu.'),
     ('Bảo quản bao keo dán gạch đã mở dở tại công trình thế nào?',
-     ['Để mở miệng ngoài trời', 'Đổ ra xô nước để sẵn',
-      'Buộc kín miệng, để nơi khô ráo, kê cao khỏi nền ẩm, tránh nắng mưa', 'Đặt trực tiếp trên nền đất'], 'C',
+     ['Để mở miệng bao cho thoáng, tránh keo bị hấp hơi',
+      'Đổ ra xô, đậy nắp và đổ sẵn nước để dùng hôm sau',
+      'Buộc kín, để nơi khô ráo, kê cao khỏi nền ẩm',
+      'Đặt trực tiếp trên nền đất, che bạt là đủ'], 'C',
      'Keo hút ẩm sẽ vón cục, giảm chất lượng.'),
     ('Công trình thi công chậm (1 thợ, gạch lớn). Nên trộn keo thế nào?',
-     ['Trộn cả bao 25 kg một lần cho tiện', 'Trộn sẵn từ chiều hôm trước', 'Trộn lỏng hơn để keo lâu khô',
-      'Trộn từng mẻ vừa đủ dùng trước khi keo bắt đầu đông kết, trải keo từng mảng nhỏ'], 'D',
+     ['Trộn cả bao 25 kg một lần để keo đều màu, đỡ mất công',
+      'Trộn sẵn từ chiều hôm trước để keo kịp ngấm đều',
+      'Trộn lỏng hơn tỉ lệ để keo lâu khô, kịp dán gạch lớn',
+      'Trộn từng mẻ nhỏ vừa đủ dùng, trải keo từng mảng nhỏ'], 'D',
      'Không dùng keo đã đông kết; trộn mẻ nhỏ, trải mảng nhỏ.'),
 ]
 
@@ -418,7 +492,66 @@ def seed(replace=False):
           f'{len(MULTIPLE_CHOICE)} câu trắc nghiệm + {len(ESSAYS)} câu tự luận')
 
 
+def update():
+    """
+    Cập nhật nội dung đề đã có theo dữ liệu trong file này mà KHÔNG xóa kết quả đã làm.
+    Ghép theo thứ tự câu hỏi và thứ tự đáp án (giữ nguyên id), nên chỉ dùng khi
+    số câu, loại câu và vị trí đáp án đúng không đổi.
+    """
+    quiz = Quiz.query.filter_by(slug=QUIZ_SLUG).first()
+    if not quiz:
+        print(f'⚠️  Chưa có đề "{QUIZ_SLUG}". Chạy không kèm tham số để tạo đề.')
+        return
+
+    questions = quiz.questions.order_by(Question.order, Question.id).all()
+    expected = [('multiple_choice', item) for item in MULTIPLE_CHOICE] + [('essay', item) for item in ESSAYS]
+    if len(questions) != len(expected):
+        print(f'❌ Đề hiện có {len(questions)} câu, dữ liệu mới có {len(expected)} câu. '
+              f'Không cập nhật được – dùng --replace nếu chấp nhận xóa kết quả cũ.')
+        return
+
+    changed = 0
+    for q, (qtype, item) in zip(questions, expected):
+        if (q.question_type == 'essay') != (qtype == 'essay'):
+            print(f'❌ Câu id={q.id} khác loại với dữ liệu mới. Dừng, không thay đổi gì.')
+            db.session.rollback()
+            return
+
+        if qtype == 'essay':
+            text, model_answer = item
+            if (q.question_text, q.model_answer) != (text, model_answer):
+                q.question_text, q.model_answer = text, model_answer
+                changed += 1
+            continue
+
+        text, options, correct, explanation = item
+        answers = q.answers.order_by(Answer.order, Answer.id).all()
+        if len(answers) != len(options):
+            print(f'❌ Câu id={q.id} có {len(answers)} đáp án, dữ liệu mới có {len(options)}. Dừng, không thay đổi gì.')
+            db.session.rollback()
+            return
+        old_correct = next((i for i, a in enumerate(answers) if a.is_correct), None)
+        if old_correct != 'ABCD'.index(correct):
+            print(f'❌ Câu id={q.id}: vị trí đáp án đúng thay đổi – cập nhật sẽ làm sai kết quả cũ. Dừng.')
+            db.session.rollback()
+            return
+
+        dirty = (q.question_text, q.explanation) != (text, explanation)
+        q.question_text, q.explanation = text, explanation
+        for a, opt in zip(answers, options):
+            if a.answer_text != opt:
+                a.answer_text = opt
+                dirty = True
+        changed += dirty
+
+    db.session.commit()
+    print(f'✅ Đã cập nhật {changed} câu của đề "{quiz.title}" (id={quiz.id}); kết quả đã làm được giữ nguyên.')
+
+
 if __name__ == '__main__':
     app = create_app()
     with app.app_context():
-        seed(replace='--replace' in sys.argv)
+        if '--update' in sys.argv:
+            update()
+        else:
+            seed(replace='--replace' in sys.argv)
