@@ -103,7 +103,7 @@
               {% set media_info = blog.get_media_seo_info() %}
 
               <img
-                src="{{ blog.image }}"
+                src="{{ blog.image|cld(1400) }}"
                 class="img-fluid rounded shadow-sm"
                 alt="{{ media_info.alt_text if media_info and media_info.alt_text else blog.title }}"
                 title="{{ media_info.title if media_info and media_info.title else blog.title }}"
@@ -229,7 +229,7 @@
                 {% if fb.image %}
                 <div class="featured-thumb flex-shrink-0 me-2">
                   <img
-                    src="{{ fb.image }}"
+                    src="{{ fb.image|cld(240) }}"
                     alt="{{ fb.title }}"
                     class="img-fluid rounded"
                   />

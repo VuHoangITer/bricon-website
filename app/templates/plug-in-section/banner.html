@@ -31,18 +31,20 @@
         <picture>
           {% if banner.image_mobile %}
           <!-- Ảnh mobile  768px -->
-          <source media="(max-width: 767px)" srcset="{{ banner.image_mobile }}" type="image/webp">
+          <source media="(max-width: 767px)" srcset="{{ banner.image_mobile|cld(828) }}">
           {% endif %}
           <!-- Ảnh desktop -->
-          <source media="(min-width: 768px)" srcset="{{ banner.image }}" type="image/webp">
+          <source media="(min-width: 768px)" srcset="{{ banner.image|cld(1920) }}">
 
           <!-- Fallback -->
           <img
-            src="{{ banner.image if banner.image else 'https://via.placeholder.com/1200x500/FFC107/FFFFFF?text=Banner+' + loop.index|string }}"
+            src="{{ banner.image|cld(1920) if banner.image else 'https://via.placeholder.com/1200x500/FFC107/FFFFFF?text=Banner+' + loop.index|string }}"
             class="d-block w-100"
             alt="{{ media_info.alt if media_info else banner.title }}"
             title="{{ media_info.title if media_info else banner.title }}"
-            loading="lazy"
+            {# Slide đầu: tải ngay, ưu tiên cao (ảnh người xem thấy đầu tiên); các slide sau: tải chậm #}
+            {% if loop.first %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}
+            decoding="async"
           />
         </picture>
 

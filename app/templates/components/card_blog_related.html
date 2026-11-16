@@ -9,7 +9,7 @@
 
     <a href="{{ url_for('main.blog_detail', slug=blog.slug) }}">
       <img
-        src="{{ blog.image if blog.image else 'https://via.placeholder.com/400x300/FFC107/FFFFFF?text=Blog' }}"
+        src="{{ blog.image|cld(720) if blog.image else 'https://via.placeholder.com/400x300/FFC107/FFFFFF?text=Blog' }}"
         alt="{{ media_info.alt_text if media_info and media_info.alt_text else blog.title }}"
         title="{{ media_info.title if media_info and media_info.title else blog.title }}"
         itemprop="image"

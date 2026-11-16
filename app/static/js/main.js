@@ -378,7 +378,8 @@ window.addEventListener("resize", function () {
 document.addEventListener("DOMContentLoaded", () => {
   const loader = document.getElementById("page-loader");
   if (loader) {
-    setTimeout(() => loader.classList.add("hidden"), 1000);
+    // Ẩn ngay khi HTML đã sẵn sàng (trước đây giữ thêm 1 giây làm trang có cảm giác chậm)
+    loader.classList.add("hidden");
   }
 });
 

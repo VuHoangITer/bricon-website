@@ -79,7 +79,7 @@
           <!-- Project Image -->
           <div class="position-relative overflow-hidden">
             <img
-              src="{{ project.image or url_for('static', filename='img/placeholder.jpg') }}"
+              src="{{ project.image|cld(800) or url_for('static', filename='img/placeholder.jpg') }}"
               class="card-img-top"
               alt="{{ project.title }}"
               itemprop="image"

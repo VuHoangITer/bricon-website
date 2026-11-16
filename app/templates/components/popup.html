@@ -15,10 +15,10 @@
         <!-- Clickable Image -->
         {% if popup.link %}
         <a href="{{ popup.link }}" id="popup-link-{{ popup.id }}" class="bricon-popup-link">
-            <img src="{{ popup.image }}" alt="Popup" class="bricon-popup-img">
+            <img src="{{ popup.image|cld(900) }}" alt="Popup" class="bricon-popup-img">
         </a>
         {% else %}
-        <img src="{{ popup.image }}" alt="Popup" class="bricon-popup-img">
+        <img src="{{ popup.image|cld(900) }}" alt="Popup" class="bricon-popup-img">
         {% endif %}
     </div>
 </div>

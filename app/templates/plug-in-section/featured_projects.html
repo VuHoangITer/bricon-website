@@ -63,7 +63,7 @@
             <div class="project-image">
               {% set media_info = project.get_media_seo_info() if project.image else None %}
               <img
-                src="{{ project.image if project.image else 'https://via.placeholder.com/800x600/FFC107/FFFFFF?text=Project' }}"
+                src="{{ project.image|cld(900) if project.image else 'https://via.placeholder.com/800x600/FFC107/FFFFFF?text=Project' }}"
                 alt="{{ media_info.alt_text if media_info and media_info.alt_text else project.title }}"
                 loading="lazy"
               />

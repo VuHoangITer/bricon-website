@@ -61,7 +61,7 @@
             <div class="card-body">
               <div class="card border-0 shadow-sm mb-4">
                 <img
-                  src="{{ project.image or url_for('static', filename='img/placeholder.jpg') }}"
+                  src="{{ project.image|cld(1400) or url_for('static', filename='img/placeholder.jpg') }}"
                   class="card-img-top"
                   alt="{{ project.title }}"
                   itemprop="image"
@@ -145,7 +145,7 @@
                   <div class="row g-0">
                     <div class="col-4">
                       <img
-                        src="{{ rel.image or url_for('static', filename='img/placeholder.jpg') }}"
+                        src="{{ rel.image|cld(600) or url_for('static', filename='img/placeholder.jpg') }}"
                         class="img-fluid h-100"
                         style="object-fit: cover"
                         alt="{{ rel.title }}"

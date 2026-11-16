@@ -217,6 +217,25 @@ def create_app(config_class=Config):
             return '{:,.0f}'.format(value).replace(',', '.')
         return '0'
 
+    @app.template_filter('cld')
+    def cloudinary_optimize(url, width=None):
+        """
+        Nén ảnh Cloudinary tự động khi hiển thị: f_auto (WebP/AVIF theo trình duyệt),
+        q_auto (chất lượng tối ưu), w_<width> + c_limit (không phóng to ảnh nhỏ).
+        VD: {{ banner.image|cld(1920) }}. Ảnh không phải Cloudinary giữ nguyên.
+        """
+        marker = '/image/upload/'
+        if not url or 'res.cloudinary.com' not in url or marker not in url:
+            return url
+        head, tail = url.split(marker, 1)
+        first = tail.split('/', 1)[0]
+        if ',' in first or first.startswith(('f_', 'q_', 'w_', 'c_')):
+            return url  # đã có tham số biến đổi
+        transform = 'f_auto,q_auto'
+        if width:
+            transform += f',c_limit,w_{int(width)}'
+        return f'{head}{marker}{transform}/{tail}'
+
     @app.template_filter('nl2br')
     def nl2br_filter(text):
         if not text:

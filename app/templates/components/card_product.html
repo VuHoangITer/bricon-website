@@ -15,7 +15,7 @@
         class="d-block"
       >
         <img
-          src="{{ product.image if product.image else 'https://via.placeholder.com/300x300/FFC107/FFFFFF?text=Product' }}"
+          src="{{ product.image|cld(600) if product.image else 'https://via.placeholder.com/300x300/FFC107/FFFFFF?text=Product' }}"
           class="card-img-top"
           alt="{{ media_info.alt_text if media_info and media_info.alt_text else product.name }}"
           title="{{ media_info.title if media_info and media_info.title else product.name }}"

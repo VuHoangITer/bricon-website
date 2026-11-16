@@ -98,7 +98,7 @@
               {% if fb.image %}
               <div class="featured-thumb flex-shrink-0 me-2">
                 <img
-                  src="{{ fb.image }}"
+                  src="{{ fb.image|cld(240) }}"
                   alt="{{ fb.title }}"
                   class="img-fluid rounded"
                 />
