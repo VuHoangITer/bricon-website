@@ -278,6 +278,7 @@ def quiz_result(attempt_id):
 
     # Chi tiết tất cả câu trắc nghiệm (kể cả câu bỏ trống); câu tự luận do HR đánh giá riêng
     questions_detail = attempt.get_questions_detail()
+    essay_detail = attempt.get_essay_detail()  # ứng viên xem lại bài làm tự luận (không có đáp án tham khảo)
 
     essay_count = sum(1 for q in quiz.questions.all() if q.is_essay)
 
@@ -285,4 +286,5 @@ def quiz_result(attempt_id):
                            attempt=attempt,
                            quiz=quiz,
                            questions_detail=questions_detail,
+                           essay_detail=essay_detail,
                            essay_count=essay_count)

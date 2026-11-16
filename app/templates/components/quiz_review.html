@@ -1,123 +1,183 @@
 {#
-  Khối xem lại đáp án gọn cho đề dài (50–70+ câu).
-  Cần biến: questions_detail = attempt.get_questions_detail()
-  - Lưới số câu tô màu (đúng / sai / bỏ trống), bấm để nhảy tới câu
-  - Bộ lọc, mặc định "Cần xem lại" (sai + bỏ trống)
-  - Mỗi câu 1 dòng, bấm để mở chi tiết
+  Xem lại bài làm dạng 2 cột, vừa 1 màn hình kể cả đề 50–70+ câu.
+  Biến:
+    questions_detail  = attempt.get_questions_detail()   (bắt buộc)
+    essay_detail      = attempt.get_essay_detail()       (tùy chọn – câu tự luận)
+    show_model_answer = True                              (tùy chọn – chỉ admin/HR: hiện đáp án tham khảo tự luận)
+  - Cột trái: lưới số câu tô màu (đúng / sai / bỏ trống / tự luận) + bộ lọc
+  - Cột phải: chi tiết 1 câu đang chọn, nút câu trước / câu sau, phím ← →
 #}
+{% set qrv_essays = essay_detail if (essay_detail is defined and essay_detail) else [] %}
+{% set qrv_show_model = show_model_answer if show_model_answer is defined else False %}
+{% set qrv_all = (questions_detail + qrv_essays)|sort(attribute='number') %}
 {% set qrv_correct = questions_detail|selectattr('is_correct')|list|length %}
 {% set qrv_blank = questions_detail|selectattr('unanswered')|list|length %}
 {% set qrv_wrong = questions_detail|length - qrv_correct - qrv_blank %}
+{% set qrv_essay = qrv_essays|length %}
 
 <style>
-.qrv { padding: 16px 20px 20px; }
-.qrv-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.qrv-title { font-size: 17px; font-weight: 700; margin: 0; color: #1a1a1a; }
-.qrv-legend { display: flex; gap: 14px; font-size: 13px; color: #555; }
-.qrv-legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+.qrv { display: grid; grid-template-columns: minmax(280px, 5fr) 7fr; gap: 16px; padding: 16px; align-items: start; }
+.qrv-panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; }
+.qrv-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.qrv-title { font-size: 15px; font-weight: 700; margin: 0; color: #111827; }
+.qrv-legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; color: #4b5563; }
+.qrv-legend span::before { content: ''; display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
 .qrv-legend .ok::before { background: #16a34a; }
 .qrv-legend .bad::before { background: #dc2626; }
 .qrv-legend .blank::before { background: #f59e0b; }
+.qrv-legend .essay::before { background: #2563eb; }
 
-.qrv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(34px, 1fr)); gap: 6px; margin-bottom: 14px; }
-.qrv-cell { height: 34px; border: 0; border-radius: 6px; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; transition: transform .1s; }
-.qrv-cell:hover { transform: scale(1.08); }
+.qrv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)); gap: 5px; }
+.qrv-cell { height: 30px; border: 2px solid transparent; border-radius: 6px; color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; padding: 0; }
 .qrv-cell.correct { background: #16a34a; }
 .qrv-cell.wrong { background: #dc2626; }
 .qrv-cell.blank { background: #f59e0b; }
+.qrv-cell.essay { background: #2563eb; }
+.qrv-cell.essay.empty { background: #fff; color: #2563eb; border-color: #93c5fd; }
+.qrv-cell.dim { opacity: .22; }
+.qrv-cell.current { border-color: #111827; box-shadow: 0 0 0 2px #fff inset; }
 
-.qrv-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-.qrv-filter { border: 1px solid #d1d5db; background: #fff; color: #374151; border-radius: 999px; padding: 4px 12px; font-size: 13px; cursor: pointer; }
-.qrv-filter.active { background: #1f2937; border-color: #1f2937; color: #fff; }
-.qrv-toggle { margin-left: auto; border: 0; background: none; color: #2563eb; font-size: 13px; cursor: pointer; }
+.qrv-filters { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
+.qrv-filter { border: 1px solid #d1d5db; background: #fff; color: #374151; border-radius: 999px; padding: 3px 10px; font-size: 12px; cursor: pointer; }
+.qrv-filter.active { background: #111827; border-color: #111827; color: #fff; }
 
-.qrv-list { border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
-.qrv-row { border-bottom: 1px solid #f0f0f0; }
-.qrv-row:last-of-type { border-bottom: 0; }
-.qrv-row > summary { list-style: none; display: flex; align-items: center; gap: 10px; padding: 9px 12px; cursor: pointer; }
-.qrv-row > summary::-webkit-details-marker { display: none; }
-.qrv-row > summary:hover { background: #f9fafb; }
-.qrv-row[open] > summary { background: #f9fafb; }
-.qrv-num { flex: 0 0 30px; height: 24px; border-radius: 5px; color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
-.qrv-row.correct .qrv-num { background: #16a34a; }
-.qrv-row.wrong .qrv-num { background: #dc2626; }
-.qrv-row.blank .qrv-num { background: #f59e0b; }
-.qrv-q { flex: 1; min-width: 0; font-size: 14px; color: #1f2937; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.qrv-row[open] .qrv-q { white-space: normal; }
-.qrv-tag { flex: 0 0 auto; font-size: 12px; color: #6b7280; }
-.qrv-chevron { flex: 0 0 auto; color: #9ca3af; transition: transform .15s; }
-.qrv-row[open] .qrv-chevron { transform: rotate(90deg); }
+.qrv-detail { min-height: 330px; display: flex; flex-direction: column; }
+.qrv-item { display: none; flex: 1; }
+.qrv-item.show { display: block; }
+.qrv-item-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.qrv-num { padding: 2px 9px; border-radius: 5px; color: #fff; font-size: 13px; font-weight: 700; }
+.qrv-item.correct .qrv-num { background: #16a34a; }
+.qrv-item.wrong .qrv-num { background: #dc2626; }
+.qrv-item.blank .qrv-num { background: #f59e0b; }
+.qrv-item.essay .qrv-num { background: #2563eb; }
+.qrv-status { font-size: 13px; font-weight: 600; }
+.qrv-item.correct .qrv-status { color: #16a34a; }
+.qrv-item.wrong .qrv-status { color: #dc2626; }
+.qrv-item.blank .qrv-status { color: #b45309; }
+.qrv-item.essay .qrv-status { color: #2563eb; }
+.qrv-question { font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 10px; line-height: 1.45; white-space: pre-line; }
+.qrv-opts { display: grid; gap: 6px; }
+.qrv-opt { display: flex; gap: 8px; align-items: flex-start; padding: 7px 10px; border: 1px solid #e5e7eb; border-radius: 7px; font-size: 14px; color: #374151; }
+.qrv-opt .mk { flex: 0 0 18px; font-weight: 700; }
+.qrv-opt .tag { margin-left: auto; font-size: 12px; white-space: nowrap; }
+.qrv-opt.is-correct { border-color: #86efac; background: #ecfdf3; color: #166534; }
+.qrv-opt.is-picked-wrong { border-color: #fca5a5; background: #fef2f2; color: #991b1b; }
+.qrv-blank-note { margin-top: 8px; font-size: 13px; color: #92400e; background: #fffbeb; padding: 6px 10px; border-radius: 6px; }
+.qrv-exp { margin-top: 10px; padding: 7px 10px; border-left: 3px solid #93c5fd; background: #f8fafc; color: #475569; font-size: 13px; }
 
-.qrv-body { padding: 4px 12px 12px 52px; display: grid; gap: 6px; font-size: 14px; }
-.qrv-ans { padding: 6px 10px; border-radius: 6px; }
-.qrv-ans.ok { background: #ecfdf3; color: #166534; }
-.qrv-ans.bad { background: #fef2f2; color: #991b1b; }
-.qrv-ans.blank { background: #fffbeb; color: #92400e; }
-.qrv-exp { padding: 6px 10px; border-left: 3px solid #93c5fd; background: #f8fafc; color: #475569; font-size: 13px; }
-.qrv-empty { padding: 14px; text-align: center; color: #6b7280; margin: 0; }
+/* Tự luận: khung bài làm / đáp án tham khảo, cuộn bên trong để trang không bị dài */
+.qrv-box { border: 1px solid #e5e7eb; border-radius: 8px; margin-top: 8px; }
+.qrv-box-label { font-size: 12px; font-weight: 700; padding: 6px 10px; border-bottom: 1px solid #e5e7eb; background: #f9fafb; color: #374151; }
+.qrv-box-body { padding: 8px 10px; font-size: 14px; color: #1f2937; white-space: pre-wrap; max-height: 190px; overflow-y: auto; }
+.qrv-box.model { border-color: #bbf7d0; }
+.qrv-box.model .qrv-box-label { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+.qrv-box-body.empty { color: #9ca3af; font-style: italic; }
 
-@media (max-width: 576px) {
-  .qrv { padding: 12px; }
-  .qrv-tag { display: none; }
-  .qrv-body { padding-left: 12px; }
+.qrv-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #f0f0f0; }
+.qrv-nav button { border: 1px solid #d1d5db; background: #fff; border-radius: 7px; padding: 6px 14px; font-size: 13px; cursor: pointer; }
+.qrv-nav button:disabled { opacity: .4; cursor: default; }
+.qrv-pos { font-size: 12px; color: #6b7280; text-align: center; }
+.qrv-empty { margin: auto; color: #6b7280; text-align: center; }
+
+@media (max-width: 860px) {
+  .qrv { grid-template-columns: 1fr; padding: 12px; }
+  .qrv-detail { min-height: 0; }
 }
 </style>
 
 <div class="qrv" id="qrv">
-  <div class="qrv-head">
-    <h3 class="qrv-title">Chi tiết đáp án</h3>
-    <div class="qrv-legend">
-      <span class="ok">Đúng {{ qrv_correct }}</span>
-      <span class="bad">Sai {{ qrv_wrong }}</span>
-      <span class="blank">Bỏ trống {{ qrv_blank }}</span>
+  <div class="qrv-panel">
+    <div class="qrv-head">
+      <h3 class="qrv-title">Chi tiết bài làm</h3>
+      <div class="qrv-legend">
+        <span class="ok">Đúng {{ qrv_correct }}</span>
+        <span class="bad">Sai {{ qrv_wrong }}</span>
+        <span class="blank">Bỏ trống {{ qrv_blank }}</span>
+        {% if qrv_essay %}<span class="essay">Tự luận {{ qrv_essay }}</span>{% endif %}
+      </div>
+    </div>
+    <div class="qrv-grid">
+      {% for item in qrv_all %}
+        {% if item.question.is_essay %}
+          {% set st = 'essay' %}
+        {% else %}
+          {% set st = 'correct' if item.is_correct else ('blank' if item.unanswered else 'wrong') %}
+        {% endif %}
+        <button type="button" class="qrv-cell {{ st }}{% if st == 'essay' and not item.text_answer %} empty{% endif %}"
+                data-i="{{ loop.index0 }}" data-status="{{ st }}"
+                title="Câu {{ item.number }}{% if st == 'essay' %} (tự luận){% endif %}">{{ item.number }}</button>
+      {% endfor %}
+    </div>
+    <div class="qrv-filters">
+      <button type="button" class="qrv-filter" data-filter="review">Cần xem lại ({{ qrv_wrong + qrv_blank }})</button>
+      <button type="button" class="qrv-filter" data-filter="wrong">Sai ({{ qrv_wrong }})</button>
+      <button type="button" class="qrv-filter" data-filter="blank">Bỏ trống ({{ qrv_blank }})</button>
+      <button type="button" class="qrv-filter" data-filter="correct">Đúng ({{ qrv_correct }})</button>
+      {% if qrv_essay %}<button type="button" class="qrv-filter" data-filter="essay">Tự luận ({{ qrv_essay }})</button>{% endif %}
+      <button type="button" class="qrv-filter" data-filter="all">Tất cả ({{ qrv_all|length }})</button>
     </div>
   </div>
 
-  <div class="qrv-grid">
-    {% for item in questions_detail %}
-      {% set st = 'correct' if item.is_correct else ('blank' if item.unanswered else 'wrong') %}
-      <button type="button" class="qrv-cell {{ st }}" data-target="qrv-q{{ item.number }}"
-              title="Câu {{ item.number }}">{{ item.number }}</button>
-    {% endfor %}
-  </div>
-
-  <div class="qrv-filters">
-    <button type="button" class="qrv-filter" data-filter="review">Cần xem lại ({{ qrv_wrong + qrv_blank }})</button>
-    <button type="button" class="qrv-filter" data-filter="wrong">Sai ({{ qrv_wrong }})</button>
-    <button type="button" class="qrv-filter" data-filter="blank">Bỏ trống ({{ qrv_blank }})</button>
-    <button type="button" class="qrv-filter" data-filter="correct">Đúng ({{ qrv_correct }})</button>
-    <button type="button" class="qrv-filter" data-filter="all">Tất cả ({{ questions_detail|length }})</button>
-    <button type="button" class="qrv-toggle" id="qrv-toggle">Mở hết</button>
-  </div>
-
-  <div class="qrv-list">
-    {% for item in questions_detail %}
-      {% set st = 'correct' if item.is_correct else ('blank' if item.unanswered else 'wrong') %}
-      <details class="qrv-row {{ st }}" id="qrv-q{{ item.number }}" data-status="{{ st }}">
-        <summary>
-          <span class="qrv-num">{{ item.number }}</span>
-          <span class="qrv-q">{{ item.question.question_text }}</span>
-          <span class="qrv-tag">{% if st == 'correct' %}Đúng{% elif st == 'blank' %}Bỏ trống{% else %}Sai{% endif %}</span>
-          <span class="qrv-chevron">›</span>
-        </summary>
-        <div class="qrv-body">
-          {% if item.unanswered %}
-            <div class="qrv-ans blank">Không chọn đáp án</div>
-          {% else %}
-            <div class="qrv-ans {{ 'ok' if item.is_correct else 'bad' }}">
-              {{ '✓' if item.is_correct else '✗' }} Đã chọn: {{ item.selected_answer.answer_text }}
-            </div>
-          {% endif %}
-          {% if not item.is_correct and item.correct_answer %}
-            <div class="qrv-ans ok">✓ Đáp án đúng: {{ item.correct_answer.answer_text }}</div>
-          {% endif %}
-          {% if item.question.explanation %}
-            <div class="qrv-exp">💡 {{ item.question.explanation }}</div>
+  <div class="qrv-panel qrv-detail">
+    {% for item in qrv_all %}
+      {% if item.question.is_essay %}
+        <div class="qrv-item essay" data-i="{{ loop.index0 }}">
+          <div class="qrv-item-head">
+            <span class="qrv-num">Câu {{ item.number }}</span>
+            <span class="qrv-status">Tự luận{% if not item.text_answer %} – bỏ trống{% endif %}</span>
+          </div>
+          <div class="qrv-question">{{ item.question.question_text }}</div>
+          <div class="qrv-box">
+            <div class="qrv-box-label">Bài làm</div>
+            {% if item.text_answer %}
+              <div class="qrv-box-body">{{ item.text_answer }}</div>
+            {% else %}
+              <div class="qrv-box-body empty">Không trả lời</div>
+            {% endif %}
+          </div>
+          {% if qrv_show_model %}
+          <div class="qrv-box model">
+            <div class="qrv-box-label">Đáp án tham khảo cho HR</div>
+            {% if item.question.model_answer %}
+              <div class="qrv-box-body">{{ item.question.model_answer }}</div>
+            {% else %}
+              <div class="qrv-box-body empty">Chưa nhập đáp án tham khảo</div>
+            {% endif %}
+          </div>
           {% endif %}
         </div>
-      </details>
+      {% else %}
+        {% set st = 'correct' if item.is_correct else ('blank' if item.unanswered else 'wrong') %}
+        {% set picked_id = item.selected_answer.id if item.selected_answer else None %}
+        {% set correct_id = item.correct_answer.id if item.correct_answer else None %}
+        <div class="qrv-item {{ st }}" data-i="{{ loop.index0 }}">
+          <div class="qrv-item-head">
+            <span class="qrv-num">Câu {{ item.number }}</span>
+            <span class="qrv-status">{% if st == 'correct' %}✓ Đúng{% elif st == 'blank' %}Bỏ trống{% else %}✗ Sai{% endif %}</span>
+          </div>
+          <div class="qrv-question">{{ item.question.question_text }}</div>
+          <div class="qrv-opts">
+            {% for ans in item.question.answers.all()|sort(attribute='order') %}
+              {% set is_c = ans.id == correct_id %}
+              {% set is_p = ans.id == picked_id %}
+              <div class="qrv-opt {% if is_c %}is-correct{% elif is_p %}is-picked-wrong{% endif %}">
+                <span class="mk">{% if is_c %}✓{% elif is_p %}✗{% else %}{{ 'ABCDEF'[loop.index0] }}{% endif %}</span>
+                <span>{{ ans.answer_text }}</span>
+                {% if is_p %}<span class="tag">Đã chọn</span>{% elif is_c %}<span class="tag">Đáp án đúng</span>{% endif %}
+              </div>
+            {% endfor %}
+          </div>
+          {% if item.unanswered %}<div class="qrv-blank-note">Không chọn đáp án cho câu này.</div>{% endif %}
+          {% if item.question.explanation %}<div class="qrv-exp">💡 {{ item.question.explanation }}</div>{% endif %}
+        </div>
+      {% endif %}
     {% endfor %}
     <p class="qrv-empty" id="qrv-empty" hidden>Không có câu nào trong mục này.</p>
+    <div class="qrv-nav">
+      <button type="button" id="qrv-prev">← Câu trước</button>
+      <span class="qrv-pos" id="qrv-pos"></span>
+      <button type="button" id="qrv-next">Câu sau →</button>
+    </div>
   </div>
 </div>
 
@@ -125,42 +185,50 @@
 (function () {
   const root = document.getElementById('qrv');
   if (!root) return;
-  const rows = Array.from(root.querySelectorAll('.qrv-row'));
+  const cells = Array.from(root.querySelectorAll('.qrv-cell'));
+  const items = Array.from(root.querySelectorAll('.qrv-item'));
   const filters = root.querySelectorAll('.qrv-filter');
-  const empty = root.querySelector('#qrv-empty');
-  const toggle = root.querySelector('#qrv-toggle');
-  const match = { review: s => s !== 'correct', wrong: s => s === 'wrong', blank: s => s === 'blank',
-                  correct: s => s === 'correct', all: () => true };
+  const prev = root.querySelector('#qrv-prev'), next = root.querySelector('#qrv-next');
+  const pos = root.querySelector('#qrv-pos'), empty = root.querySelector('#qrv-empty');
+  const match = { review: s => s === 'wrong' || s === 'blank', wrong: s => s === 'wrong', blank: s => s === 'blank',
+                  correct: s => s === 'correct', essay: s => s === 'essay', all: () => true };
+  let list = [], cur = -1;  // list = chỉ số các câu thuộc bộ lọc hiện tại
 
-  function applyFilter(name) {
-    let shown = 0;
-    rows.forEach(r => {
-      const ok = match[name](r.dataset.status);
-      r.hidden = !ok;
-      if (ok) shown++;
-    });
-    filters.forEach(f => f.classList.toggle('active', f.dataset.filter === name));
-    empty.hidden = shown > 0;
-    toggle.textContent = 'Mở hết';
+  function show(i) {
+    cur = i;
+    items.forEach(el => el.classList.toggle('show', +el.dataset.i === i));
+    cells.forEach(c => c.classList.toggle('current', +c.dataset.i === i));
+    const k = list.indexOf(i);
+    prev.disabled = k <= 0;
+    next.disabled = k < 0 || k >= list.length - 1;
+    pos.textContent = k >= 0 ? `${k + 1} / ${list.length}` : '';
   }
 
-  filters.forEach(f => f.addEventListener('click', () => applyFilter(f.dataset.filter)));
+  function applyFilter(name) {
+    list = cells.filter(c => match[name](c.dataset.status)).map(c => +c.dataset.i);
+    cells.forEach(c => c.classList.toggle('dim', !list.includes(+c.dataset.i)));
+    filters.forEach(f => f.classList.toggle('active', f.dataset.filter === name));
+    empty.hidden = list.length > 0;
+    if (list.length) show(list.includes(cur) ? cur : list[0]);
+    else { items.forEach(el => el.classList.remove('show')); cells.forEach(c => c.classList.remove('current'));
+           prev.disabled = next.disabled = true; pos.textContent = ''; }
+  }
 
-  // Bấm ô số trên lưới: hiện câu đó (chuyển sang "Tất cả" nếu đang bị lọc ẩn), mở và cuộn tới
-  root.querySelectorAll('.qrv-cell').forEach(cell => cell.addEventListener('click', () => {
-    const row = document.getElementById(cell.dataset.target);
-    if (row.hidden) applyFilter('all');
-    row.open = true;
-    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  cells.forEach(c => c.addEventListener('click', () => {
+    const i = +c.dataset.i;
+    if (!list.includes(i)) applyFilter('all');  // bấm câu đang bị lọc ẩn → xem tất cả
+    show(i);
   }));
-
-  toggle.addEventListener('click', () => {
-    const open = toggle.textContent === 'Mở hết';
-    rows.forEach(r => { if (!r.hidden) r.open = open; });
-    toggle.textContent = open ? 'Thu gọn' : 'Mở hết';
+  filters.forEach(f => f.addEventListener('click', () => applyFilter(f.dataset.filter)));
+  prev.addEventListener('click', () => { const k = list.indexOf(cur); if (k > 0) show(list[k - 1]); });
+  next.addEventListener('click', () => { const k = list.indexOf(cur); if (k < list.length - 1) show(list[k + 1]); });
+  document.addEventListener('keydown', e => {
+    if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+    if (e.key === 'ArrowLeft') prev.click();
+    if (e.key === 'ArrowRight') next.click();
   });
 
-  // Mặc định: chỉ hiện câu cần xem lại; làm đúng hết thì hiện tất cả
+  // Mặc định: câu trắc nghiệm cần xem lại; nếu không có thì xem tất cả
   applyFilter('{{ "review" if (qrv_wrong + qrv_blank) > 0 else "all" }}');
 })();
 </script>
