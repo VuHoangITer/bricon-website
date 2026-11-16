@@ -268,9 +268,9 @@ class QuizAttempt(db.Model):
             self.score = 0
             return
 
+        scored_count = sum(1 for q in quiz.questions.all() if not q.is_essay)
         earned_points = 0
         correct_count = 0
-        wrong_count = 0
 
         for user_answer in self.user_answers.all():
             if user_answer.question.is_essay:
@@ -278,15 +278,46 @@ class QuizAttempt(db.Model):
             if user_answer.is_correct:
                 earned_points += user_answer.question.points
                 correct_count += 1
-            else:
-                wrong_count += 1
 
         self.score = round((earned_points / total_points) * 100, 2)
         self.correct_answers = correct_count
-        self.wrong_answers = wrong_count
+        # Câu sai = chọn sai + bỏ trống (câu không chọn cũng là không đạt điểm)
+        self.wrong_answers = scored_count - correct_count
         self.passed = self.score >= quiz.pass_score
 
         db.session.commit()
+
+    def get_questions_detail(self):
+        """
+        Chi tiết TẤT CẢ câu trắc nghiệm của đề theo thứ tự (kể cả câu bỏ trống).
+        number = số thứ tự thật của câu trong đề.
+        """
+        answers = {ua.question_id: ua for ua in self.user_answers.all()}
+        detail = []
+        for number, question in enumerate(self.quiz.questions.order_by(Question.order, Question.id).all(), start=1):
+            if question.is_essay:
+                continue
+            ua = answers.get(question.id)
+            detail.append({
+                'number': number,
+                'question': question,
+                'selected_answer': ua.answer if ua else None,
+                'correct_answer': question.get_correct_answer(),
+                'is_correct': bool(ua and ua.is_correct),
+                'unanswered': ua is None,
+            })
+        return detail
+
+    def get_essay_detail(self):
+        """Tất cả câu tự luận của đề (kể cả câu bỏ trống) kèm bài làm."""
+        answers = {ua.question_id: ua for ua in self.user_answers.all()}
+        detail = []
+        for number, question in enumerate(self.quiz.questions.order_by(Question.order, Question.id).all(), start=1):
+            if question.is_essay:
+                ua = answers.get(question.id)
+                detail.append({'number': number, 'question': question,
+                               'text_answer': ua.text_answer if ua else None})
+        return detail
 
     def get_time_spent_formatted(self):
         """Format thời gian làm bài"""
@@ -307,6 +338,10 @@ class UserAnswer(db.Model):
     Model Câu trả lời của user cho từng câu hỏi
     """
     __tablename__ = 'user_answers'
+    # Mỗi câu hỏi chỉ có 1 câu trả lời trong 1 lượt làm bài
+    __table_args__ = (
+        db.UniqueConstraint('attempt_id', 'question_id', name='uq_user_answers_attempt_question'),
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     attempt_id = db.Column(db.Integer, db.ForeignKey('quiz_attempts.id'), nullable=False)

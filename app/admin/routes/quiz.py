@@ -387,30 +387,9 @@ def view_result(attempt_id):
     """Xem chi tiết kết quả của 1 lượt làm bài"""
     attempt = QuizAttempt.query.get_or_404(attempt_id)
 
-    # Lấy chi tiết từng câu trả lời trắc nghiệm
-    questions_detail = []
-    essay_texts = {}
-    for user_answer in attempt.user_answers.all():
-        question = user_answer.question
-        if question.is_essay:
-            essay_texts[question.id] = user_answer.text_answer
-            continue
-        selected_answer = user_answer.answer
-        correct_answer = question.get_correct_answer()
-
-        questions_detail.append({
-            'question': question,
-            'selected_answer': selected_answer,
-            'correct_answer': correct_answer,
-            'is_correct': user_answer.is_correct
-        })
-
-    # Phần tự luận: hiện TẤT CẢ câu tự luận của đề (kể cả câu bỏ trống) kèm đáp án tham khảo cho HR
-    essay_detail = [
-        {'question': q, 'text_answer': essay_texts.get(q.id)}
-        for q in attempt.quiz.questions.order_by(Question.order).all()
-        if q.is_essay
-    ]
+    # Tất cả câu trắc nghiệm (kể cả câu bỏ trống) và tất cả câu tự luận kèm đáp án tham khảo cho HR
+    questions_detail = attempt.get_questions_detail()
+    essay_detail = attempt.get_essay_detail()
 
     return render_template('admin/trac_nghiem/result_detail.html',
                            attempt=attempt,

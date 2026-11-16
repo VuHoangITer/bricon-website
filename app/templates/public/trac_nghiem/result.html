@@ -322,8 +322,8 @@
         <!-- Statistics Grid -->
         <div class="stats-grid">
             <div class="stat-item">
-                <div class="stat-label">Tổng số câu</div>
-                <div class="stat-value">{{ attempt.total_questions }}</div>
+                <div class="stat-label">Câu trắc nghiệm</div>
+                <div class="stat-value">{{ questions_detail|length }}</div>
             </div>
 
             <div class="stat-item">
@@ -332,7 +332,7 @@
             </div>
 
             <div class="stat-item">
-                <div class="stat-label">Trả lời sai</div>
+                <div class="stat-label">Sai / bỏ trống</div>
                 <div class="stat-value text-danger">{{ attempt.wrong_answers }}</div>
             </div>
 
@@ -361,7 +361,7 @@
                     <a class="nav-link active" data-bs-toggle="tab" href="#tab-correct">Câu đúng ({{ attempt.correct_answers }})</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="tab" href="#tab-wrong">Câu sai ({{ attempt.wrong_answers }})</a>
+                    <a class="nav-link" data-bs-toggle="tab" href="#tab-wrong">Câu sai / bỏ trống ({{ attempt.wrong_answers }})</a>
                 </li>
             </ul>
 
@@ -373,7 +373,7 @@
                         {% for item in correct_questions %}
                             <div class="question-review">
                                 <div class="question-review-header">
-                                    ✓ Câu {{ loop.index }}
+                                    ✓ Câu {{ item.number }}
                                 </div>
                                 <div class="question-review-text">{{ item.question.question_text }}</div>
                                 <div class="answer-review correct">
@@ -400,12 +400,12 @@
                         {% for item in wrong_questions %}
                             <div class="question-review wrong">
                                 <div class="question-review-header">
-                                    ✗ Câu {{ loop.index }}
+                                    ✗ Câu {{ item.number }}{% if item.unanswered %} – Bỏ trống{% endif %}
                                 </div>
                                 <div class="question-review-text">{{ item.question.question_text }}</div>
                                 <div class="answer-review wrong">
                                     <span class="answer-icon">✗</span>
-                                    <span>Bạn chọn: {{ item.selected_answer.answer_text }}</span>
+                                    <span>{% if item.unanswered %}Bạn chưa chọn đáp án{% else %}Bạn chọn: {{ item.selected_answer.answer_text }}{% endif %}</span>
                                 </div>
                                 <div class="answer-review correct">
                                     <span class="answer-icon">✓</span>

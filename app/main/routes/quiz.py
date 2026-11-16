@@ -15,8 +15,34 @@ from datetime import datetime
 import random
 from app.models.features import feature_required
 
+from sqlalchemy.exc import IntegrityError
+
 # Giới hạn độ dài 1 câu trả lời tự luận (ký tự)
 ESSAY_MAX_LENGTH = 5000
+
+
+def _save_user_answer(attempt_id, question_id, answer_id=None, text_answer=None, is_correct=False):
+    """
+    Lưu (hoặc cập nhật) câu trả lời duy nhất của 1 câu hỏi trong 1 lượt làm bài.
+    Cập nhật tại chỗ thay vì xóa-rồi-thêm, để 2 request gửi gần như cùng lúc
+    không tạo ra 2 bản ghi (bảng có ràng buộc UNIQUE attempt_id + question_id).
+    """
+    for _ in range(2):
+        ua = UserAnswer.query.filter_by(attempt_id=attempt_id, question_id=question_id).first()
+        if ua is None:
+            ua = UserAnswer(attempt_id=attempt_id, question_id=question_id)
+            db.session.add(ua)
+        ua.answer_id = answer_id
+        ua.text_answer = text_answer
+        ua.is_correct = is_correct
+        ua.answered_at = datetime.utcnow()
+        try:
+            db.session.commit()
+            return
+        except IntegrityError:
+            # Request khác vừa thêm bản ghi cho câu này → lần lặp sau sẽ cập nhật bản ghi đó
+            db.session.rollback()
+    raise RuntimeError('Không lưu được câu trả lời')
 
 # ==================== TRANG NHẬP THÔNG TIN TRƯỚC KHI LÀM BÀI ====================
 @main_bp.route('/<slug>/start', methods=['GET', 'POST'])
@@ -158,16 +184,11 @@ def save_answer():
     if question.is_essay:
         text = (data.get('text_answer') or '').strip()[:ESSAY_MAX_LENGTH]
 
-        UserAnswer.query.filter_by(attempt_id=attempt.id, question_id=question.id).delete()
         if text:
-            db.session.add(UserAnswer(
-                attempt_id=attempt.id,
-                question_id=question.id,
-                answer_id=None,
-                text_answer=text,
-                is_correct=False
-            ))
-        db.session.commit()
+            _save_user_answer(attempt.id, question.id, answer_id=None, text_answer=text, is_correct=False)
+        else:
+            UserAnswer.query.filter_by(attempt_id=attempt.id, question_id=question.id).delete()
+            db.session.commit()
 
         return jsonify({
             'success': True,
@@ -184,22 +205,8 @@ def save_answer():
     if not answer or answer.question_id != question_id:
         return jsonify({'success': False, 'message': 'Đáp án không hợp lệ'}), 400
 
-    # Xóa câu trả lời cũ (nếu có)
-    UserAnswer.query.filter_by(
-        attempt_id=attempt.id,
-        question_id=question_id
-    ).delete()
-
-    # Lưu câu trả lời mới
-    user_answer = UserAnswer(
-        attempt_id=attempt.id,
-        question_id=question_id,
-        answer_id=answer_id,
-        is_correct=answer.is_correct
-    )
-
-    db.session.add(user_answer)
-    db.session.commit()
+    # Lưu / cập nhật câu trả lời (mỗi câu chỉ 1 bản ghi)
+    _save_user_answer(attempt.id, question.id, answer_id=answer.id, is_correct=answer.is_correct)
 
     # Đếm số câu đã trả lời
     answered_count = attempt.user_answers.count()
@@ -269,21 +276,8 @@ def quiz_result(attempt_id):
 
     quiz = attempt.quiz
 
-    # Lấy chi tiết các câu trả lời (chỉ câu trắc nghiệm - câu tự luận do HR đánh giá riêng)
-    questions_detail = []
-    for user_answer in attempt.user_answers.all():
-        question = user_answer.question
-        if question.is_essay:
-            continue
-        selected_answer = user_answer.answer
-        correct_answer = question.get_correct_answer()
-
-        questions_detail.append({
-            'question': question,
-            'selected_answer': selected_answer,
-            'correct_answer': correct_answer,
-            'is_correct': user_answer.is_correct
-        })
+    # Chi tiết tất cả câu trắc nghiệm (kể cả câu bỏ trống); câu tự luận do HR đánh giá riêng
+    questions_detail = attempt.get_questions_detail()
 
     essay_count = sum(1 for q in quiz.questions.all() if q.is_essay)
 

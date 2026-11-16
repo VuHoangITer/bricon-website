@@ -148,8 +148,8 @@
             <div class="stats-grid">
                 <div class="stat-item">
                     <div class="stat-icon">📝</div>
-                    <div class="stat-value">{{ attempt.total_questions }}</div>
-                    <div class="stat-label">Tổng câu hỏi</div>
+                    <div class="stat-value">{{ questions_detail|length }}</div>
+                    <div class="stat-label">Câu trắc nghiệm</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-icon">✅</div>
@@ -159,7 +159,7 @@
                 <div class="stat-item">
                     <div class="stat-icon">❌</div>
                     <div class="stat-value text-danger">{{ attempt.wrong_answers }}</div>
-                    <div class="stat-label">Câu sai</div>
+                    <div class="stat-label">Sai / bỏ trống</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-icon">⏱️</div>
@@ -174,12 +174,12 @@
                 {% for item in questions_detail %}
                 <div class="question-review {% if not item.is_correct %}wrong{% endif %}">
                     <div class="question-review-header">
-                        Câu {{ loop.index }}: {% if item.is_correct %}✓ Đúng{% else %}✗ Sai{% endif %}
+                        Câu {{ item.number }}: {% if item.is_correct %}✓ Đúng{% elif item.unanswered %}✗ Bỏ trống{% else %}✗ Sai{% endif %}
                     </div>
                     <div class="question-review-text">{{ item.question.question_text }}</div>
                     <div class="answer-review {% if item.is_correct %}correct{% else %}wrong{% endif %}">
                         <span class="answer-icon">{% if item.is_correct %}✓{% else %}✗{% endif %}</span>
-                        <strong>Trả lời:</strong> {{ item.selected_answer.answer_text }}
+                        <strong>Trả lời:</strong> {% if item.unanswered %}<em>Không chọn đáp án</em>{% else %}{{ item.selected_answer.answer_text }}{% endif %}
                     </div>
                     {% if not item.is_correct %}
                     <div class="answer-review correct">
@@ -204,7 +204,7 @@
                 {% for item in essay_detail %}
                 <div class="question-review">
                     <div class="question-review-header">
-                        Tự luận {{ loop.index }}{% if not item.text_answer %} – <span class="text-danger">Bỏ trống</span>{% endif %}
+                        Câu {{ item.number }} (tự luận){% if not item.text_answer %} – <span class="text-danger">Bỏ trống</span>{% endif %}
                     </div>
                     <div class="question-review-text" style="white-space: pre-line;">{{ item.question.question_text }}</div>
                     <div class="row g-3 mt-1">
