@@ -168,33 +168,7 @@
                 </div>
             </div>
 
-            <!-- Review Section -->
-            <div class="review-section">
-                <h4 class="mb-3">Chi tiết đáp án trắc nghiệm</h4>
-                {% for item in questions_detail %}
-                <div class="question-review {% if not item.is_correct %}wrong{% endif %}">
-                    <div class="question-review-header">
-                        Câu {{ item.number }}: {% if item.is_correct %}✓ Đúng{% elif item.unanswered %}✗ Bỏ trống{% else %}✗ Sai{% endif %}
-                    </div>
-                    <div class="question-review-text">{{ item.question.question_text }}</div>
-                    <div class="answer-review {% if item.is_correct %}correct{% else %}wrong{% endif %}">
-                        <span class="answer-icon">{% if item.is_correct %}✓{% else %}✗{% endif %}</span>
-                        <strong>Trả lời:</strong> {% if item.unanswered %}<em>Không chọn đáp án</em>{% else %}{{ item.selected_answer.answer_text }}{% endif %}
-                    </div>
-                    {% if not item.is_correct %}
-                    <div class="answer-review correct">
-                        <span class="answer-icon">✓</span>
-                        <strong>Đáp án đúng:</strong> {{ item.correct_answer.answer_text }}
-                    </div>
-                    {% endif %}
-                    {% if item.question.explanation %}
-                    <div class="mt-2 p-2 bg-light rounded">
-                        <strong>Giải thích:</strong> {{ item.question.explanation }}
-                    </div>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
+            {% include 'components/quiz_review.html' %}
 
             {% if essay_detail %}
             <!-- Essay Section: HR tự đánh giá, không chấm điểm -->

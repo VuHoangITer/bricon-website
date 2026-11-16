@@ -351,138 +351,16 @@
         {% endif %}
 
         {% if quiz.show_correct_answers %}
-        <!-- Review Section -->
-        <div class="review-section">
-            <h3 class="review-title">Chi tiết đáp án</h3>
-
-            <!-- Tabs -->
-            <ul class="nav nav-tabs mb-3" id="reviewTabs">
-                <li class="nav-item">
-                    <a class="nav-link active" data-bs-toggle="tab" href="#tab-correct">Câu đúng ({{ attempt.correct_answers }})</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="tab" href="#tab-wrong">Câu sai / bỏ trống ({{ attempt.wrong_answers }})</a>
-                </li>
-            </ul>
-
-            <div class="tab-content">
-                <!-- CÂU ĐÚNG -->
-                <div class="tab-pane fade show active" id="tab-correct">
-                    {% set correct_questions = questions_detail|selectattr('is_correct', 'equalto', True)|list %}
-                    {% if correct_questions %}
-                        {% for item in correct_questions %}
-                            <div class="question-review">
-                                <div class="question-review-header">
-                                    ✓ Câu {{ item.number }}
-                                </div>
-                                <div class="question-review-text">{{ item.question.question_text }}</div>
-                                <div class="answer-review correct">
-                                    <span class="answer-icon">✓</span>
-                                    <span>{{ item.selected_answer.answer_text }}</span>
-                                </div>
-                                {% if item.question.explanation %}
-                                <div class="explanation-box">
-                                    <strong>💡 Giải thích</strong>
-                                    <p>{{ item.question.explanation }}</p>
-                                </div>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                    {% else %}
-                        <p class="text-muted">Không có câu nào đúng.</p>
-                    {% endif %}
-                </div>
-
-                <!-- CÂU SAI -->
-                <div class="tab-pane fade" id="tab-wrong">
-                    {% set wrong_questions = questions_detail|rejectattr('is_correct', 'equalto', True)|list %}
-                    {% if wrong_questions %}
-                        {% for item in wrong_questions %}
-                            <div class="question-review wrong">
-                                <div class="question-review-header">
-                                    ✗ Câu {{ item.number }}{% if item.unanswered %} – Bỏ trống{% endif %}
-                                </div>
-                                <div class="question-review-text">{{ item.question.question_text }}</div>
-                                <div class="answer-review wrong">
-                                    <span class="answer-icon">✗</span>
-                                    <span>{% if item.unanswered %}Bạn chưa chọn đáp án{% else %}Bạn chọn: {{ item.selected_answer.answer_text }}{% endif %}</span>
-                                </div>
-                                <div class="answer-review correct">
-                                    <span class="answer-icon">✓</span>
-                                    <span>Đáp án đúng: {{ item.correct_answer.answer_text }}</span>
-                                </div>
-                                {% if item.question.explanation %}
-                                <div class="explanation-box">
-                                    <strong>💡 Giải thích</strong>
-                                    <p>{{ item.question.explanation }}</p>
-                                </div>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                    {% else %}
-                        <p class="text-muted">Không có câu nào sai.</p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- PHÂN TRANG -->
-            <nav id="paginationContainer" class="text-center"></nav>
-        </div>
+        {% include 'components/quiz_review.html' %}
         {% endif %}
     </div>
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    const perPage = 5;
-    const tabs = document.querySelectorAll('#reviewTabs a');
-
-    tabs.forEach(tab => {
-        tab.addEventListener('shown.bs.tab', function (e) {
-            setupPagination(e.target.getAttribute('href'));
-        });
-    });
-
-    setupPagination('#tab-correct');
-
-    function setupPagination(tabId) {
-        const container = document.querySelector(tabId);
-        const reviews = container.querySelectorAll('.question-review');
-        const pagination = document.getElementById('paginationContainer');
-        pagination.innerHTML = '';
-
-        if (reviews.length <= perPage) {
-            reviews.forEach(el => el.style.display = '');
-            return;
-        }
-
-        let currentPage = 1;
-        const totalPages = Math.ceil(reviews.length / perPage);
-
-        function showPage(page) {
-            reviews.forEach((el, i) => {
-                el.style.display = (i >= (page - 1) * perPage && i < page * perPage) ? '' : 'none';
-            });
-
-            pagination.innerHTML = '';
-            for (let i = 1; i <= totalPages; i++) {
-                const btn = document.createElement('button');
-                btn.textContent = i;
-                btn.className = 'btn btn-sm ' + (i === page ? 'btn-primary' : 'btn-outline-secondary');
-                btn.style.margin = '0 4px';
-                btn.onclick = () => showPage(i);
-                pagination.appendChild(btn);
-            }
-        }
-
-        showPage(currentPage);
-    }
-
-    // Ngăn chặn quay lại trang trước
+// Ngăn chặn quay lại trang làm bài
+history.pushState(null, null, window.location.href);
+window.onpopstate = function () {
     history.pushState(null, null, window.location.href);
-    window.onpopstate = function () {
-        history.pushState(null, null, window.location.href);
-    };
-});
+};
 </script>
 {% endblock %}
