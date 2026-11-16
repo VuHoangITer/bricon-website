@@ -691,7 +691,7 @@ let answeredQuestions = new Set({{ answered_questions|list|tojson }});
 // ==================== TIMER ====================
 function updateTimer() {
     if (remainingSeconds <= 0) {
-        alert('⏰ Hết thời gian! Bài thi sẽ được nộp tự động.');
+        // Hết giờ: nộp bài ngay, không hiện hộp thoại
         submitQuizForm();
         return;
     }
@@ -819,7 +819,15 @@ function flushEssays() {
     return Promise.all(pending);
 }
 
+let isSubmitting = false;
+
 function submitQuizForm() {
+    if (isSubmitting) return;  // tránh nộp 2 lần (bấm nhiều lần / hết giờ cùng lúc)
+    isSubmitting = true;
+    document.querySelectorAll('.dethi-vn__submit-btn, .dethi-vn__btn--submit').forEach(btn => {
+        btn.disabled = true;
+        btn.textContent = 'Đang nộp bài...';
+    });
     flushEssays().finally(() => document.getElementById('submit-form').submit());
 }
 
@@ -895,19 +903,10 @@ function closeModal(event) {
     }
 }
 
-// ==================== CONFIRM SUBMIT ====================
+// ==================== SUBMIT ====================
+// Bấm "Nộp bài" / "Hoàn thành" là nộp luôn, không hiện hộp thoại xác nhận
 function confirmSubmit() {
-    const unansweredCount = totalQuestions - answeredQuestions.size;
-
-    if (unansweredCount > 0) {
-        if (!confirm(`⚠️ Bạn còn ${unansweredCount} câu chưa trả lời. Vẫn muốn nộp bài?`)) {
-            return;
-        }
-    }
-
-    if (confirm('✅ Bạn có chắc chắn muốn nộp bài?')) {
-        submitQuizForm();
-    }
+    submitQuizForm();
 }
 
 // ==================== AUTO SUBMIT ====================
@@ -922,13 +921,6 @@ history.pushState(null, null, location.href);
 window.onpopstate = function () {
     history.pushState(null, null, location.href);
 };
-
-// ==================== PREVENT PAGE RELOAD/CLOSE ====================
-window.addEventListener('beforeunload', function (e) {
-    e.preventDefault();
-    e.returnValue = '';
-    return '';
-});
 
 // ==================== DISABLE RIGHT CLICK & F12 ====================
 document.addEventListener('contextmenu', function(e) {
