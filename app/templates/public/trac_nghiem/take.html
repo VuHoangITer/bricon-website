@@ -633,6 +633,7 @@ body {
             </div>
 
             <form method="POST" action="{{ url_for('main.submit_quiz') }}" id="submit-form">
+                <input type="hidden" name="attempt_token" value="{{ attempt_token }}">
                 <button type="button" class="dethi-vn__submit-btn" onclick="confirmSubmit()">
                     Nộp bài
                 </button>
@@ -672,6 +673,7 @@ body {
             </div>
 
             <form method="POST" action="{{ url_for('main.submit_quiz') }}" id="submit-form-mobile">
+                <input type="hidden" name="attempt_token" value="{{ attempt_token }}">
                 <button type="button" class="dethi-vn__submit-btn" onclick="confirmSubmit()">
                     Nộp bài
                 </button>
@@ -687,6 +689,8 @@ let currentQuestionIndex = 1;
 const totalQuestions = {{ questions|length }};
 let remainingSeconds = {{ remaining_seconds }};
 let answeredQuestions = new Set({{ answered_questions|list|tojson }});
+// Mã lượt làm bài: gửi kèm mọi lệnh lưu/nộp để không phụ thuộc cookie session (có thể hết hạn giữa bài)
+const ATTEMPT_TOKEN = {{ attempt_token|tojson }};
 
 // ==================== TIMER ====================
 function updateTimer() {
@@ -758,7 +762,8 @@ function saveAnswer(questionId, answerId) {
         },
         body: JSON.stringify({
             question_id: questionId,
-            answer_id: answerId
+            answer_id: answerId,
+            attempt_token: ATTEMPT_TOKEN
         })
     })
     .then(response => response.json())
@@ -786,7 +791,7 @@ function saveEssay(textarea) {
     return fetch('{{ url_for("main.save_answer") }}', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question_id: questionId, text_answer: textarea.value })
+        body: JSON.stringify({ question_id: questionId, text_answer: textarea.value, attempt_token: ATTEMPT_TOKEN })
     })
     .then(response => response.json())
     .then(data => {

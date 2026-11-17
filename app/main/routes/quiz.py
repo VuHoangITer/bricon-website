@@ -7,7 +7,8 @@ Chức năng:
 3. Làm bài quiz
 4. Nộp bài và xem kết quả
 """
-from flask import render_template, request, redirect, url_for, flash, session, jsonify
+from flask import render_template, request, redirect, url_for, flash, session, jsonify, current_app
+from itsdangerous import URLSafeTimedSerializer, BadSignature
 from app import db
 from app.models.quiz import Quiz, Question, Answer, QuizAttempt, UserAnswer
 from app.main import main_bp
@@ -19,6 +20,45 @@ from sqlalchemy.exc import IntegrityError
 
 # Giới hạn độ dài 1 câu trả lời tự luận (ký tự)
 ESSAY_MAX_LENGTH = 5000
+
+# Mã lượt làm bài (ký bằng SECRET_KEY) có hiệu lực tối đa 1 ngày
+ATTEMPT_TOKEN_MAX_AGE = 24 * 3600
+
+
+def _token_serializer():
+    return URLSafeTimedSerializer(current_app.secret_key, salt='quiz-attempt')
+
+
+def _make_attempt_token(attempt_id):
+    return _token_serializer().dumps(attempt_id)
+
+
+def _current_attempt(token=None):
+    """
+    Lượt làm bài hiện tại của người dùng.
+    Ưu tiên session; nếu session đã hết hạn (cookie chỉ sống 30 phút trong khi đề làm 60–80 phút)
+    thì nhận diện bằng mã lượt làm bài nhúng trong trang/đường dẫn và khôi phục lại session.
+    """
+    attempt_id = session.get('current_attempt_id')
+    if token:
+        try:
+            token_attempt_id = _token_serializer().loads(token, max_age=ATTEMPT_TOKEN_MAX_AGE)
+        except BadSignature:
+            token_attempt_id = None
+        if token_attempt_id and token_attempt_id != attempt_id:
+            attempt_id = token_attempt_id
+            session.permanent = True
+            session['current_attempt_id'] = attempt_id
+    if not attempt_id:
+        return None
+    return db.session.get(QuizAttempt, attempt_id)
+
+
+def _remaining_seconds(attempt, quiz):
+    """Thời gian còn lại tính theo giờ bắt đầu lưu trong database (không phụ thuộc session)."""
+    started = attempt.started_at or datetime.utcnow()
+    elapsed = int((datetime.utcnow() - started).total_seconds())
+    return max(0, quiz.duration_minutes * 60 - elapsed)
 
 
 def _save_user_answer(attempt_id, question_id, answer_id=None, text_answer=None, is_correct=False):
@@ -79,12 +119,13 @@ def quiz_start(slug):
         db.session.add(attempt)
         db.session.commit()
 
-        # Lưu attempt_id vào session
+        # Lưu attempt_id vào session (permanent: tự gia hạn mỗi lần lưu câu trả lời)
+        session.permanent = True
         session['current_attempt_id'] = attempt.id
-        session['quiz_start_time'] = datetime.utcnow().isoformat()
 
         flash(f'Chào {user_name}! Bắt đầu làm bài "{quiz.title}"', 'success')
-        return redirect(url_for('main.quiz_take', slug=slug))
+        # Mã lượt làm bài đi kèm đường dẫn: tải lại trang vẫn làm tiếp được kể cả khi session hết hạn
+        return redirect(url_for('main.quiz_take', slug=slug, t=_make_attempt_token(attempt.id)))
 
     return render_template('public/trac_nghiem/start.html', quiz=quiz)
 
@@ -99,14 +140,13 @@ def quiz_take(slug):
     """
     quiz = Quiz.query.filter_by(slug=slug, is_active=True).first_or_404()
 
-    # Kiểm tra có attempt trong session không
-    attempt_id = session.get('current_attempt_id')
-    if not attempt_id:
+    # Lượt làm bài: từ session, hoặc từ mã ?t=... nếu session đã hết hạn
+    attempt = _current_attempt(request.args.get('t'))
+    if not attempt:
         flash('Vui lòng nhập thông tin để bắt đầu làm bài!', 'warning')
         return redirect(url_for('main.quiz_start', slug=slug))
 
-    attempt = QuizAttempt.query.get(attempt_id)
-    if not attempt or attempt.quiz_id != quiz.id:
+    if attempt.quiz_id != quiz.id:
         flash('Phiên làm bài không hợp lệ!', 'danger')
         session.pop('current_attempt_id', None)
         return redirect(url_for('main.quiz_start', slug=slug))
@@ -137,9 +177,7 @@ def quiz_take(slug):
     essay_texts = {ua.question_id: ua.text_answer or '' for ua in saved_answers if ua.answer_id is None}
 
     # Tính thời gian còn lại
-    start_time = datetime.fromisoformat(session.get('quiz_start_time'))
-    elapsed_seconds = int((datetime.utcnow() - start_time).total_seconds())
-    remaining_seconds = max(0, (quiz.duration_minutes * 60) - elapsed_seconds)
+    remaining_seconds = _remaining_seconds(attempt, quiz)
 
     return render_template('public/trac_nghiem/take.html',
                            quiz=quiz,
@@ -148,6 +186,7 @@ def quiz_take(slug):
                            answered_questions=answered_questions,
                            selected_answers=selected_answers,
                            essay_texts=essay_texts,
+                           attempt_token=_make_attempt_token(attempt.id),
                            remaining_seconds=remaining_seconds)
 
 
@@ -159,14 +198,13 @@ def save_answer():
     API lưu câu trả lời của user (AJAX)
     Được gọi khi user click vào đáp án
     """
-    data = request.get_json()
-    attempt_id = session.get('current_attempt_id')
+    data = request.get_json(silent=True) or {}
+    attempt = _current_attempt(data.get('attempt_token'))
 
-    if not attempt_id:
+    if not attempt:
         return jsonify({'success': False, 'message': 'Phiên làm bài không hợp lệ'}), 400
 
-    attempt = QuizAttempt.query.get(attempt_id)
-    if not attempt or attempt.is_completed:
+    if attempt.is_completed:
         return jsonify({'success': False, 'message': 'Không thể lưu câu trả lời'}), 400
 
     question_id = data.get('question_id')
@@ -227,20 +265,20 @@ def submit_quiz():
     """
     Nộp bài và chuyển đến trang kết quả
     """
-    attempt_id = session.get('current_attempt_id')
+    attempt = _current_attempt(request.form.get('attempt_token'))
 
-    if not attempt_id:
+    if not attempt:
         flash('Phiên làm bài không hợp lệ!', 'danger')
-        return redirect(url_for('main.quiz_list'))
+        return redirect(url_for('main.index'))
 
-    attempt = QuizAttempt.query.get(attempt_id)
-    if not attempt or attempt.is_completed:
+    if attempt.is_completed:
         flash('Bài quiz này đã được nộp rồi!', 'info')
         return redirect(url_for('main.quiz_result', attempt_id=attempt.id))
 
-    # Tính thời gian làm bài
-    start_time = datetime.fromisoformat(session.get('quiz_start_time'))
-    time_spent = int((datetime.utcnow() - start_time).total_seconds())
+    # Thời gian làm bài theo giờ bắt đầu lưu trong database, tối đa bằng thời gian của đề
+    started = attempt.started_at or datetime.utcnow()
+    time_spent = min(int((datetime.utcnow() - started).total_seconds()),
+                     attempt.quiz.duration_minutes * 60 + 120)
 
     # Cập nhật attempt
     attempt.is_completed = True
