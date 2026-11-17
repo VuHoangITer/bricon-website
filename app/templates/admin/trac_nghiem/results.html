@@ -19,6 +19,23 @@
     background: #dc3545;
     color: #fff;
 }
+
+/* ===== Mobile: mỗi kết quả là 1 thẻ thay vì bảng 9 cột ===== */
+@media (max-width: 767.98px) {
+    .result-table thead { display: none; }
+    .result-table, .result-table tbody, .result-table tr, .result-table td { display: block; width: 100%; }
+    .result-table tr { padding: 12px 14px; border-bottom: 8px solid #f1f3f5; }
+    .result-table tr.hover-row:hover { background: transparent; }
+    .result-table td { display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+                       border: 0; padding: 3px 0; text-align: right; font-size: 14px; }
+    .result-table td::before { content: attr(data-label); flex: 0 0 auto; text-align: left; color: #6b7280; font-weight: 500; }
+    .result-table td.rt-name { font-size: 16px; font-weight: 700; text-align: left; padding-bottom: 6px; }
+    .result-table td.rt-email, .result-table td.rt-quiz { word-break: break-word; }
+    .result-table td.rt-actions { justify-content: flex-start; gap: 8px; padding-top: 10px; }
+    .result-table td.rt-name::before, .result-table td.rt-actions::before, .result-table td.rt-empty::before { content: none; }
+    .result-table td.rt-id { display: none; }
+    .result-table td.rt-empty { display: block; text-align: center; }
+}
 </style>
 {% endblock %}
 
@@ -28,7 +45,7 @@
 
     <!-- Filter Form -->
     <form method="GET" class="mb-4">
-        <div class="row">
+        <div class="row g-2">
             <div class="col-md-4">
                 <select name="quiz_id" class="form-select">
                     <option value="">Tất cả Quiz</option>
@@ -56,7 +73,7 @@
     <!-- Table Results -->
     <div class="card">
         <div class="card-body p-0">
-            <table class="table result-table table-hover mb-0">
+            <table class="table result-table table-hover mb-0" data-no-scroll-wrap>
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -73,21 +90,21 @@
                 <tbody>
                     {% for attempt in attempts.items %}
                     <tr class="hover-row">
-                        <td>{{ attempt.id }}</td>
-                        <td>{{ attempt.user_name }}</td>
-                        <td>{{ attempt.user_email or 'N/A' }}</td>
-                        <td>{{ attempt.quiz.title }}</td>
-                        <td>{{ attempt.score }}</td>
-                        <td>
+                        <td class="rt-id" data-label="ID">{{ attempt.id }}</td>
+                        <td class="rt-name" data-label="Tên">{{ attempt.user_name }}</td>
+                        <td class="rt-email" data-label="Email">{{ attempt.user_email or 'N/A' }}</td>
+                        <td class="rt-quiz" data-label="Quiz">{{ attempt.quiz.title }}</td>
+                        <td data-label="Điểm"><strong>{{ attempt.score }}</strong></td>
+                        <td data-label="Trạng thái">
                             {% if attempt.passed %}
                             <span class="badge badge-passed">Đạt</span>
                             {% else %}
                             <span class="badge badge-failed">Chưa Đạt</span>
                             {% endif %}
                         </td>
-                        <td>{{ attempt.get_time_spent_formatted() }}</td>
-                        <td>{{ attempt.completed_at|vn_datetime_friendly }}</td>
-                        <td>
+                        <td data-label="Thời gian làm">{{ attempt.get_time_spent_formatted() }}</td>
+                        <td data-label="Ngày làm">{{ attempt.completed_at|vn_datetime_friendly }}</td>
+                        <td class="rt-actions">
                             <a href="{{ url_for('admin.view_result', attempt_id=attempt.id) }}"
                                class="btn btn-sm btn-info">
                                 <i class="bi bi-eye"></i> Chi Tiết
@@ -105,7 +122,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="9" class="text-center text-muted py-4">Chưa có kết quả nào</td>
+                        <td colspan="9" class="text-center text-muted py-4 rt-empty">Chưa có kết quả nào</td>
                     </tr>
                     {% endfor %}
                 </tbody>

@@ -157,7 +157,18 @@
             .main-content {
                 margin-left: 0;
             }
+
+            /* Mobile: bớt khoảng đệm, không để nội dung đẩy tràn ngang cả trang */
+            .main-content { min-width: 0; overflow-x: hidden; }
+            .top-bar { padding: .75rem 1rem; }
+            .content-wrapper { padding: 1rem .75rem; }
+            .main-content .container-fluid { padding-left: .5rem; padding-right: .5rem; }
+            .main-content h2 { font-size: 1.4rem; }
         }
+
+        /* Bảng rộng: cuộn ngang trong khung bảng thay vì làm tràn trang */
+        .admin-table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .main-content img { max-width: 100%; height: auto; }
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -434,6 +445,15 @@
         // Sidebar toggle for mobile
         document.getElementById('sidebarToggle')?.addEventListener('click', function() {
             document.querySelector('.sidebar').classList.toggle('show');
+        });
+
+        // Bảng nào chưa có .table-responsive thì tự bọc khung cuộn ngang (tránh tràn trang trên mobile)
+        document.querySelectorAll('.main-content table').forEach(function(table) {
+            if (table.closest('.table-responsive, .admin-table-scroll, [data-no-scroll-wrap]')) return;
+            var wrap = document.createElement('div');
+            wrap.className = 'admin-table-scroll';
+            table.parentNode.insertBefore(wrap, table);
+            wrap.appendChild(table);
         });
 
         // Confirm delete
