@@ -1,0 +1,58 @@
+{#
+  Thẻ sản phẩm kiểu mới – CHỈ dùng ở mục "Sản Phẩm Nổi Bật" trang chủ.
+  CSS nằm trong plug-in-section/featured-products.html (class .pcard).
+  Thẻ cũ components/card_product.html giữ nguyên cho các trang khác.
+#}
+{% set ti = product.technical_info if product.technical_info is mapping else {} %}
+{% set specs = [] %}
+{% for key, icon in [('Tiêu chuẩn', 'bi-patch-check'), ('Định mức sử dụng', 'bi-calculator'), ('Quy cách', 'bi-box-seam'), ('Loại sản phẩm', 'bi-tag')] %}
+  {% if ti.get(key) and specs|length < 2 %}
+    {% set value = (ti[key]|string).split('|')[0]|trim %}
+    {% if value %}{% set _ = specs.append((icon, value|truncate(30, True, '…'))) %}{% endif %}
+  {% endif %}
+{% endfor %}
+{% set detail_url = url_for('main.product_detail', slug=product.slug) %}
+{% set media_info = product.get_media_seo_info() if product.image else None %}
+
+<div class="col-lg-4 col-md-6 col-6">
+  <article class="pcard" itemscope itemtype="https://schema.org/Product">
+    <a href="{{ detail_url }}" class="pcard-media" aria-label="{{ product.name }}">
+      {% if product.old_price and product.price and product.price > 0 and product.old_price > product.price %}
+        <span class="pcard-sale">-{{ ((product.old_price - product.price) / product.old_price * 100)|int }}%</span>
+      {% endif %}
+      <img
+        src="{{ product.image|cld(600) if product.image else 'https://via.placeholder.com/600x600/FFC107/FFFFFF?text=Bricon' }}"
+        alt="{{ media_info.alt_text if media_info and media_info.alt_text else product.name }}"
+        title="{{ media_info.title if media_info and media_info.title else product.name }}"
+        loading="lazy" decoding="async" itemprop="image"
+      />
+    </a>
+
+    <div class="pcard-body">
+      <h3 class="pcard-name" itemprop="name">
+        <a href="{{ detail_url }}">{{ product.name }}</a>
+      </h3>
+
+      {% if specs %}
+      <ul class="pcard-specs">
+        {% for icon, value in specs %}
+        <li><i class="bi {{ icon }}"></i><span>{{ value }}</span></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      <div class="pcard-foot">
+        <div class="pcard-price">
+          {% if product.price and product.price > 0 %}
+            <strong>{{ product.price|format_price }}đ</strong>
+            {% if product.old_price and product.old_price > product.price %}<del>{{ product.old_price|format_price }}đ</del>{% endif %}
+          {% else %}
+            <span class="pcard-price-contact"><i class="bi bi-telephone"></i> Giá liên hệ</span>
+          {% endif %}
+        </div>
+        <a href="{{ detail_url }}" class="pcard-btn" aria-label="Xem chi tiết {{ product.name }}"><span class="pcard-btn-text">Xem chi tiết</span> <i class="bi bi-arrow-right"></i></a>
+      </div>
+      {% if media_info and media_info.caption %}<div class="visually-hidden">{{ media_info.caption }}</div>{% endif %}
+    </div>
+  </article>
+</div>
