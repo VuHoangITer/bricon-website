@@ -1,0 +1,291 @@
+{#
+  Xem ảnh sản phẩm: kính lúp (máy tính) + trình xem toàn màn hình (mọi thiết bị).
+  Gắn vào ảnh chính #mainImage trong .product-image-slider của trang chi tiết sản phẩm.
+  Gỡ bỏ: xóa dòng include trong public/san_pham/product_detail.html.
+#}
+{% set pz_extra = product.get_images_list() %}
+{% set pz_images = ([product.image] + pz_extra) if product.image else pz_extra %}
+
+<style>
+/* ---------- Gợi ý trên ảnh ---------- */
+.pz-hint { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 3;
+           display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px;
+           background: rgba(17, 24, 39, .72); color: #fff; font-size: 12.5px; white-space: nowrap;
+           pointer-events: none; transition: opacity .25s ease; backdrop-filter: blur(4px); }
+.pz-hint i { color: #ffc107; }
+.pz-hint .pz-sep { opacity: .45; }
+.product-image-slider.pz-lens-on .pz-hint { opacity: 0; }
+.product-image-slider .product-image-main { cursor: zoom-in; }
+
+/* ---------- Kính lúp (chỉ máy tính có chuột) ---------- */
+.pz-lens { position: absolute; z-index: 4; width: 200px; height: 200px; border-radius: 50%;
+           border: 3px solid #ffc107; box-shadow: 0 10px 30px rgba(0,0,0,.25), inset 0 0 0 2px rgba(255,255,255,.7);
+           background-color: #fff; background-repeat: no-repeat; pointer-events: none;
+           opacity: 0; transform: scale(.6); transition: opacity .18s ease, transform .18s ease; }
+.product-image-slider.pz-lens-on .pz-lens { opacity: 1; transform: scale(1); }
+.pz-lens-level { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%);
+                 background: #ffc107; color: #111827; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 999px; }
+
+/* ---------- Trình xem toàn màn hình ---------- */
+.pz-viewer { position: fixed; inset: 0; z-index: 10050; display: none; flex-direction: column;
+             background: rgba(10, 12, 16, .97); color: #fff; user-select: none; -webkit-user-select: none;
+             backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.pz-viewer.open { display: flex; animation: pzFade .2s ease; }
+@keyframes pzFade { from { opacity: 0; } to { opacity: 1; } }
+.pz-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; }
+.pz-title { font-size: 14px; font-weight: 600; opacity: .9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pz-count { font-size: 13px; opacity: .7; margin-left: 8px; }
+.pz-tools { display: flex; gap: 6px; flex: 0 0 auto; }
+.pz-icon-btn { width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(255,255,255,.1); color: #fff;
+               font-size: 18px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.pz-icon-btn:hover { background: rgba(255,255,255,.2); }
+.pz-stage { position: relative; flex: 1; overflow: hidden; touch-action: none; cursor: zoom-in; }
+.pz-stage.zoomed { cursor: grab; }
+.pz-stage.dragging { cursor: grabbing; }
+.pz-stage img { position: absolute; left: 50%; top: 50%; max-width: 92%; max-height: 92%; object-fit: contain;
+                transform: translate(-50%, -50%); transform-origin: center center; will-change: transform; }
+.pz-stage img.animate { transition: transform .22s ease; }
+.pz-nav { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; }
+.pz-nav.prev { left: 14px; } .pz-nav.next { right: 14px; }
+.pz-thumbs { display: flex; justify-content: center; gap: 8px; padding: 10px 16px 16px; overflow-x: auto; }
+.pz-thumbs img { width: 58px; height: 58px; object-fit: contain; background: #fff; border-radius: 8px; opacity: .55;
+                 border: 2px solid transparent; cursor: pointer; flex: 0 0 auto; }
+.pz-thumbs img.active { opacity: 1; border-color: #ffc107; }
+.pz-tip { text-align: center; font-size: 12px; opacity: .55; padding-bottom: 6px; }
+@media (max-width: 767.98px) {
+  .pz-nav { display: none; }
+  .pz-thumbs img { width: 48px; height: 48px; }
+}
+</style>
+
+<div class="pz-viewer" id="pzViewer" role="dialog" aria-modal="true" aria-label="Xem ảnh sản phẩm">
+  <div class="pz-top">
+    <div class="pz-title">{{ product.name }}<span class="pz-count" id="pzCount"></span></div>
+    <div class="pz-tools">
+      <button type="button" class="pz-icon-btn" id="pzZoomOut" aria-label="Thu nhỏ"><i class="bi bi-zoom-out"></i></button>
+      <button type="button" class="pz-icon-btn" id="pzZoomIn" aria-label="Phóng to"><i class="bi bi-zoom-in"></i></button>
+      <button type="button" class="pz-icon-btn" id="pzClose" aria-label="Đóng"><i class="bi bi-x-lg"></i></button>
+    </div>
+  </div>
+  <div class="pz-stage" id="pzStage">
+    <img id="pzImg" alt="{{ product.name }}">
+    <button type="button" class="pz-icon-btn pz-nav prev" id="pzPrev" aria-label="Ảnh trước"><i class="bi bi-chevron-left"></i></button>
+    <button type="button" class="pz-icon-btn pz-nav next" id="pzNext" aria-label="Ảnh sau"><i class="bi bi-chevron-right"></i></button>
+  </div>
+  <div class="pz-tip" id="pzTip"></div>
+  <div class="pz-thumbs" id="pzThumbs"></div>
+</div>
+
+<script>
+(function () {
+  const box = document.querySelector('.product-image-slider');
+  const mainImg = document.getElementById('mainImage');
+  const viewer = document.getElementById('pzViewer');
+  if (!box || !mainImg || !viewer) return;
+
+  const IMAGES = {{ pz_images|tojson }};
+  if (!IMAGES.length) return;
+  const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  // Gợi ý trên ảnh chính
+  const hint = document.createElement('div');
+  hint.className = 'pz-hint';
+  hint.innerHTML = finePointer
+    ? '<i class="bi bi-search"></i> Rê chuột để soi chi tiết <span class="pz-sep">·</span> Bấm để phóng to'
+    : '<i class="bi bi-arrows-fullscreen"></i> Chạm để xem ảnh lớn';
+  box.appendChild(hint);
+
+  // ================= KÍNH LÚP (máy tính) =================
+  if (finePointer) {
+    const lens = document.createElement('div');
+    lens.className = 'pz-lens';
+    lens.innerHTML = '<span class="pz-lens-level"></span>';
+    box.appendChild(lens);
+    const levelEl = lens.firstElementChild;
+    const R = 100;           // bán kính kính lúp (200px / 2)
+    let zoom = 2.5;
+
+    // Vùng ảnh thật bên trong khung (ảnh dùng object-fit: contain nên có viền trống)
+    function renderedRect() {
+      const w = mainImg.clientWidth, h = mainImg.clientHeight;
+      const nw = mainImg.naturalWidth || w, nh = mainImg.naturalHeight || h;
+      const s = Math.min(w / nw, h / nh);
+      const rw = nw * s, rh = nh * s;
+      return { x: mainImg.offsetLeft + (w - rw) / 2, y: mainImg.offsetTop + (h - rh) / 2, w: rw, h: rh };
+    }
+
+    function update(e) {
+      const b = box.getBoundingClientRect();
+      const px = e.clientX - b.left, py = e.clientY - b.top;
+      const r = renderedRect();
+      const inside = px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h;
+      box.classList.toggle('pz-lens-on', inside);
+      if (!inside) return;
+      lens.style.left = (px - R) + 'px';
+      lens.style.top = (py - R) + 'px';
+      lens.style.backgroundImage = 'url("' + (mainImg.currentSrc || mainImg.src) + '")';
+      lens.style.backgroundSize = (r.w * zoom) + 'px ' + (r.h * zoom) + 'px';
+      lens.style.backgroundPosition = (R - (px - r.x) * zoom) + 'px ' + (R - (py - r.y) * zoom) + 'px';
+      levelEl.textContent = zoom.toFixed(1).replace('.0', '') + '×';
+    }
+
+    mainImg.addEventListener('mousemove', update);
+    mainImg.addEventListener('mouseleave', function () { box.classList.remove('pz-lens-on'); });
+    mainImg.addEventListener('wheel', function (e) {
+      if (!box.classList.contains('pz-lens-on')) return;
+      e.preventDefault();
+      zoom = Math.min(4, Math.max(1.5, zoom + (e.deltaY < 0 ? 0.5 : -0.5)));
+      update(e);
+    }, { passive: false });
+  }
+
+  // ================= TRÌNH XEM TOÀN MÀN HÌNH =================
+  const stage = document.getElementById('pzStage');
+  const vImg = document.getElementById('pzImg');
+  const countEl = document.getElementById('pzCount');
+  const thumbs = document.getElementById('pzThumbs');
+  const tip = document.getElementById('pzTip');
+  const prevBtn = document.getElementById('pzPrev'), nextBtn = document.getElementById('pzNext');
+  let idx = 0, scale = 1, tx = 0, ty = 0;
+  const MIN = 1, MAX = 5;
+
+  tip.textContent = finePointer
+    ? 'Bấm đúp hoặc lăn chuột để phóng to · Kéo để di chuyển · ← → đổi ảnh · Esc để đóng'
+    : 'Chạm đúp hoặc chụm 2 ngón để phóng to · Vuốt để đổi ảnh';
+  if (IMAGES.length < 2) { prevBtn.style.display = nextBtn.style.display = 'none'; }
+  else {
+    IMAGES.forEach(function (src, i) {
+      const t = document.createElement('img');
+      t.src = src; t.alt = ''; t.addEventListener('click', function () { show(i); });
+      thumbs.appendChild(t);
+    });
+  }
+
+  function apply(animate) {
+    vImg.classList.toggle('animate', !!animate);
+    vImg.style.transform = 'translate(calc(-50% + ' + tx + 'px), calc(-50% + ' + ty + 'px)) scale(' + scale + ')';
+    stage.classList.toggle('zoomed', scale > 1.01);
+  }
+  function clampPan() {
+    const w = vImg.offsetWidth * scale, h = vImg.offsetHeight * scale;
+    const mx = Math.max(0, (w - stage.clientWidth) / 2), my = Math.max(0, (h - stage.clientHeight) / 2);
+    tx = Math.min(mx, Math.max(-mx, tx)); ty = Math.min(my, Math.max(-my, ty));
+  }
+  // Phóng tới mức s, giữ nguyên điểm (cx, cy) dưới con trỏ / ngón tay
+  function zoomAt(s, cx, cy, animate) {
+    s = Math.min(MAX, Math.max(MIN, s));
+    const r = stage.getBoundingClientRect();
+    const ox = cx - (r.left + r.width / 2), oy = cy - (r.top + r.height / 2);
+    tx = ox - (ox - tx) * (s / scale); ty = oy - (oy - ty) * (s / scale);
+    scale = s;
+    if (scale <= 1.01) { scale = 1; tx = ty = 0; }
+    clampPan(); apply(animate);
+  }
+  function show(i) {
+    idx = (i + IMAGES.length) % IMAGES.length;
+    vImg.src = IMAGES[idx];
+    scale = 1; tx = ty = 0; apply(false);
+    countEl.textContent = IMAGES.length > 1 ? (idx + 1) + ' / ' + IMAGES.length : '';
+    Array.from(thumbs.children).forEach(function (t, k) { t.classList.toggle('active', k === idx); });
+    if (typeof window.setImage === 'function') { try { window.setImage(idx); } catch (e) {} }
+  }
+  function open() {
+    const cur = IMAGES.indexOf(mainImg.getAttribute('src'));
+    show(cur >= 0 ? cur : 0);
+    viewer.classList.add('open');
+    document.documentElement.style.overflow = 'hidden';
+  }
+  function close() {
+    viewer.classList.remove('open');
+    document.documentElement.style.overflow = '';
+  }
+
+  mainImg.addEventListener('click', open);
+  document.getElementById('pzClose').addEventListener('click', close);
+  document.getElementById('pzZoomIn').addEventListener('click', function () {
+    const r = stage.getBoundingClientRect(); zoomAt(scale * 1.6, r.left + r.width / 2, r.top + r.height / 2, true);
+  });
+  document.getElementById('pzZoomOut').addEventListener('click', function () {
+    const r = stage.getBoundingClientRect(); zoomAt(scale / 1.6, r.left + r.width / 2, r.top + r.height / 2, true);
+  });
+  prevBtn.addEventListener('click', function () { show(idx - 1); });
+  nextBtn.addEventListener('click', function () { show(idx + 1); });
+
+  // Phím tắt: chặn phím ← → của trang khi trình xem đang mở
+  document.addEventListener('keydown', function (e) {
+    if (!viewer.classList.contains('open')) return;
+    if (e.key === 'Escape') close();
+    else if (e.key === 'ArrowLeft') { show(idx - 1); }
+    else if (e.key === 'ArrowRight') { show(idx + 1); }
+    else return;
+    e.preventDefault(); e.stopImmediatePropagation();
+  }, true);
+
+  // Lăn chuột để phóng
+  stage.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    zoomAt(scale * (e.deltaY < 0 ? 1.25 : 0.8), e.clientX, e.clientY, false);
+  }, { passive: false });
+
+  // Bấm đúp / chạm đúp: phóng 2.5x tại điểm chạm hoặc trả về ban đầu
+  let lastTap = 0;
+  function toggleZoom(x, y) { if (scale > 1.01) zoomAt(1, x, y, true); else zoomAt(2.5, x, y, true); }
+  stage.addEventListener('dblclick', function (e) { if (!e.target.closest('.pz-nav')) toggleZoom(e.clientX, e.clientY); });
+
+  // Kéo để di chuyển, chụm 2 ngón để phóng, vuốt để đổi ảnh
+  const pts = new Map();
+  let startDist = 0, startScale = 1, dragStart = null, moved = false, downOnEmpty = false;
+  stage.addEventListener('pointerdown', function (e) {
+    if (e.target.closest('.pz-nav')) return;
+    // Ghi nhận bấm vào vùng tối (không phải ảnh) TRƯỚC khi capture con trỏ
+    downOnEmpty = e.target === stage;
+    stage.setPointerCapture(e.pointerId);
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    moved = false;
+    if (pts.size === 2) {
+      const [a, b] = Array.from(pts.values());
+      startDist = Math.hypot(a.x - b.x, a.y - b.y); startScale = scale;
+    } else {
+      dragStart = { x: e.clientX, y: e.clientY, tx: tx, ty: ty };
+      stage.classList.add('dragging');
+    }
+  });
+  stage.addEventListener('pointermove', function (e) {
+    if (!pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pts.size === 2) {
+      const [a, b] = Array.from(pts.values());
+      const d = Math.hypot(a.x - b.x, a.y - b.y);
+      zoomAt(startScale * d / startDist, (a.x + b.x) / 2, (a.y + b.y) / 2, false);
+      moved = true;
+    } else if (dragStart) {
+      const dx = e.clientX - dragStart.x, dy = e.clientY - dragStart.y;
+      if (Math.abs(dx) + Math.abs(dy) > 6) moved = true;
+      if (scale > 1.01) { tx = dragStart.tx + dx; ty = dragStart.ty + dy; clampPan(); apply(false); }
+    }
+  });
+  function endPointer(e) {
+    if (!pts.has(e.pointerId)) return;
+    pts.delete(e.pointerId);
+    stage.classList.remove('dragging');
+    if (dragStart && pts.size === 0) {
+      const dx = e.clientX - dragStart.x;
+      if (scale <= 1.01 && moved && Math.abs(dx) > 60 && IMAGES.length > 1) {
+        show(idx + (dx < 0 ? 1 : -1));                    // vuốt đổi ảnh
+      } else if (!moved && e.pointerType === 'touch') {    // chạm đúp
+        const now = Date.now();
+        if (now - lastTap < 300) { toggleZoom(e.clientX, e.clientY); lastTap = 0; } else { lastTap = now; }
+      } else if (!moved && downOnEmpty && e.pointerType !== 'touch') {
+        close();                                            // bấm ra vùng tối để đóng
+      }
+      dragStart = null;
+    }
+    if (pts.size === 1) {
+      const p = Array.from(pts.values())[0];
+      dragStart = { x: p.x, y: p.y, tx: tx, ty: ty };
+    }
+  }
+  stage.addEventListener('pointerup', endPointer);
+  stage.addEventListener('pointercancel', endPointer);
+})();
+</script>
