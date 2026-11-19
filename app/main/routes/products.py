@@ -77,6 +77,8 @@ def products(category_slug=None):
         products_list = sorted(products_list, key=lambda p: p.price or 0, reverse=True)
     elif sort == 'popular':
         products_list = sorted(products_list, key=lambda p: p.views, reverse=True)
+    elif sort == 'name':
+        products_list = sorted(products_list, key=lambda p: (p.name or '').lower())
 
     # ========== PHÂN TRANG THỦ CÔNG ==========
     per_page = 6
