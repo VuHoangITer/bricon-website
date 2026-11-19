@@ -88,6 +88,14 @@
     .slider-nav-btn { width: 40px; height: 40px; }
 }
 
+/* ===== Tab Mô tả / Thông số: luôn nằm ngang trên điện thoại & iPad =====
+   (CSS chung của menu mobile đặt .nav-item width:100% ở <=991px làm 2 tab xếp chồng) */
+@media (max-width: 991.98px) {
+    .trang-san-pham-chi-tiet-vn .nav-tabs { flex-wrap: nowrap; }
+    .trang-san-pham-chi-tiet-vn .nav-tabs .nav-item { width: auto; flex: 1 1 0; min-width: 0; }
+    .trang-san-pham-chi-tiet-vn .nav-tabs .nav-link { padding: .7rem .5rem !important; text-align: center;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: transparent !important; }
+}
 </style>
 {% endblock %}
 
@@ -307,7 +315,7 @@
                     {% for key, value in product.technical_info.items() %}
                     <tr>
                       <td class="fw-semibold text-dark">
-                        <i class="bi bi-dot text-warning fs-3"></i>{{ key }}
+                        {{ key }}
                       </td>
                       <td>
                         {% if value is string %}
