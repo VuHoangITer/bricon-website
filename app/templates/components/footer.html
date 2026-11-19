@@ -166,7 +166,7 @@
           <h5 class="footer-title">Fanpage Facebook</h5>
           <div class="mini-block">
             <div class="fanpage-box">
-              <iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fkeoxaydungvachongthambricon&tabs=timeline&width=500&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="340" height="500" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+              <iframe class="fb-page-frame" title="Fanpage Facebook BRICON" width="340" height="500" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" loading="lazy"></iframe>
             </div>
           </div>
         </div>
@@ -194,5 +194,52 @@
   .footer-grid { grid-template-columns: 1fr 1fr; column-gap: 16px; row-gap: 22px; }
   .footer-grid > .footer-brand,
   .footer-grid > .footer-right { grid-column: 1 / -1; }
+
+  /* Logo + mô tả + mạng xã hội căn giữa */
+  .footer-brand .brand-row { justify-content: center; }
+  .footer-brand .brand-desc { text-align: center; }
+  .footer-brand .social-row { justify-content: center; }
+  .footer-right .footer-title { text-align: center; }
 }
+
+/* Fanpage: căn giữa, chiều rộng/cao do JS tính theo khung (không bị cắt) */
+.footer-hero .fanpage-box { display: flex; justify-content: center; }
+.footer-hero .fanpage-box iframe { display: block; max-width: 100%; }
+
+/* Thanh dưới cùng: tông sáng thay cho nền xám đen */
+.footer-hero .footer-bottom { background: #fffbeb; border: 1px solid #fde68a; color: #4b5563; }
+.footer-hero .footer-bottom a { color: #b45309; font-weight: 700; }
+.footer-hero .footer-bottom a:hover { color: #92400e; }
 </style>
+
+<script>
+/* Fanpage Facebook: dựng plugin đúng bề rộng khung (180–500px theo giới hạn của Facebook).
+   Điện thoại: chỉ thẻ trang (ảnh bìa, tên, nút Theo dõi) cho gọn; máy tính: kèm bài viết. */
+(function () {
+  var box = document.querySelector('.footer-hero .fanpage-box');
+  var frame = box && box.querySelector('.fb-page-frame');
+  if (!frame) return;
+  var PAGE = 'https%3A%2F%2Fwww.facebook.com%2Fkeoxaydungvachongthambricon';
+  var last = '';
+  function fit() {
+    var cs = getComputedStyle(box);
+    var inner = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    var width = Math.max(180, Math.min(500, Math.floor(inner)));
+    var mobile = window.innerWidth <= 600;
+    var height = mobile ? 310 : 500;
+    var tabs = mobile ? '' : 'timeline';
+    var key = width + '|' + height + '|' + tabs;
+    if (key === last) return;
+    last = key;
+    frame.width = width; frame.height = height;
+    frame.style.setProperty('width', width + 'px', 'important');
+    frame.style.setProperty('height', height + 'px', 'important');
+    frame.src = 'https://www.facebook.com/plugins/page.php?href=' + PAGE + '&tabs=' + tabs +
+      '&width=' + width + '&height=' + height +
+      '&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=false&appId';
+  }
+  fit();
+  var t;
+  window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(fit, 300); });
+})();
+</script>
