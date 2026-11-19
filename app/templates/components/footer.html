@@ -215,9 +215,9 @@
 </style>
 
 <script>
-/* Fanpage Facebook – CHỈ trên điện thoại (<=600px): khung vừa màn hình, chỉ hiện thẻ trang
-   (ảnh bìa, tên, nút Theo dõi) để không bị cắt ngang bài viết.
-   Máy tính/iPad: giữ nguyên mã nhúng gốc lấy từ Facebook, không can thiệp. */
+/* Fanpage Facebook – CHỈ trên điện thoại (<=600px): khung vừa bề ngang màn hình và chiều cao
+   plugin khớp chiều cao khung (trước đây plugin dựng cao 500 trong khung 350 nên bị cắt đáy),
+   vẫn giữ danh sách bài viết để lướt xem. Máy tính/iPad: giữ nguyên mã nhúng gốc, không can thiệp. */
 (function () {
   if (window.innerWidth > 600) return;
   var box = document.querySelector('.footer-hero .fanpage-box');
@@ -226,12 +226,11 @@
   var cs = getComputedStyle(box);
   var inner = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
   var width = Math.max(180, Math.min(500, Math.floor(inner)));
-  var height = 310;
+  var height = 450;
   frame.width = width; frame.height = height;
   frame.style.setProperty('width', width + 'px', 'important');
   frame.style.setProperty('height', height + 'px', 'important');
-  frame.src = frame.src.replace('tabs=timeline', 'tabs=')
-                       .replace(/width=\d+/, 'width=' + width)
+  frame.src = frame.src.replace(/width=\d+/, 'width=' + width)
                        .replace(/height=\d+/, 'height=' + height);
 })();
 </script>
