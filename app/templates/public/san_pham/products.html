@@ -3,6 +3,7 @@
 {% block meta_description %}{{ get_setting('products_meta_description', '') }}{% endblock %}
 
 {% block extra_css %}
+{% include 'components/card_product_home_css.html' %}
 <style>
 /* ===== Thanh lọc sản phẩm (không lọc theo giá vì sản phẩm đều "Liên hệ") ===== */
 .trang-san-pham-vn .pf-bar { background: #fff; border: 1px solid #eef0f3; border-radius: 16px; padding: 14px; margin-bottom: 22px;
@@ -129,7 +130,7 @@
                 {% if products %}
                 <div class="row g-4">
                     {% for product in products %}
-                        {% include 'components/card_product.html' with context %}
+                        {% include 'components/card_product_home.html' with context %}
                     {% endfor %}
                 </div>
 
