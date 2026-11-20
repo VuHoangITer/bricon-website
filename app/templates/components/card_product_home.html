@@ -7,7 +7,7 @@
 {% set specs = [] %}
 {% for key, icon in [('Tiêu chuẩn', 'bi-patch-check'), ('Định mức sử dụng', 'bi-calculator'), ('Quy cách', 'bi-box-seam'), ('Loại sản phẩm', 'bi-tag')] %}
   {% if ti.get(key) and specs|length < 2 %}
-    {% set value = (ti[key]|string).split('|')[0]|trim %}
+    {% set raw = ti[key] %}{% set raw = (raw|first if raw|length else '') if raw is sequence and raw is not string else raw %}{% set value = (raw|string).split('|')[0]|trim %}
     {% if value %}{% set _ = specs.append((icon, value|truncate(30, True, '…'))) %}{% endif %}
   {% endif %}
 {% endfor %}
